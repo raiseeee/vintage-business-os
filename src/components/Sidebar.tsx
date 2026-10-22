@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "@/app/(app)/actions";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard" },
@@ -12,7 +13,7 @@ const NAV = [
   { href: "/roadmap", label: "Roadmap" },
 ];
 
-export function Sidebar() {
+export function Sidebar({ email }: { email: string }) {
   const pathname = usePathname();
 
   return (
@@ -43,6 +44,20 @@ export function Sidebar() {
           );
         })}
       </nav>
+      <form
+        action={signOut}
+        className="mt-auto flex items-center justify-between gap-3 border-t border-stone-200 px-5 py-3 md:block md:py-4"
+      >
+        <p className="truncate text-xs text-stone-500" title={email}>
+          {email}
+        </p>
+        <button
+          type="submit"
+          className="mt-1 text-sm font-medium text-stone-700 hover:text-stone-900"
+        >
+          Esci
+        </button>
+      </form>
     </aside>
   );
 }
