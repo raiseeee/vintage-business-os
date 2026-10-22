@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   allocatedItemCost,
   computeDashboard,
+  summarizeByLot,
+  summarizeBySupplier,
   itemProfit,
   lotTotalCost,
   saleNetRevenue,
@@ -90,5 +92,74 @@ describe("dashboard", () => {
     expect(m.stockValue).toBe(3000);
     expect(m.stockCount).toBe(2);
     expect(m.soldCount).toBe(1);
+  });
+});
+
+describe("saldo di cassa e netto", () => {
+  it("netRevenue = vendite - costi di vendita; cashBalance = netto - capitale investito", () => {
+    const m = computeDashboard([lot], [soldItem]);
+    expect(m.netRevenue).toBe(3600);
+    expect(m.cashBalance).toBe(3600 - 13000);
+  });
+
+  it("con nessun dato sono zero", () => {
+    const m = computeDashboard([], []);
+    expect(m.netRevenue).toBe(0);
+    expect(m.cashBalance).toBe(0);
+  });
+});
+
+describe("riepiloghi per lotto e per fornitore", () => {
+  const lotA: Lot = { ...lot, id: "A", supplierId: "S1" };
+  const lotB: Lot = { id: "B", supplierId: "S1", purchaseCost: 5000, inboundShipping: 0, otherCosts: 0, quantity: 5 };
+  const lotC: Lot = { id: "C", supplierId: "S2", purchaseCost: 2000, inboundShipping: 0, otherCosts: 0, quantity: 2 };
+
+  const sale = { price: 3000, fees: 0, outboundShipping: 0, extraCosts: 0 };
+  const items: Item[] = [
+    { id: "1", lotId: "A", status: "venduto", expectedPrice: 3000, sale },
+    { id: "2", lotId: "B", status: "venduto", expectedPrice: 3000, sale },
+    { id: "3", lotId: "B", status: "pronto", expectedPrice: 1500, sale: null },
+    { id: "4", lotId: "C", status: "pubblicato", expectedPrice: 1000, sale: null },
+  ];
+
+  it("per lotto: ogni lotto conta solo i propri capi, anche se vuoto", () => {
+    const byLot = summarizeByLot([lotA, lotB, lotC], items);
+    expect(byLot.get("A")!.salesRevenue).toBe(3000);
+    expect(byLot.get("B")!.salesRevenue).toBe(3000);
+    expect(byLot.get("B")!.stockValue).toBe(1500);
+    expect(byLot.get("C")!.salesRevenue).toBe(0);
+    expect(byLot.get("C")!.capitalInvested).toBe(2000);
+  });
+
+  it("per fornitore: somma i lotti dello stesso fornitore", () => {
+    const bySupplier = summarizeBySupplier([lotA, lotB, lotC], items);
+    const s1 = bySupplier.get("S1")!;
+    expect(s1.capitalInvested).toBe(13000 + 5000);
+    expect(s1.salesRevenue).toBe(6000);
+    expect(s1.soldCount).toBe(2);
+    expect(bySupplier.get("S2")!.capitalInvested).toBe(2000);
+  });
+
+  it("la somma dei fornitori coincide col totale della dashboard (nessun doppio conteggio)", () => {
+    const all = [lotA, lotB, lotC];
+    const total = computeDashboard(all, items);
+    const parts = [...summarizeBySupplier(all, items).values()];
+    expect(parts.reduce((s, m) => s + m.capitalInvested, 0)).toBe(total.capitalInvested);
+    expect(parts.reduce((s, m) => s + m.salesRevenue, 0)).toBe(total.salesRevenue);
+    expect(parts.reduce((s, m) => s + m.realizedMargin, 0)).toBe(total.realizedMargin);
+    expect(parts.reduce((s, m) => s + m.stockValue, 0)).toBe(total.stockValue);
+  });
+
+  it("la somma dei lotti coincide col totale", () => {
+    const all = [lotA, lotB, lotC];
+    const total = computeDashboard(all, items);
+    const parts = [...summarizeByLot(all, items).values()];
+    expect(parts.reduce((s, m) => s + m.realizedMargin, 0)).toBe(total.realizedMargin);
+    expect(parts.reduce((s, m) => s + m.cashBalance, 0)).toBe(total.cashBalance);
+  });
+
+  it("i lotti senza fornitore non entrano nei riepiloghi per fornitore", () => {
+    const orphan: Lot = { ...lotC, id: "X", supplierId: undefined };
+    expect(summarizeBySupplier([orphan], []).size).toBe(0);
   });
 });

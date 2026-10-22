@@ -111,6 +111,7 @@ export function Field({
   hint,
   required,
   placeholder,
+  list,
   rows = 3,
 }: {
   label: string;
@@ -122,6 +123,8 @@ export function Field({
   hint?: string;
   required?: boolean;
   placeholder?: string;
+  /** Id di un <datalist> con suggerimenti per il campo di testo. */
+  list?: string;
   rows?: number;
 }) {
   const submitted = useContext(ValuesContext);
@@ -152,6 +155,7 @@ export function Field({
           defaultValue={value}
           required={required}
           placeholder={placeholder}
+          list={list}
           className={controlClass}
         />
       )}

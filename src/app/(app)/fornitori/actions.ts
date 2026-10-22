@@ -2,75 +2,21 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import type { ZodType } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import {
+  dbErrorMessage,
+  fail,
+  parseForm as parse,
+  success,
+  validId,
+  type FormState,
+} from "@/lib/form-action";
 import {
   claimSchema,
   evaluationSchema,
   sourceSchema,
   supplierSchema,
-  uuidSchema,
 } from "@/lib/suppliers/schemas";
-
-export type FormState = {
-  error: string | null;
-  ok: boolean;
-  /** Valori inviati, restituiti in caso di errore per non far perdere ciò che è stato scritto. */
-  values?: Record<string, string>;
-};
-
-const fail = (error: string, formData?: FormData): FormState => ({
-  error,
-  ok: false,
-  values: formData ? formValues(formData) : undefined,
-});
-const success: FormState = { error: null, ok: true };
-
-/** Legge i valori testuali del form (i file e gli altri tipi vengono ignorati). */
-function formValues(formData: FormData): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const [key, value] of formData.entries()) {
-    if (typeof value === "string") out[key] = value;
-  }
-  return out;
-}
-
-function parse<T>(schema: ZodType<T>, formData: FormData):
-  | { ok: true; data: T }
-  | { ok: false; error: string } {
-  const result = schema.safeParse(formValues(formData));
-  if (result.success) return { ok: true, data: result.data };
-  const issue = result.error.issues[0];
-  return { ok: false, error: issue?.message ?? "Dati non validi" };
-}
-
-/**
- * Traduce gli errori del database in messaggi comprensibili.
- * I messaggi dei nostri trigger (in italiano) sono sicuri da mostrare;
- * degli altri errori non si espongono i dettagli interni.
- */
-function dbErrorMessage(error: { code?: string; message?: string }): string {
-  if (
-    error.code === "23514" &&
-    (error.message?.startsWith("Il tipo") || error.message?.startsWith("Impossibile rimuovere"))
-  ) {
-    return error.message;
-  }
-  switch (error.code) {
-    case "23514":
-      return "Uno dei valori non rispetta i limiti consentiti.";
-    case "23503":
-      return "Il dato è collegato ad altri elementi e non può essere modificato o rimosso così.";
-    case "23505":
-      return "Esiste già un elemento uguale.";
-    default:
-      return "Operazione non riuscita. Riprova.";
-  }
-}
-
-function validId(id: string): boolean {
-  return uuidSchema.safeParse(id).success;
-}
 
 export async function createSupplier(
   _prev: FormState,

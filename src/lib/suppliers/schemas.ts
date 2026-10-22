@@ -1,75 +1,16 @@
 import { z } from "zod";
-import { parseEuroToCents } from "@/lib/money";
+import {
+  optionalDecimal,
+  optionalEuro,
+  optionalInt,
+  optionalText,
+  optionalUrl,
+} from "@/lib/validation";
 import {
   CLAIM_FIELDS,
   EVIDENCE_LEVELS,
   SUPPLIER_TYPES,
 } from "./constants";
-
-/** Stringa dal form: vuota → null. */
-const optionalText = z
-  .string()
-  .trim()
-  .max(2000, "Testo troppo lungo")
-  .transform((s) => (s === "" ? null : s));
-
-/** Solo http(s): questi valori diventano link, quindi niente "javascript:" e simili. */
-const optionalUrl = z
-  .string()
-  .trim()
-  .max(500, "Indirizzo troppo lungo")
-  .transform((s, ctx) => {
-    if (s === "") return null;
-    try {
-      const url = new URL(/^[a-z][a-z0-9+.-]*:/i.test(s) ? s : `https://${s}`);
-      if (url.protocol !== "http:" && url.protocol !== "https:") throw new Error();
-      return url.toString();
-    } catch {
-      ctx.addIssue({ code: "custom", message: "Indirizzo web non valido" });
-      return z.NEVER;
-    }
-  });
-
-const optionalEuro = z
-  .string()
-  .trim()
-  .transform((s, ctx) => {
-    if (s === "") return null;
-    const cents = parseEuroToCents(s);
-    if (cents === undefined) {
-      ctx.addIssue({
-        code: "custom",
-        message: "Importo non valido (usa la virgola per i decimali, es. 12,50)",
-      });
-      return z.NEVER;
-    }
-    return cents;
-  });
-
-const optionalInt = z
-  .string()
-  .trim()
-  .transform((s, ctx) => {
-    if (s === "") return null;
-    if (!/^\d{1,9}$/.test(s)) {
-      ctx.addIssue({ code: "custom", message: "Inserisci un numero intero" });
-      return z.NEVER;
-    }
-    return Number(s);
-  });
-
-const optionalDecimal = z
-  .string()
-  .trim()
-  .transform((s, ctx) => {
-    if (s === "") return null;
-    const n = Number(s.replace(",", "."));
-    if (!Number.isFinite(n) || n < 0 || n > 99_999_999) {
-      ctx.addIssue({ code: "custom", message: "Inserisci un numero valido" });
-      return z.NEVER;
-    }
-    return Math.round(n * 100) / 100;
-  });
 
 /** "IT", "it" → "IT"; vuoto → null. */
 const optionalCountry = z

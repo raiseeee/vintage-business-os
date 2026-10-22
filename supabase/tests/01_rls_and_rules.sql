@@ -167,6 +167,63 @@ select test.expect_error(
 commit;
 
 -- =====================================================================
+-- Registrazione e annullamento delle vendite
+-- =====================================================================
+select set_config('test.c1', (select id::text from public.items where code = 'C-1'), false);
+
+begin;
+set local role authenticated;
+select set_config('request.jwt.claim.sub', :uid_a, true);
+
+select public.record_sale(current_setting('test.c1')::uuid, 'Canale X', current_date, 5000, 300, 400, 100, 'nota');
+select test.expect_equal((select count(*) from public.items where code = 'C-1' and status = 'venduto'), 1,
+  'record_sale segna il capo come venduto');
+select test.expect_equal((select price_cents from public.sales), 5000, 'record_sale sostituisce la vendita precedente');
+select test.expect_equal((select fees_cents + outbound_shipping_cents + extra_costs_cents from public.sales), 800,
+  'record_sale salva i costi della vendita');
+
+select public.record_sale(current_setting('test.c1')::uuid, 'Canale Y', current_date, 6000, 0, 0, 0);
+select test.expect_equal((select count(*) from public.sales), 1, 'rivendere non crea una seconda vendita');
+select test.expect_equal((select price_cents from public.sales), 6000, 'la rivendita aggiorna il prezzo');
+
+select test.expect_error(
+  format('select public.record_sale(%L, %L, current_date, -1, 0, 0, 0)', current_setting('test.c1'), 'x'),
+  '23514', 'record_sale rifiuta un prezzo negativo');
+select test.expect_equal((select price_cents from public.sales), 6000,
+  'una vendita rifiutata non modifica niente');
+commit;
+
+begin;
+set local role authenticated;
+select set_config('request.jwt.claim.sub', :uid_b, true);
+select test.expect_error(
+  format('select public.record_sale(%L, %L, current_date, 100, 0, 0, 0)', current_setting('test.c1'), 'x'),
+  'P0002', 'B non può registrare vendite sui capi di A');
+select test.expect_error(
+  format('select public.undo_sale(%L)', current_setting('test.c1')),
+  'P0002', 'B non può annullare le vendite di A');
+commit;
+
+begin;
+set local role anon;
+select test.expect_error(
+  format('select public.record_sale(%L, %L, current_date, 100, 0, 0, 0)', current_setting('test.c1'), 'x'),
+  '42501', 'utente anonimo non può registrare vendite');
+commit;
+
+begin;
+set local role authenticated;
+select set_config('request.jwt.claim.sub', :uid_a, true);
+select public.undo_sale(current_setting('test.c1')::uuid);
+select test.expect_equal((select count(*) from public.sales), 0, 'undo_sale elimina la vendita');
+select test.expect_equal((select count(*) from public.items where code = 'C-1' and status = 'pronto'), 1,
+  'undo_sale rimette il capo pronto');
+select test.expect_error(
+  format('select public.undo_sale(%L)', current_setting('test.c1')),
+  'P0002', 'annullare una vendita inesistente è rifiutato');
+commit;
+
+-- =====================================================================
 -- Storage delle foto
 -- =====================================================================
 begin;

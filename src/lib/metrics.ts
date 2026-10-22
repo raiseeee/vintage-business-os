@@ -19,6 +19,8 @@ export type ItemStatus =
 
 export interface Lot {
   id: string;
+  /** Fornitore del lotto: serve solo per i riepiloghi per fornitore. */
+  supplierId?: string;
   /** Prezzo pagato al fornitore per la merce. */
   purchaseCost: number;
   /** Spedizione/dogana per ricevere il lotto. */
@@ -62,6 +64,14 @@ export interface DashboardMetrics {
   costOfGoodsSold: number;
   /** Margine realizzato = incassi - costi di vendita - costo dei capi venduti. */
   realizedMargin: number;
+  /** Incassi al netto dei costi di vendita (vendite - costi di vendita). */
+  netRevenue: number;
+  /**
+   * Saldo di cassa = incassi netti - capitale investito. Negativo finché non hai
+   * recuperato quanto speso; diverso dal margine realizzato perché conta l'intero
+   * costo dei lotti, anche dei capi ancora da vendere.
+   */
+  cashBalance: number;
   soldCount: number;
   stockCount: number;
 }
@@ -125,9 +135,50 @@ export function computeDashboard(lots: Lot[], items: Item[]): DashboardMetrics {
     saleCosts,
     costOfGoodsSold,
     realizedMargin: salesRevenue - saleCosts - costOfGoodsSold,
+    netRevenue: salesRevenue - saleCosts,
+    cashBalance: salesRevenue - saleCosts - capitalInvested,
     soldCount,
     stockCount,
   };
+}
+
+/** Riepilogo per ogni lotto (chiave = id del lotto), compresi i lotti senza capi. */
+export function summarizeByLot(lots: Lot[], items: Item[]): Map<string, DashboardMetrics> {
+  const result = new Map<string, DashboardMetrics>();
+  for (const lot of lots) {
+    result.set(
+      lot.id,
+      computeDashboard(
+        [lot],
+        items.filter((i) => i.lotId === lot.id),
+      ),
+    );
+  }
+  return result;
+}
+
+/** Riepilogo per fornitore (chiave = supplierId), sommando tutti i suoi lotti. */
+export function summarizeBySupplier(lots: Lot[], items: Item[]): Map<string, DashboardMetrics> {
+  const lotsBySupplier = new Map<string, Lot[]>();
+  for (const lot of lots) {
+    if (!lot.supplierId) continue;
+    const list = lotsBySupplier.get(lot.supplierId) ?? [];
+    list.push(lot);
+    lotsBySupplier.set(lot.supplierId, list);
+  }
+
+  const result = new Map<string, DashboardMetrics>();
+  for (const [supplierId, supplierLots] of lotsBySupplier) {
+    const ids = new Set(supplierLots.map((l) => l.id));
+    result.set(
+      supplierId,
+      computeDashboard(
+        supplierLots,
+        items.filter((i) => ids.has(i.lotId)),
+      ),
+    );
+  }
+  return result;
 }
 
 const eur = new Intl.NumberFormat("it-IT", {

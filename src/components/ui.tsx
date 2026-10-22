@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { SupplierType } from "@/lib/suppliers/constants";
 import { SUPPLIER_TYPE_LABELS } from "@/lib/suppliers/constants";
+import { ITEM_STATUS_LABELS } from "@/lib/business/constants";
 
 export function Section({
   title,
@@ -68,4 +69,48 @@ export function formatDate(iso: string | null | undefined): string {
   if (!iso) return "—";
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString("it-IT");
+}
+
+const ITEM_STATUS_STYLES: Record<string, string> = {
+  da_controllare: "bg-stone-200 text-stone-800",
+  da_fotografare: "bg-amber-100 text-amber-900",
+  pronto: "bg-sky-100 text-sky-900",
+  pubblicato: "bg-indigo-100 text-indigo-900",
+  venduto: "bg-green-100 text-green-900",
+  reso: "bg-red-100 text-red-900",
+};
+
+export function ItemStatusBadge({ status }: { status: keyof typeof ITEM_STATUS_LABELS }) {
+  return (
+    <span className={`inline-block whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ${ITEM_STATUS_STYLES[status]}`}>
+      {ITEM_STATUS_LABELS[status]}
+    </span>
+  );
+}
+
+/** Riquadro con un numero: usato per i riepiloghi economici. */
+export function Stat({
+  label,
+  value,
+  hint,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  tone?: "neutral" | "good" | "bad";
+}) {
+  const color = { neutral: "text-stone-900", good: "text-green-800", bad: "text-red-800" }[tone];
+  return (
+    <div className="rounded-lg border border-stone-200 bg-white p-4">
+      <p className="text-sm text-stone-500">{label}</p>
+      <p className={`mt-1 text-2xl font-semibold tabular-nums ${color}`}>{value}</p>
+      {hint && <p className="mt-1 text-xs text-stone-500">{hint}</p>}
+    </div>
+  );
+}
+
+/** Tono di un importo con segno: verde se positivo, rosso se negativo, neutro se zero. */
+export function toneOf(cents: number): "neutral" | "good" | "bad" {
+  return cents > 0 ? "good" : cents < 0 ? "bad" : "neutral";
 }

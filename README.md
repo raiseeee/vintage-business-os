@@ -2,7 +2,7 @@
 
 Gestionale per compravendita di abbigliamento vintage e streetwear: fornitori verificabili, lotti, capi, vendite e margini reali.
 
-**Stato: Milestone 3 completata** (Supplier Finder). Lotti, capi e CRM arrivano nelle milestone successive; la dashboard mostra ancora zeri perché non è ancora collegata ai lotti.
+**Stato: Milestone 4 completata** (lotti, capi, vendite, profitti, dashboard, CSV). Resta il CRM fornitori (Milestone 5).
 
 ## Requisiti
 - Node.js 20.19+ (testato con 22) e npm
@@ -16,6 +16,9 @@ Gestionale per compravendita di abbigliamento vintage e streetwear: fornitori ve
    2. `20261022000002_rls.sql`
    3. `20261022000003_storage.sql`
    4. `20261022000004_demo_data.sql`
+   5. `20261022000005_sales_functions.sql`
+
+   Se avevi già applicato le prime quattro, **applica solo la quinta** (serve per registrare le vendite).
 
    In alternativa, con la [Supabase CLI](https://supabase.com/docs/guides/cli): `supabase link` e `supabase db push`.
 3. **Disattiva le registrazioni pubbliche**: *Authentication → Sign In / Providers* → disattiva *Allow new users to sign up*. L'app è per una sola persona e non ha una pagina di registrazione.
@@ -34,13 +37,13 @@ Senza `.env.local` l'app mostra la pagina di login con le istruzioni di configur
 
 ## Verifiche
 ```bash
-npm test           # Vitest: margini, importi, validazione, punteggio, form
+npm test           # Vitest: margini, importi, validazione, punteggio, CSV, paginazione, form
 npm run test:db    # migrazioni + RLS su un Postgres locale temporaneo
 npm run typecheck
 npm run lint
 npm run build
 ```
-`npm run test:db` crea un cluster Postgres temporaneo, simula le parti di Supabase (ruoli, `auth.uid()`, storage) e verifica 40 casi: isolamento tra utenti, regola del fornitore "diretto", vincoli sui dati, storage e dati demo. Non sostituisce una prova sul progetto Supabase reale (vedi sotto).
+`npm run test:db` crea un cluster Postgres temporaneo, simula le parti di Supabase (ruoli, `auth.uid()`, storage) e verifica 53 casi: isolamento tra utenti, regola del fornitore "diretto", vincoli sui dati, storage, registrazione e annullamento delle vendite, dati demo. Non sostituisce una prova sul progetto Supabase reale (vedi sotto).
 
 ## Sicurezza
 - Nessuna chiave segreta nel repository o nel frontend. La publishable key è pubblica per progetto; i dati sono protetti dalle policy RLS.
@@ -50,7 +53,7 @@ npm run build
 - Il bucket foto `item-photos` è privato; i file stanno in `<user_id>/<item_id>/<file>`.
 
 ## Dati demo
-Le funzioni SQL `load_demo_data()` e `clear_demo_data()` caricano/rimuovono dati di esempio marcati `[DEMO]` / `DEMO-…`, con domini `example.com` e nessuna azienda o marca reale. Si caricano e si rimuovono dal pulsante in fondo alla pagina *Supplier Finder*.
+Le funzioni SQL `load_demo_data()` e `clear_demo_data()` caricano/rimuovono dati di esempio marcati `[DEMO]` / `DEMO-…`, con domini `example.com` e nessuna azienda o marca reale. Comprendono 2 fornitori, il lotto `DEMO-L1` con 4 capi e una vendita. Si caricano e si rimuovono dal pulsante in fondo alla pagina *Supplier Finder*; i dati reali non vengono toccati.
 
 ## Supplier Finder (Milestone 3)
 - Lista con filtri per nome, paese, lingua, tipologia di stock, marchio e tipo di fornitore.
@@ -58,6 +61,18 @@ Le funzioni SQL `load_demo_data()` e `clear_demo_data()` caricano/rimuovono dati
 - **Punteggio 0-100**, mostrato criterio per criterio: vicinanza alla fonte 30%, trasparenza 25%, ordine minimo 15%, budget 15%, interesse vintage 15%. Il voto di vicinanza ha un tetto per tipo di fornitore (es. origine non verificata: max 2/5), così non si gonfia senza prove. I pesi sono in `src/lib/suppliers/score.ts`.
 - **Ricerca web**: per ora manuale. `src/lib/search/provider.ts` è il punto di integrazione per una futura API; non c'è nessun risultato simulato.
 - Non ancora disponibile: eliminare un fornitore e modificare lo stato di contatto (arriva col CRM, Milestone 5).
+
+## Lotti, capi e vendite (Milestone 4)
+- **Lotti**: fornitore, data, costi (merce, spedizione in entrata, altri), quantità dichiarata, peso. Il costo di ogni capo è il costo totale del lotto diviso la quantità **dichiarata**, così registrare i capi a poco a poco non sposta il costo unitario.
+- **Capi**: codice univoco, marca, categoria, taglia, condizione, stato, prezzo previsto, foto. Si possono creare 1 alla volta o tanti vuoti insieme (`L-001-001`, `-002`…) dalla scheda del lotto.
+- **Stati**: da controllare, da fotografare, pronto, pubblicato, venduto, reso. «Venduto» si ottiene solo registrando una vendita; «reso» con il pulsante dedicato.
+- **Vendita**: canale, data, prezzo incassato, commissioni, spedizione in uscita, costi extra. Registrare una vendita e cambiare lo stato del capo avviene in un'unica operazione del database. Un capo reso e poi rivenduto sostituisce la vecchia vendita.
+- **Foto**: caricate dal browser direttamente nello storage privato (JPG, PNG, WebP, max 10 MB), poi registrate nel database.
+- **Profitto** per capo (ricavo netto − costo attribuito), per lotto e per fornitore; dashboard con capitale investito, valore stock, vendite, costi, margine realizzato e saldo di cassa.
+- **Esportazione CSV** di capi, lotti e vendite (pulsanti in dashboard e nelle liste). Formato per Excel italiano: separatore `;`, importi con la virgola, accenti corretti; i testi che sembrano formule sono neutralizzati.
+- Le liste leggono i dati a pagine fino in fondo, quindi i totali non si fermano a 1000 righe.
+
+**Margine realizzato** = vendite − costi di vendita − costo dei soli capi venduti. **Saldo di cassa** = incassi netti − costo dell'intero capitale investito: resta negativo finché non hai recuperato quanto speso.
 
 ## Struttura
 ```
@@ -68,6 +83,8 @@ src/lib/supabase/     client server e gestione sessione
 src/lib/env.ts        validazione configurazione
 src/lib/metrics.ts    calcoli in centesimi: costi lotto, profitto capo, dashboard
 src/lib/suppliers/    costanti, validazione zod, punteggio, query
+src/lib/business/     lotti, capi, vendite: validazione, query paginate, esportazione CSV
+src/lib/csv.ts        generatore CSV sicuro per Excel
 src/lib/search/       interfaccia per la futura ricerca web
 src/components/       form (client), elementi UI condivisi
 supabase/migrations/  schema, RLS, storage, dati demo
@@ -90,8 +107,13 @@ scripts/test-db.sh    esegue migrazioni e test SQL in locale
 1. Progetto avviabile, layout, dashboard (fatto)
 2. Supabase: migrazioni SQL, RLS per utente, autenticazione (fatto)
 3. Supplier Finder: anagrafica, fonti, punteggio trasparente, dati demo (fatto)
-4. Lotti e capi: inventario, vendite, profitti, CSV, dashboard collegata
+4. Lotti e capi: inventario, vendite, profitti, CSV, dashboard collegata (fatto)
 5. CRM fornitori
+
+## Da fare / promemoria
+- **Ricerca fornitori e fonti**: l'app non cerca da sola. Prima di comprare servono fornitori veri con fonti verificabili (provenienza, registro imprese, autorizzazioni). Si può fare a mano o chiedendo a Claude di cercarli e riassumere cosa è documentato e cosa solo dichiarato.
+- Allegare file (documenti, screenshot) alle fonti dei fornitori.
+- Eliminare un fornitore dall'interfaccia (oggi si rimuovono solo i dati demo).
 
 ## Roadmap futura (non implementata)
 Casella email, email dei fornitori in app, invii multipli con controlli anti-spam, ricerche pianificate e notifiche, API di ricerca web, sito pubblico/multiutenza/abbonamenti.

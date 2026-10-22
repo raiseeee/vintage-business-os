@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActionForm, Field } from "@/components/form";
-import { ExternalLink, Section, SupplierTypeBadge, Tag, formatDate } from "@/components/ui";
-import { formatEuro } from "@/lib/metrics";
+import { ExternalLink, Section, Stat, SupplierTypeBadge, Tag, formatDate, toneOf } from "@/components/ui";
+import { toMetricItems, toMetricLot } from "@/lib/business/mappers";
+import { getBusinessData } from "@/lib/business/queries";
+import { formatEuro, summarizeBySupplier } from "@/lib/metrics";
 import {
   CLAIM_FIELDS,
   CLAIM_FIELD_LABELS,
@@ -48,6 +50,16 @@ export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[
   const detail = await getSupplierDetail(id);
   if (!detail) notFound();
   const { supplier, sources, claims, evaluations, score } = detail;
+
+  // Risultati economici di questo fornitore (profitto per fornitore).
+  const business = await getBusinessData();
+  const supplierLots = business.lots
+    .filter((l) => l.supplier_id === id)
+    .sort((a, b) => b.purchased_at.localeCompare(a.purchased_at));
+  const econ = summarizeBySupplier(
+    business.lots.map(toMetricLot),
+    toMetricItems(business.items, business.sales),
+  ).get(id);
 
   const sourceById = new Map(sources.map((s) => [s.id, s]));
   const sourceOptions = [
@@ -158,6 +170,38 @@ export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[
       </div>
 
       <div className="mt-5 space-y-5">
+        <Section
+          title="Risultati economici"
+          description="Quanto hai speso e guadagnato con gli acquisti da questo fornitore."
+        >
+          {econ ? (
+            <>
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <Stat label="Investito" value={formatEuro(econ.capitalInvested)} hint={`${supplierLots.length} lotti`} />
+                <Stat label="Vendite" value={formatEuro(econ.salesRevenue)} hint={`${econ.soldCount} capi venduti`} />
+                <Stat label="Margine realizzato" value={formatEuro(econ.realizedMargin)} tone={toneOf(econ.realizedMargin)} />
+                <Stat label="Saldo di cassa" value={formatEuro(econ.cashBalance)} tone={toneOf(econ.cashBalance)} hint="Incassi netti − investito" />
+              </div>
+              <ul className="mt-4 divide-y divide-stone-100 text-sm">
+                {supplierLots.map((l) => (
+                  <li key={l.id} className="flex items-center justify-between py-2">
+                    <Link href={`/lotti/${l.id}`} className="font-medium text-stone-900 hover:underline">{l.code}</Link>
+                    <span className="text-stone-600">{formatDate(l.purchased_at)} · {l.quantity} capi</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p className="text-sm text-stone-500">Nessun acquisto registrato da questo fornitore.</p>
+          )}
+          <Link
+            href={`/lotti/nuovo?fornitore=${supplier.id}`}
+            className="mt-4 inline-block rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
+          >
+            Registra un acquisto
+          </Link>
+        </Section>
+
         <Section
           title="Informazioni e livello di prova"
           description="Ogni informazione dice quanto è affidabile. Solo quelle documentate poggiano su una fonte registrata."
