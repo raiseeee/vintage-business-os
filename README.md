@@ -2,7 +2,7 @@
 
 Gestionale per compravendita di abbigliamento vintage e streetwear: fornitori verificabili, lotti, capi, vendite e margini reali.
 
-**Stato: Milestone 2 completata** (schema SQL, RLS, autenticazione). L'interfaccia dei moduli (fornitori, lotti, capi, CRM) arriva nelle milestone successive; la dashboard mostra ancora zeri perché non è ancora collegata al database.
+**Stato: Milestone 3 completata** (Supplier Finder). Lotti, capi e CRM arrivano nelle milestone successive; la dashboard mostra ancora zeri perché non è ancora collegata ai lotti.
 
 ## Requisiti
 - Node.js 20.19+ (testato con 22) e npm
@@ -34,7 +34,7 @@ Senza `.env.local` l'app mostra la pagina di login con le istruzioni di configur
 
 ## Verifiche
 ```bash
-npm test           # Vitest: margini e validazione configurazione
+npm test           # Vitest: margini, importi, validazione, punteggio, form
 npm run test:db    # migrazioni + RLS su un Postgres locale temporaneo
 npm run typecheck
 npm run lint
@@ -50,7 +50,14 @@ npm run build
 - Il bucket foto `item-photos` è privato; i file stanno in `<user_id>/<item_id>/<file>`.
 
 ## Dati demo
-Le funzioni SQL `load_demo_data()` e `clear_demo_data()` caricano/rimuovono dati di esempio marcati `[DEMO]` / `DEMO-…`, con domini `example.com` e nessuna azienda o marca reale. **Non sono ancora richiamabili dall'interfaccia**: il pulsante arriva con la Milestone 3.
+Le funzioni SQL `load_demo_data()` e `clear_demo_data()` caricano/rimuovono dati di esempio marcati `[DEMO]` / `DEMO-…`, con domini `example.com` e nessuna azienda o marca reale. Si caricano e si rimuovono dal pulsante in fondo alla pagina *Supplier Finder*.
+
+## Supplier Finder (Milestone 3)
+- Lista con filtri per nome, paese, lingua, tipologia di stock, marchio e tipo di fornitore.
+- Scheda con: dati e contatti, ordine minimo e prezzi, **informazioni raggruppate per livello di prova** (documentato / dichiarato / ipotesi), fonti, storico valutazioni.
+- **Punteggio 0-100**, mostrato criterio per criterio: vicinanza alla fonte 30%, trasparenza 25%, ordine minimo 15%, budget 15%, interesse vintage 15%. Il voto di vicinanza ha un tetto per tipo di fornitore (es. origine non verificata: max 2/5), così non si gonfia senza prove. I pesi sono in `src/lib/suppliers/score.ts`.
+- **Ricerca web**: per ora manuale. `src/lib/search/provider.ts` è il punto di integrazione per una futura API; non c'è nessun risultato simulato.
+- Non ancora disponibile: eliminare un fornitore e modificare lo stato di contatto (arriva col CRM, Milestone 5).
 
 ## Struttura
 ```
@@ -60,6 +67,9 @@ src/proxy.ts          protezione delle rotte e rinnovo sessione
 src/lib/supabase/     client server e gestione sessione
 src/lib/env.ts        validazione configurazione
 src/lib/metrics.ts    calcoli in centesimi: costi lotto, profitto capo, dashboard
+src/lib/suppliers/    costanti, validazione zod, punteggio, query
+src/lib/search/       interfaccia per la futura ricerca web
+src/components/       form (client), elementi UI condivisi
 supabase/migrations/  schema, RLS, storage, dati demo
 supabase/tests/       harness e test SQL
 scripts/test-db.sh    esegue migrazioni e test SQL in locale
@@ -79,7 +89,7 @@ scripts/test-db.sh    esegue migrazioni e test SQL in locale
 ## Milestone
 1. Progetto avviabile, layout, dashboard (fatto)
 2. Supabase: migrazioni SQL, RLS per utente, autenticazione (fatto)
-3. Supplier Finder: anagrafica, fonti, punteggio trasparente, pulsante dati demo
+3. Supplier Finder: anagrafica, fonti, punteggio trasparente, dati demo (fatto)
 4. Lotti e capi: inventario, vendite, profitti, CSV, dashboard collegata
 5. CRM fornitori
 
