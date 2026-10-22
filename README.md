@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Vintage Business OS
 
-## Getting Started
+Gestionale per compravendita di abbigliamento vintage e streetwear: fornitori verificabili, lotti, capi, vendite e margini reali.
 
-First, run the development server:
+**Stato: Milestone 1 completata** (layout, navigazione, dashboard, logica margini testata). Nessun database collegato: la dashboard mostra zeri, non dati inventati.
 
+## Requisiti
+- Node.js 20.19+ (testato con 22) e npm
+
+## Avvio locale
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Verifiche
+```bash
+npm test           # Vitest: logica margini e anti doppio conteggio
+npm run typecheck
+npm run lint
+npm run build
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Struttura
+```
+src/app/(app)/     pagine con sidebar (dashboard, fornitori, crm, lotti, capi, roadmap)
+src/components/    Sidebar, intestazioni e segnaposto
+src/lib/metrics.ts calcoli in centesimi: costi lotto, profitto capo, dashboard
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Regole di calcolo
+- Costi di acquisto, spedizione in entrata e altri costi stanno **solo sul lotto**.
+- Commissioni, spedizione in uscita ed extra stanno **solo sulla vendita del capo**.
+- Costo per capo = costo totale lotto / quantità dichiarata.
+- Capi resi: esclusi da ricavi e valore stock finché non rivalutati.
 
-## Learn More
+## Milestone
+1. Progetto avviabile, layout, dashboard (fatto)
+2. Supabase: migrazioni SQL, RLS per utente, autenticazione
+3. Supplier Finder: anagrafica, fonti, punteggio trasparente
+4. Lotti e capi: inventario, vendite, profitti, CSV
+5. CRM fornitori
 
-To learn more about Next.js, take a look at the following resources:
+## Roadmap futura (non implementata)
+Casella email, email dei fornitori in app, invii multipli con controlli anti-spam, ricerche pianificate e notifiche, API di ricerca web, sito pubblico/multiutenza/abbonamenti.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deployment
+Previsto su Vercel dopo la Milestone 2 (servono le variabili Supabase in `.env.example`).
