@@ -112,6 +112,7 @@ scripts/test-db.sh    esegue migrazioni e test SQL in locale
 
 ## Da fare / promemoria
 - **Ricerca fornitori e fonti**: l'app non cerca da sola. Prima di comprare servono fornitori veri con fonti verificabili (provenienza, registro imprese, autorizzazioni). Si può fare a mano o chiedendo a Claude di cercarli e riassumere cosa è documentato e cosa solo dichiarato.
+- Nella pagina Fornitori finiranno i fornitori che ti sono piaciuti dalla ricerca (vedi sezione «Ricerca fornitori» della Roadmap).
 - Allegare file (documenti, screenshot) alle fonti dei fornitori.
 - Eliminare un fornitore dall'interfaccia (oggi si rimuovono solo i dati demo).
 

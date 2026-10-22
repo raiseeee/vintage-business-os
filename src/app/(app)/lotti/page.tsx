@@ -1,15 +1,22 @@
 import Link from "next/link";
+import { ModalButton } from "@/components/Modal";
 import { PageHeader } from "@/components/PagePlaceholder";
 import { Tag, formatDate, toneOf } from "@/components/ui";
 import { toMetricItems, toMetricLot } from "@/lib/business/mappers";
 import { getBusinessData } from "@/lib/business/queries";
+import { todayIso } from "@/lib/dates";
 import { formatEuro, summarizeByLot } from "@/lib/metrics";
+import { createLot } from "./actions";
+import { LotForm } from "./LotForm";
 
 export const metadata = { title: "Acquisti e lotti · Vintage Business OS" };
 
 const toneClass = { neutral: "text-stone-700", good: "text-green-800", bad: "text-red-800" };
 
-export default async function LottiPage() {
+export default async function LottiPage(props: PageProps<"/lotti">) {
+  const params = await props.searchParams;
+  const preselected = Array.isArray(params.fornitore) ? params.fornitore[0] : params.fornitore;
+  const openNew = (Array.isArray(params.nuovo) ? params.nuovo[0] : params.nuovo) === "1";
   const { suppliers, lots, items, sales } = await getBusinessData();
 
   const supplierName = new Map(suppliers.map((s) => [s.id, s.name]));
@@ -35,9 +42,30 @@ export default async function LottiPage() {
           >
             Esporta CSV
           </a>
-          <Link href="/lotti/nuovo" className="rounded-md bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700">
-            Nuovo lotto
-          </Link>
+          <ModalButton
+            label="Nuovo lotto"
+            title="Nuovo lotto"
+            description="Registra un acquisto. I costi del lotto si ripartiscono sui capi; quelli di vendita si inseriscono sul singolo capo."
+            defaultOpen={openNew}
+          >
+            {suppliers.length === 0 ? (
+              <p className="text-sm text-stone-700">
+                Per registrare un lotto serve almeno un fornitore:{" "}
+                <Link href="/fornitori?nuovo=1" className="font-medium text-stone-900 underline">aggiungine uno</Link>.
+              </p>
+            ) : (
+              <LotForm
+                action={createLot}
+                suppliers={suppliers.map((s) => ({ id: s.id, name: s.name }))}
+                defaults={{
+                  code: `L-${String(lots.length + 1).padStart(3, "0")}`,
+                  supplierId: preselected,
+                  purchasedAt: todayIso(),
+                }}
+                submitLabel="Crea lotto"
+              />
+            )}
+          </ModalButton>
         </div>
       </div>
 

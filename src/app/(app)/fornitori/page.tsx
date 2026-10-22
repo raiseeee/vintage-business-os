@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/PagePlaceholder";
 import { ActionForm } from "@/components/form";
+import { ModalButton } from "@/components/Modal";
 import { SupplierTypeBadge, Tag } from "@/components/ui";
 import { formatEuro } from "@/lib/metrics";
 import { getWebSearchProvider } from "@/lib/search/provider";
@@ -11,7 +12,8 @@ import {
 } from "@/lib/suppliers/constants";
 import { hasDemoData, listSuppliers, type SupplierListItem } from "@/lib/suppliers/queries";
 import type { SupplierFilters } from "@/lib/suppliers/types";
-import { clearDemoData, loadDemoData } from "./actions";
+import { clearDemoData, createSupplier, loadDemoData } from "./actions";
+import { SupplierForm } from "./SupplierForm";
 
 export const metadata = { title: "Supplier Finder · Vintage Business OS" };
 
@@ -48,12 +50,14 @@ export default async function FornitoriPage(props: PageProps<"/fornitori">) {
           title="Supplier Finder"
           description="Fornitori con fonti verificabili: separa ciò che è documentato da ciò che è solo dichiarato o ipotizzato."
         />
-        <Link
-          href="/fornitori/nuovo"
-          className="rounded-md bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700"
+        <ModalButton
+          label="Nuovo fornitore"
+          title="Nuovo fornitore"
+          description="Registra solo ciò che sai. Fonti, prove e valutazione si aggiungono nella scheda dopo il salvataggio."
+          defaultOpen={pick(params.nuovo) === "1"}
         >
-          Nuovo fornitore
-        </Link>
+          <SupplierForm action={createSupplier} submitLabel="Crea fornitore" />
+        </ModalButton>
       </div>
 
       <form method="get" className="mb-6 grid gap-3 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-3 lg:grid-cols-6">

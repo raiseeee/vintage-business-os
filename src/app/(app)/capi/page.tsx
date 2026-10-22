@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { ModalButton } from "@/components/Modal";
 import { PageHeader } from "@/components/PagePlaceholder";
 import { ItemStatusBadge, Tag, toneOf } from "@/components/ui";
 import { ITEM_STATUSES, ITEM_STATUS_LABELS } from "@/lib/business/constants";
 import { toMetricItems, toMetricLot } from "@/lib/business/mappers";
 import { getBusinessData, getFirstPhotoUrls } from "@/lib/business/queries";
 import { formatEuro, itemProfit } from "@/lib/metrics";
+import { createItem } from "./actions";
+import { ItemForm } from "./ItemForm";
 
 export const metadata = { title: "Capi · Vintage Business OS" };
 
@@ -49,6 +52,20 @@ export default async function CapiPage(props: PageProps<"/capi">) {
     )
     .sort((a, b) => a.code.localeCompare(b.code));
 
+  // Modal "Nuovo capo": lotto preselezionato (parametro ?nuovolotto, distinto dal filtro ?lotto) e codice suggerito.
+  const lotParam = pick(params.nuovolotto);
+  const sortedLots = [...lots].sort((a, b) => b.purchased_at.localeCompare(a.purchased_at));
+  const selected = sortedLots.find((l) => l.id === lotParam) ?? sortedLots[0];
+  let suggested = "";
+  if (selected) {
+    const prefix = `${selected.code}-`;
+    const used = items
+      .filter((i) => i.lot_id === selected.id && i.code.startsWith(prefix))
+      .map((i) => Number(i.code.slice(prefix.length)))
+      .filter(Number.isFinite);
+    suggested = `${prefix}${String(Math.max(0, ...used) + 1).padStart(3, "0")}`;
+  }
+
   const shown = filtered.slice(0, MAX_ROWS);
   const photos = await getFirstPhotoUrls(shown.map((i) => i.id));
   const hasFilters = Boolean(q || status || lotFilter);
@@ -69,9 +86,26 @@ export default async function CapiPage(props: PageProps<"/capi">) {
           >
             Esporta CSV
           </a>
-          <Link href="/capi/nuovo" className="rounded-md bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700">
-            Nuovo capo
-          </Link>
+          <ModalButton
+            label="Nuovo capo"
+            title="Nuovo capo"
+            description="Le foto si aggiungono nella scheda, dopo il salvataggio."
+            defaultOpen={pick(params.nuovo) === "1"}
+          >
+            {sortedLots.length === 0 ? (
+              <p className="text-sm text-stone-700">
+                Ogni capo appartiene a un lotto.{" "}
+                <Link href="/lotti?nuovo=1" className="font-medium text-stone-900 underline">Registra prima un lotto</Link>.
+              </p>
+            ) : (
+              <ItemForm
+                action={createItem}
+                lots={sortedLots}
+                defaults={{ lotId: selected?.id, code: suggested }}
+                submitLabel="Crea capo"
+              />
+            )}
+          </ModalButton>
         </div>
       </div>
 

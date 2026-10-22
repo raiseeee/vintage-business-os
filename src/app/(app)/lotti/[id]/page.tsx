@@ -113,7 +113,7 @@ export default async function LottoDetailPage(props: PageProps<"/lotti/[id]">) {
               <h3 className="text-sm font-semibold text-stone-900">Aggiungi un capo</h3>
               <p className="mt-1 text-sm text-stone-600">Con tutti i dettagli: marca, categoria, taglia, condizione.</p>
               <Link
-                href={`/capi/nuovo?lotto=${lot.id}`}
+                href={`/capi?nuovo=1&nuovolotto=${lot.id}`}
                 className="mt-3 inline-block rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
               >
                 Nuovo capo

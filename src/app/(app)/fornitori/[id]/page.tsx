@@ -195,7 +195,7 @@ export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[
             <p className="text-sm text-stone-500">Nessun acquisto registrato da questo fornitore.</p>
           )}
           <Link
-            href={`/lotti/nuovo?fornitore=${supplier.id}`}
+            href={`/lotti?nuovo=1&fornitore=${supplier.id}`}
             className="mt-4 inline-block rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
           >
             Registra un acquisto

@@ -33,8 +33,8 @@ export default async function DashboardPage() {
       {empty && (
         <div className="mb-6 rounded-md border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700">
           Non hai ancora registrato nessun acquisto: i valori sono a zero. Per iniziare,{" "}
-          <Link href="/fornitori" className="font-medium text-stone-900 underline">aggiungi un fornitore</Link>, poi{" "}
-          <Link href="/lotti/nuovo" className="font-medium text-stone-900 underline">registra un lotto</Link>.
+          <Link href="/fornitori?nuovo=1" className="font-medium text-stone-900 underline">aggiungi un fornitore</Link>, poi{" "}
+          <Link href="/lotti?nuovo=1" className="font-medium text-stone-900 underline">registra un lotto</Link>.
         </div>
       )}
 
