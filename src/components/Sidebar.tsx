@@ -7,6 +7,7 @@ import { signOut } from "@/app/(app)/actions";
 const NAV = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/fornitori", label: "Supplier Finder" },
+  { href: "/ricerca", label: "Ricerca fornitori" },
   { href: "/crm", label: "CRM fornitori" },
   { href: "/lotti", label: "Acquisti e lotti" },
   { href: "/capi", label: "Capi" },

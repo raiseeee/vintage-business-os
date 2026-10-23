@@ -157,11 +157,11 @@ export default async function FornitoriPage(props: PageProps<"/fornitori">) {
           <p className="mt-1 text-sm text-stone-600">
             {searchProvider
               ? `Provider attivo: ${searchProvider.name}.`
-              : "Nessuna API di ricerca è collegata. Per ora cerca fornitori a mano e registra qui le fonti trovate: l'app non inventa né simula risultati di ricerca."}
+              : "Nessuna API di ricerca è collegata: l'app non inventa né simula risultati."}{" "}
+            <Link href="/ricerca" className="font-medium text-stone-900 underline">Vai alla ricerca fornitori</Link>
           </p>
           <p className="mt-2 text-xs text-stone-500">
-            Quando verrà collegata, i risultati saranno solo suggerimenti da verificare: non
-            diventeranno mai fornitori o informazioni «documentate» in automatico.
+            I risultati sono solo suggerimenti da verificare: non diventano mai informazioni «documentate» in automatico.
           </p>
         </section>
 

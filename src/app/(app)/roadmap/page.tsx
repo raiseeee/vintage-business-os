@@ -19,9 +19,9 @@ const future = [
 
 const research = [
   { step: "Definire i criteri", desc: "Paese, tipo di stock, marchi, budget e ordine minimo che ti interessano.", status: "Da fare" },
-  { step: "Cercare fornitori reali", desc: "Ricerca con fonti verificabili (sito, registro imprese, recensioni): nessun dato inventato.", status: "Da fare" },
+  { step: "Cercare fornitori reali", desc: "Pagina «Ricerca fornitori»: box, prodotto e area; elenco di candidati con motivi e fonte, mai dati inventati. Richiede una chiave API (Brave o Tavily).", status: "Pronta, da collegare" },
   { step: "Valutare e scegliere", desc: "Controllare provenienza e prove, poi segnare i fornitori che ti sono piaciuti.", status: "Da fare" },
-  { step: "Portarli nella pagina Fornitori", desc: "I fornitori scelti vengono salvati con le loro fonti nella pagina Fornitori.", status: "Da fare" },
+  { step: "Portarli nella pagina Fornitori", desc: "Il pulsante «Aggiungi ai fornitori» li salva come origine non verificata, con la pagina trovata come fonte.", status: "Fatto" },
 ];
 
 export default function RoadmapPage() {

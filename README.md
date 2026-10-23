@@ -62,6 +62,14 @@ Le funzioni SQL `load_demo_data()` e `clear_demo_data()` caricano/rimuovono dati
 - **Ricerca web**: per ora manuale. `src/lib/search/provider.ts` è il punto di integrazione per una futura API; non c'è nessun risultato simulato.
 - Non ancora disponibile: eliminare un fornitore dall'interfaccia.
 
+## Ricerca fornitori (pagina «Ricerca fornitori»)
+- Scrivi cosa cerchi, il tipo di prodotto (jeans, maglie…) e l'area (Tutta Europa o un Paese): l'app lancia fino a 6 ricerche web con le parole di settore nella lingua del Paese e mostra un elenco di aziende, una per dominio.
+- Ogni risultato ha un'etichetta («Possibile fornitore a monte», «Da capire», «Probabile rivenditore») **basata solo sulle parole del risultato**, con i motivi: è un indizio, non una prova. I probabili rivenditori sono nascosti di default; marketplace e social sono esclusi.
+- «Aggiungi ai fornitori» crea il fornitore come *origine non verificata* (stato CRM «da contattare»), con la pagina trovata come fonte e la nota «non ancora verificato». Non salva nessuna informazione come documentata.
+- **Serve una chiave API** (Brave Search o Tavily) in `.env.local`: `BRAVE_SEARCH_API_KEY` oppure `TAVILY_API_KEY`. Senza chiave la ricerca è spenta e non mostra nulla di inventato. La chiave resta solo sul server.
+- Le email e i prezzi non vengono letti dai siti: si raccolgono a mano nella scheda, dopo aver aperto il sito.
+- Stato: scritta e testata nelle parti di analisi (lettura risposte, query, classificazione); **non ancora provata con una chiave reale**.
+
 ## CRM fornitori (Milestone 5)
 - Pagina **CRM**: prossime azioni ordinate per scadenza (le scadute in rosso) e pipeline per stato (da contattare → contattata → in attesa → risposta ricevuta → campione richiesto → verificata / scartata), con data dell'ultimo contatto.
 - Nella scheda di ogni fornitore, sezione **CRM**: cambi stato, scrivi la prossima azione con data, registri i contatti (canale, data, riassunto) e vedi lo storico.
