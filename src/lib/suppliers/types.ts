@@ -69,3 +69,11 @@ export interface SupplierFilters {
   brand?: string;
   type?: string;
 }
+
+export interface ContactLogEntry {
+  id: string;
+  supplier_id: string;
+  contacted_at: string;
+  channel: import("./constants").ContactChannel;
+  summary: string;
+}

@@ -2,7 +2,7 @@
 
 Gestionale per compravendita di abbigliamento vintage e streetwear: fornitori verificabili, lotti, capi, vendite e margini reali.
 
-**Stato: Milestone 4 completata** (lotti, capi, vendite, profitti, dashboard, CSV). Resta il CRM fornitori (Milestone 5).
+**Stato: Milestone 5 completata** (CRM fornitori). Tutte le milestone dell'MVP sono fatte; restano la ricerca di fornitori reali e le funzioni future.
 
 ## Requisiti
 - Node.js 20.19+ (testato con 22) e npm
@@ -60,7 +60,12 @@ Le funzioni SQL `load_demo_data()` e `clear_demo_data()` caricano/rimuovono dati
 - Scheda con: dati e contatti, ordine minimo e prezzi, **informazioni raggruppate per livello di prova** (documentato / dichiarato / ipotesi), fonti, storico valutazioni.
 - **Punteggio 0-100**, mostrato criterio per criterio: vicinanza alla fonte 30%, trasparenza 25%, ordine minimo 15%, budget 15%, interesse vintage 15%. Il voto di vicinanza ha un tetto per tipo di fornitore (es. origine non verificata: max 2/5), così non si gonfia senza prove. I pesi sono in `src/lib/suppliers/score.ts`.
 - **Ricerca web**: per ora manuale. `src/lib/search/provider.ts` è il punto di integrazione per una futura API; non c'è nessun risultato simulato.
-- Non ancora disponibile: eliminare un fornitore e modificare lo stato di contatto (arriva col CRM, Milestone 5).
+- Non ancora disponibile: eliminare un fornitore dall'interfaccia.
+
+## CRM fornitori (Milestone 5)
+- Pagina **CRM**: prossime azioni ordinate per scadenza (le scadute in rosso) e pipeline per stato (da contattare → contattata → in attesa → risposta ricevuta → campione richiesto → verificata / scartata), con data dell'ultimo contatto.
+- Nella scheda di ogni fornitore, sezione **CRM**: cambi stato, scrivi la prossima azione con data, registri i contatti (canale, data, riassunto) e vedi lo storico.
+- Nessuna migrazione nuova: usa tabelle e policy già presenti. Non invia email: i contatti si registrano a mano.
 
 ## Lotti, capi e vendite (Milestone 4)
 - **Lotti**: fornitore, data, costi (merce, spedizione in entrata, altri), quantità dichiarata, peso. Il costo di ogni capo è il costo totale del lotto diviso la quantità **dichiarata**, così registrare i capi a poco a poco non sposta il costo unitario.
@@ -108,7 +113,7 @@ scripts/test-db.sh    esegue migrazioni e test SQL in locale
 2. Supabase: migrazioni SQL, RLS per utente, autenticazione (fatto)
 3. Supplier Finder: anagrafica, fonti, punteggio trasparente, dati demo (fatto)
 4. Lotti e capi: inventario, vendite, profitti, CSV, dashboard collegata (fatto)
-5. CRM fornitori
+5. CRM fornitori: stati, storico contatti, prossime azioni (fatto)
 
 ## Da fare / promemoria
 - **Ricerca fornitori e fonti**: l'app non cerca da sola. Prima di comprare servono fornitori veri con fonti verificabili (provenienza, registro imprese, autorizzazioni). Si può fare a mano o chiedendo a Claude di cercarli e riassumere cosa è documentato e cosa solo dichiarato.

@@ -69,3 +69,14 @@ export const CLAIM_FIELD_LABELS: Record<ClaimField, string> = {
   contatto: "Contatto",
   altro: "Altro",
 };
+
+export const CONTACT_CHANNELS = ["email", "telefono", "messaggio", "visita", "altro"] as const;
+export type ContactChannel = (typeof CONTACT_CHANNELS)[number];
+
+export const CONTACT_CHANNEL_LABELS: Record<ContactChannel, string> = {
+  email: "Email",
+  telefono: "Telefono",
+  messaggio: "Messaggio",
+  visita: "Visita",
+  altro: "Altro",
+};

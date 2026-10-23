@@ -8,12 +8,16 @@ import { formatEuro, summarizeBySupplier } from "@/lib/metrics";
 import {
   CLAIM_FIELDS,
   CLAIM_FIELD_LABELS,
+  CONTACT_CHANNELS,
+  CONTACT_CHANNEL_LABELS,
+  CONTACT_STATUSES,
   CONTACT_STATUS_LABELS,
   EVIDENCE_HINTS,
   EVIDENCE_LABELS,
   EVIDENCE_LEVELS,
   type EvidenceLevel,
 } from "@/lib/suppliers/constants";
+import { todayIso } from "@/lib/dates";
 import { getSupplierDetail } from "@/lib/suppliers/queries";
 import { uuidSchema } from "@/lib/suppliers/schemas";
 import {
@@ -25,10 +29,13 @@ import {
 } from "@/lib/suppliers/score";
 import {
   addClaim,
+  addContact,
   addEvaluation,
   addSource,
   deleteClaim,
+  deleteContact,
   deleteSource,
+  updateCrm,
   updateSupplier,
 } from "../actions";
 import { SupplierForm } from "../SupplierForm";
@@ -49,7 +56,7 @@ export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[
 
   const detail = await getSupplierDetail(id);
   if (!detail) notFound();
-  const { supplier, sources, claims, evaluations, score } = detail;
+  const { supplier, sources, claims, evaluations, contacts, score } = detail;
 
   // Risultati economici di questo fornitore (profitto per fornitore).
   const business = await getBusinessData();
@@ -298,6 +305,52 @@ export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[
               <Field label="Data consultazione" name="retrieved_at" type="date" />
             </div>
             <Field as="textarea" label="Nota" name="note" rows={2} />
+          </ActionForm>
+        </Section>
+
+        <Section title="CRM" description="Dove sei arrivato con questo fornitore, cosa farai dopo e lo storico dei contatti.">
+          <ActionForm action={updateCrm.bind(null, supplier.id)} submitLabel="Salva stato" successMessage="Stato salvato." className="space-y-3">
+            <div className="grid gap-3 sm:grid-cols-3">
+              <Field as="select" label="Stato" name="contact_status" defaultValue={supplier.contact_status} options={CONTACT_STATUSES.map((s) => ({ value: s, label: CONTACT_STATUS_LABELS[s] }))} />
+              <Field label="Prossima azione" name="next_action" defaultValue={supplier.next_action ?? ""} placeholder="Es. chiedere il listino" />
+              <Field label="Entro il" name="next_action_date" type="date" defaultValue={supplier.next_action_date ?? ""} />
+            </div>
+          </ActionForm>
+
+          <h3 className="mt-6 text-sm font-semibold text-stone-900">Storico contatti</h3>
+          {contacts.length === 0 ? (
+            <p className="mt-1 text-sm text-stone-500">Nessun contatto registrato.</p>
+          ) : (
+            <ul className="mt-1 divide-y divide-stone-100">
+              {contacts.map((c) => (
+                <li key={c.id} className="flex items-start justify-between gap-3 py-2 text-sm">
+                  <div>
+                    <p className="text-stone-800">
+                      <span className="font-medium">{CONTACT_CHANNEL_LABELS[c.channel]}</span>{" "}
+                      <span className="text-stone-500">· {formatDate(c.contacted_at)}</span>
+                    </p>
+                    <p className="whitespace-pre-line text-stone-700">{c.summary}</p>
+                  </div>
+                  <ActionForm
+                    action={deleteContact.bind(null, supplier.id, c.id)}
+                    submitLabel="Elimina"
+                    pendingLabel="…"
+                    successMessage={null}
+                    variant="danger"
+                    confirm="Eliminare questo contatto?"
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <h3 className="mt-6 text-sm font-semibold text-stone-900">Registra un contatto</h3>
+          <ActionForm action={addContact.bind(null, supplier.id)} submitLabel="Aggiungi contatto" successMessage="Contatto registrato." className="mt-2 space-y-3">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field as="select" label="Canale" name="channel" defaultValue="email" options={CONTACT_CHANNELS.map((c) => ({ value: c, label: CONTACT_CHANNEL_LABELS[c] }))} />
+              <Field label="Data" name="contacted_at" type="date" required defaultValue={todayIso()} />
+            </div>
+            <Field as="textarea" label="Riassunto (cosa vi siete detti)" name="summary" rows={3} required />
           </ActionForm>
         </Section>
 

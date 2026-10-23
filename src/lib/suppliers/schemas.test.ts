@@ -124,3 +124,27 @@ describe("evaluationSchema", () => {
     expect(evaluationSchema.safeParse({ ...ok, proximity: "" }).success).toBe(false);
   });
 });
+
+import { contactSchema, crmSchema } from "./schemas";
+
+describe("CRM schemas", () => {
+  it("accetta stato con azione e data", () => {
+    const r = crmSchema.safeParse({ contact_status: "contattata", next_action: "Chiedere listino", next_action_date: "2026-11-01" });
+    expect(r.success).toBe(true);
+  });
+  it("rifiuta una data senza azione", () => {
+    const r = crmSchema.safeParse({ contact_status: "contattata", next_action: "", next_action_date: "2026-11-01" });
+    expect(r.success).toBe(false);
+  });
+  it("rifiuta stato sconosciuto e data non valida", () => {
+    expect(crmSchema.safeParse({ contact_status: "boh", next_action: "", next_action_date: "" }).success).toBe(false);
+    expect(crmSchema.safeParse({ contact_status: "contattata", next_action: "x", next_action_date: "31/12" }).success).toBe(false);
+  });
+  it("il contatto richiede data e riassunto", () => {
+    const ok = contactSchema.safeParse({ channel: "email", contacted_at: "2026-10-23", summary: " Chiesto listino " });
+    expect(ok.success && ok.data.summary).toBe("Chiesto listino");
+    expect(ok.success && ok.data.contacted_at).toBe("2026-10-23T12:00:00Z");
+    expect(contactSchema.safeParse({ channel: "email", contacted_at: "", summary: "x" }).success).toBe(false);
+    expect(contactSchema.safeParse({ channel: "email", contacted_at: "2026-10-23", summary: "  " }).success).toBe(false);
+  });
+});

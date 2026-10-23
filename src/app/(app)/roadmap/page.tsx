@@ -5,7 +5,7 @@ const milestones = [
   { name: "Milestone 2", desc: "Supabase: migrazioni SQL, RLS per utente, autenticazione", status: "Completata" },
   { name: "Milestone 3", desc: "Supplier Finder: anagrafica, fonti, punteggio trasparente", status: "Completata" },
   { name: "Milestone 4", desc: "Lotti e capi: inventario, vendite, profitti, CSV", status: "Completata" },
-  { name: "Milestone 5", desc: "CRM fornitori: stati, note, prossime azioni, valutazioni", status: "Da fare" },
+  { name: "Milestone 5", desc: "CRM fornitori: stati, storico contatti, prossime azioni, valutazioni", status: "Completata" },
 ];
 
 const future = [

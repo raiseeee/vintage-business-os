@@ -8,9 +8,24 @@ import {
 } from "@/lib/validation";
 import {
   CLAIM_FIELDS,
+  CONTACT_CHANNELS,
+  CONTACT_STATUSES,
   EVIDENCE_LEVELS,
   SUPPLIER_TYPES,
 } from "./constants";
+
+/** Data AAAA-MM-GG; vuoto → null. */
+const optionalDate = z
+  .string()
+  .trim()
+  .transform((s, ctx) => {
+    if (s === "") return null;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(s) || Number.isNaN(Date.parse(s))) {
+      ctx.addIssue({ code: "custom", message: "Data non valida" });
+      return z.NEVER;
+    }
+    return s;
+  });
 
 /** "IT", "it" → "IT"; vuoto → null. */
 const optionalCountry = z
@@ -117,3 +132,25 @@ export const evaluationSchema = z.object({
 });
 
 export const uuidSchema = z.uuid();
+
+/** CRM: stato del contatto e prossima azione. La data non ha senso senza l'azione. */
+export const crmSchema = z
+  .object({
+    contact_status: z.enum(CONTACT_STATUSES, "Stato non valido"),
+    next_action: optionalText,
+    next_action_date: optionalDate,
+  })
+  .superRefine((v, ctx) => {
+    if (v.next_action_date && !v.next_action) {
+      ctx.addIssue({ code: "custom", path: ["next_action"], message: "Descrivi la prossima azione o togli la data" });
+    }
+  });
+
+/** Un contatto avvenuto: la data è obbligatoria (mezzogiorno UTC, per non slittare di giorno). */
+export const contactSchema = z.object({
+  channel: z.enum(CONTACT_CHANNELS, "Canale non valido"),
+  contacted_at: optionalDate
+    .refine((d) => d !== null, "La data è obbligatoria")
+    .transform((d) => `${d}T12:00:00Z`),
+  summary: z.string().trim().min(1, "Scrivi un riassunto del contatto").max(2000),
+});

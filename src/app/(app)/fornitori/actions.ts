@@ -13,6 +13,8 @@ import {
 } from "@/lib/form-action";
 import {
   claimSchema,
+  contactSchema,
+  crmSchema,
   evaluationSchema,
   sourceSchema,
   supplierSchema,
@@ -163,5 +165,57 @@ export async function clearDemoData(): Promise<FormState> {
   const { error } = await supabase.rpc("clear_demo_data");
   if (error) return fail("Impossibile rimuovere i dati demo.");
   revalidatePath("/fornitori");
+  return success;
+}
+
+export async function updateCrm(
+  supplierId: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  if (!validId(supplierId)) return fail("Fornitore non valido");
+  const parsed = parse(crmSchema, formData);
+  if (!parsed.ok) return fail(parsed.error, formData);
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("suppliers").update(parsed.data).eq("id", supplierId);
+  if (error) return fail(dbErrorMessage(error), formData);
+
+  revalidatePath("/crm");
+  revalidatePath("/fornitori");
+  revalidatePath(`/fornitori/${supplierId}`);
+  return success;
+}
+
+export async function addContact(
+  supplierId: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  if (!validId(supplierId)) return fail("Fornitore non valido");
+  const parsed = parse(contactSchema, formData);
+  if (!parsed.ok) return fail(parsed.error, formData);
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("contact_log")
+    .insert({ ...parsed.data, supplier_id: supplierId });
+  if (error) return fail(dbErrorMessage(error), formData);
+
+  revalidatePath("/crm");
+  revalidatePath(`/fornitori/${supplierId}`);
+  return success;
+}
+
+export async function deleteContact(
+  supplierId: string,
+  contactId: string,
+): Promise<FormState> {
+  if (!validId(supplierId) || !validId(contactId)) return fail("Dati non validi");
+  const supabase = await createClient();
+  const { error } = await supabase.from("contact_log").delete().eq("id", contactId);
+  if (error) return fail(dbErrorMessage(error));
+  revalidatePath("/crm");
+  revalidatePath(`/fornitori/${supplierId}`);
   return success;
 }

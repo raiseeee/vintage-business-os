@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SUPPLIER_TYPES } from "./constants";
 import { computeScore, type ScoreResult } from "./score";
 import type {
+  ContactLogEntry,
   Supplier,
   SupplierClaim,
   SupplierEvaluation,
@@ -74,13 +75,14 @@ export interface SupplierDetail {
   sources: SupplierSource[];
   claims: SupplierClaim[];
   evaluations: SupplierEvaluation[];
+  contacts: ContactLogEntry[];
   score: ScoreResult | null;
 }
 
 export async function getSupplierDetail(id: string): Promise<SupplierDetail | null> {
   const supabase = await createClient();
 
-  const [supplierRes, sourcesRes, claimsRes, evalsRes] = await Promise.all([
+  const [supplierRes, sourcesRes, claimsRes, evalsRes, contactsRes] = await Promise.all([
     supabase.from("suppliers").select("*").eq("id", id).maybeSingle(),
     supabase.from("supplier_sources").select("*").eq("supplier_id", id).order("created_at"),
     supabase.from("supplier_claims").select("*").eq("supplier_id", id).order("created_at"),
@@ -89,9 +91,15 @@ export async function getSupplierDetail(id: string): Promise<SupplierDetail | nu
       .select("*")
       .eq("supplier_id", id)
       .order("created_at", { ascending: false }),
+    supabase
+      .from("contact_log")
+      .select("id, supplier_id, contacted_at, channel, summary")
+      .eq("supplier_id", id)
+      .order("contacted_at", { ascending: false })
+      .order("created_at", { ascending: false }),
   ]);
 
-  if (supplierRes.error || sourcesRes.error || claimsRes.error || evalsRes.error) {
+  if (supplierRes.error || sourcesRes.error || claimsRes.error || evalsRes.error || contactsRes.error) {
     throw new Error("Impossibile caricare il fornitore");
   }
   if (!supplierRes.data) return null;
@@ -104,6 +112,37 @@ export async function getSupplierDetail(id: string): Promise<SupplierDetail | nu
     sources: (sourcesRes.data ?? []) as SupplierSource[],
     claims: (claimsRes.data ?? []) as SupplierClaim[],
     evaluations,
+    contacts: (contactsRes.data ?? []) as ContactLogEntry[],
     score: evaluations[0] ? computeScore(evaluations[0], supplier.supplier_type) : null,
   };
+}
+
+export interface CrmRow {
+  id: string;
+  name: string;
+  country: string | null;
+  contact_status: Supplier["contact_status"];
+  next_action: string | null;
+  next_action_date: string | null;
+  is_demo: boolean;
+  lastContactAt: string | null;
+  contactCount: number;
+}
+
+/** Fornitori con i dati utili al CRM (ultimo contatto, prossima azione). */
+export async function listCrmRows(): Promise<CrmRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("suppliers")
+    .select("id, name, country, contact_status, next_action, next_action_date, is_demo, contact_log(contacted_at)")
+    .order("name", { ascending: true });
+  if (error) throw new Error("Impossibile caricare il CRM");
+
+  return (data ?? []).map((row) => {
+    const { contact_log, ...rest } = row as Omit<CrmRow, "lastContactAt" | "contactCount"> & {
+      contact_log: { contacted_at: string }[];
+    };
+    const dates = contact_log.map((c) => c.contacted_at).sort();
+    return { ...rest, lastContactAt: dates.at(-1) ?? null, contactCount: dates.length };
+  });
 }

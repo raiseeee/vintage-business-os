@@ -55,6 +55,29 @@ select test.expect_error(
   '23503', 'B non può aggiungere fonti al fornitore di A');
 commit;
 
+-- CRM: registro dei contatti isolato per utente.
+begin;
+set local role authenticated;
+select set_config('request.jwt.claim.sub', :uid_a, true);
+insert into public.contact_log (supplier_id, channel, summary)
+  values (current_setting('test.sup_a')::uuid, 'email', 'Chiesto il listino');
+select test.expect_equal((select count(*) from public.contact_log), 1, 'A vede il proprio contatto');
+select test.expect_error(
+  format('insert into public.contact_log (supplier_id, summary) values (%L, %L)', current_setting('test.sup_a'), '   '),
+  '23514', 'il riassunto del contatto non può essere vuoto');
+commit;
+
+begin;
+set local role authenticated;
+select set_config('request.jwt.claim.sub', :uid_b, true);
+select test.expect_equal((select count(*) from public.contact_log), 0, 'B non vede i contatti di A');
+select test.expect_error(
+  format('insert into public.contact_log (supplier_id, summary) values (%L, %L)', current_setting('test.sup_a'), 'intruso'),
+  '23503', 'B non può registrare contatti sul fornitore di A');
+with d as (delete from public.contact_log returning 1)
+select test.expect_equal((select count(*) from d), 0, 'B non può cancellare i contatti di A');
+commit;
+
 begin;
 set local role anon;
 select test.expect_error('select * from public.suppliers', '42501', 'utente anonimo: accesso negato');
