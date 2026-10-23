@@ -4,7 +4,6 @@ import { ActionForm } from "@/components/form";
 import { ModalButton } from "@/components/Modal";
 import { SupplierTypeBadge, Tag } from "@/components/ui";
 import { formatEuro } from "@/lib/metrics";
-import { getWebSearchProvider } from "@/lib/search/provider";
 import {
   CONTACT_STATUS_LABELS,
   SUPPLIER_TYPES,
@@ -41,7 +40,6 @@ export default async function FornitoriPage(props: PageProps<"/fornitori">) {
   const hasFilters = FILTER_KEYS.some((k) => filters[k]);
 
   const [suppliers, demoPresent] = await Promise.all([listSuppliers(filters), hasDemoData()]);
-  const searchProvider = getWebSearchProvider();
 
   return (
     <>
@@ -151,20 +149,7 @@ export default async function FornitoriPage(props: PageProps<"/fornitori">) {
         </div>
       )}
 
-      <div className="mt-8 grid gap-4 lg:grid-cols-2">
-        <section className="rounded-lg border border-stone-200 bg-white p-5">
-          <h2 className="text-base font-semibold text-stone-900">Ricerca web</h2>
-          <p className="mt-1 text-sm text-stone-600">
-            {searchProvider
-              ? `Provider attivo: ${searchProvider.name}.`
-              : "Nessuna API di ricerca è collegata: l'app non inventa né simula risultati."}{" "}
-            <Link href="/ricerca" className="font-medium text-stone-900 underline">Vai alla ricerca fornitori</Link>
-          </p>
-          <p className="mt-2 text-xs text-stone-500">
-            I risultati sono solo suggerimenti da verificare: non diventano mai informazioni «documentate» in automatico.
-          </p>
-        </section>
-
+      <div className="mt-8 max-w-xl">
         <section className="rounded-lg border border-stone-200 bg-white p-5">
           <h2 className="text-base font-semibold text-stone-900">Dati demo</h2>
           <p className="mt-1 text-sm text-stone-600">
