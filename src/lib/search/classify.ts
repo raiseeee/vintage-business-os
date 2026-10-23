@@ -5,7 +5,20 @@ const EXCLUDED = [
   "ebay.", "vinted.", "etsy.", "amazon.", "alibaba.", "aliexpress.", "depop.", "wallapop.", "subito.it",
   "facebook.", "instagram.", "tiktok.", "youtube.", "pinterest.", "reddit.", "twitter.", "x.com", "linkedin.",
   "wikipedia.", "wikimedia.", "google.", "bing.", "trustpilot.", "medium.com",
+  // Foto d'archivio e immagini: non sono aziende.
+  "shutterstock.", "istockphoto.", "gettyimages.", "alamy.", "freepik.", "unsplash.", "pexels.", "pixabay.",
+  "dreamstime.", "depositphotos.", "123rf.", "flickr.", "adobestock.", "stock.adobe.", "vecteezy.", "canva.", "imgur.",
+  // Grandi negozi di moda al dettaglio.
+  "zalando.", "asos.", "zara.", "hm.com", "shein.", "temu.", "levi.com", "nike.com", "adidas.", "ikea.", "otto.de",
 ];
+
+/** Estensioni di file immagine: un risultato che punta a un'immagine non è un'azienda. */
+const IMAGE_URL = /\.(jpe?g|png|gif|webp|svg|avif|bmp)(\?|$)/i;
+const IMAGE_PATH = /\/(images?|photos?|stock-photos?|wallpapers?|pictures?)\//i;
+
+export function isImageUrl(url: string): boolean {
+  return IMAGE_URL.test(url) || IMAGE_PATH.test(url);
+}
 
 export function domainOf(url: string): string | null {
   try {
@@ -41,6 +54,7 @@ const UPSTREAM = [
 const WHOLESALE = ["wholesale", "großhandel", "grosshandel", "groothandel", "grossiste", "ingrosso", "hurt", "urmu", "grossist", "export"];
 const RETAIL = [
   "add to cart", "aggiungi al carrello", "in den warenkorb", "shop now", "buy now", "compra ora", "free shipping", "spedizione gratuita",
+  "/product/", "/products/", "/prodotto/", "/produkt/", "/shop/", "/cart", "image of", "photo of", "immagini", "foto stock", "stock photo", "royalty free", "wallpaper",
   "boutique", "online shop", "webshop", "negozio online", "vintage shop", "vintage store", "per piece", "al pezzo", "pro stück", "sale -", "% off",
 ];
 
@@ -99,7 +113,7 @@ export function buildCandidates(results: WebSearchResult[]): Candidate[] {
   const byDomain = new Map<string, Candidate>();
   for (const r of results) {
     const domain = domainOf(r.url);
-    if (!domain || isExcluded(domain)) continue;
+    if (!domain || isExcluded(domain) || isImageUrl(r.url)) continue;
     const c = classify(r);
     const existing = byDomain.get(domain);
     if (existing && existing.score >= c.score) continue;

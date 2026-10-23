@@ -15,15 +15,68 @@ describe("parse", () => {
   });
 });
 
+import { runSearches } from "./run";
+import { DEPTH_INFO } from "./queries";
+
+describe("queries (tipologie e profondità)", () => {
+  const base = { term: "", product: "jeans" };
+  it("ogni casella aggiunge una ricerca per Paese, nella lingua locale", () => {
+    const q = buildQueries({ ...base, area: "DE", types: ["kg", "miste"], depth: "approfondita" });
+    expect(q.some((x) => x.includes("pro Kilo"))).toBe(true);
+    expect(q.some((x) => x.includes("Mischpakete"))).toBe(true);
+  });
+  it("rispetta il limite di profondità e copre più Paesi", () => {
+    const q = buildQueries({ ...base, area: "europa", types: ["miste", "kg", "originale"], depth: "rapida" });
+    expect(q.length).toBeLessThanOrEqual(DEPTH_INFO.rapida.maxQueries);
+    expect(q.some((x) => x.includes("Altkleider"))).toBe(true);
+    expect(q.some((x) => x.includes("tweedehands"))).toBe(true);
+    const deep = buildQueries({ ...base, area: "europa", types: ["miste", "kg", "originale"], depth: "approfondita" });
+    expect(deep.length).toBeGreaterThan(q.length);
+    expect(deep.length).toBeLessThanOrEqual(DEPTH_INFO.approfondita.maxQueries);
+  });
+  it("lingue senza frasi proprie ripiegano sull'inglese", () => {
+    const q = buildQueries({ ...base, area: "LT", types: ["kg"], depth: "standard" });
+    expect(q.some((x) => x.includes("naudoti drabužiai") && x.includes("wholesale per kg"))).toBe(true);
+  });
+});
+
+describe("filtri immagini", () => {
+  it("scarta foto d'archivio e file immagine", () => {
+    const c = buildCandidates([
+      { title: "Jeans photo", url: "https://www.shutterstock.com/search/jeans", snippet: "" },
+      { title: "x", url: "https://azienda.de/images/jeans.jpg", snippet: "" },
+      { title: "y", url: "https://azienda.de/foto.png?x=1", snippet: "" },
+      { title: "Textil Sortierung", url: "https://azienda.de/", snippet: "Altkleider Sortierung" },
+    ]);
+    expect(c.map((x) => x.domain)).toEqual(["azienda.de"]);
+  });
+});
+
+describe("runSearches", () => {
+  it("un errore non ferma le altre query", async () => {
+    const provider = {
+      name: "finto",
+      search: async ({ text }: { text: string }) => {
+        if (text === "b") throw new Error("boom");
+        return [{ title: text, url: `https://${text}.de`, snippet: "" }];
+      },
+    };
+    const out = await runSearches(provider, ["a", "b", "c", "d", "e"], 2);
+    expect(out.results).toHaveLength(4);
+    expect(out.failed).toBe(1);
+    expect(out.firstError).toBe("boom");
+  });
+});
+
 describe("queries", () => {
   it("Europa: più lingue, massimo 6 query, include i termini dell'utente", () => {
-    const q = buildQueries({ term: "box", product: "jeans", area: "europa" });
+    const q = buildQueries({ term: "box", product: "jeans", area: "europa", types: [], depth: "rapida" });
     expect(q.length).toBeGreaterThan(3);
     expect(q.length).toBeLessThanOrEqual(6);
     expect(q.every((x) => x.includes("box"))).toBe(true);
   });
   it("un Paese: query locale + variante inglese", () => {
-    const q = buildQueries({ term: "", product: "felpe", area: "DE" });
+    const q = buildQueries({ term: "", product: "felpe", area: "DE", types: [], depth: "rapida" });
     expect(q[0]).toContain("Altkleider");
     expect(q.some((x) => x.includes("sweatshirts"))).toBe(true);
   });

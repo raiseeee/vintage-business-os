@@ -78,6 +78,38 @@ with d as (delete from public.contact_log returning 1)
 select test.expect_equal((select count(*) from d), 0, 'B non può cancellare i contatti di A');
 commit;
 
+-- Ricerche salvate: isolate per utente.
+begin;
+set local role authenticated;
+select set_config('request.jwt.claim.sub', :uid_a, true);
+insert into public.search_runs (term, area, depth, provider) values ('box', 'DE', 'standard', 'Tavily');
+insert into public.search_results (run_id, domain, name, url, root_url, likelihood)
+  select id, 'textil.de', 'Textil', 'https://textil.de/a', 'https://textil.de', 'monte' from public.search_runs;
+select test.expect_equal((select count(*) from public.search_results), 1, 'A vede i propri risultati di ricerca');
+select test.expect_error(
+  $q$insert into public.search_results (run_id, domain, name, url, root_url, likelihood)
+     select id, 'textil.de', 'Doppione', 'https://textil.de/b', 'https://textil.de', 'monte' from public.search_runs$q$,
+  '23505', 'un sito compare una sola volta per ricerca');
+select test.expect_error(
+  $q$insert into public.search_results (run_id, domain, name, url, root_url, likelihood)
+     select id, 'x.de', 'X', 'https://x.de', 'https://x.de', 'boh' from public.search_runs$q$,
+  '23514', 'giudizio di ricerca non valido rifiutato');
+commit;
+
+begin;
+set local role authenticated;
+select set_config('request.jwt.claim.sub', :uid_b, true);
+select test.expect_equal((select count(*) from public.search_runs), 0, 'B non vede le ricerche di A');
+select test.expect_equal((select count(*) from public.search_results), 0, 'B non vede i risultati di A');
+with d as (delete from public.search_runs returning 1)
+select test.expect_equal((select count(*) from d), 0, 'B non può cancellare le ricerche di A');
+commit;
+
+begin;
+set local role anon;
+select test.expect_error('select * from public.search_runs', '42501', 'utente anonimo: ricerche negate');
+commit;
+
 begin;
 set local role anon;
 select test.expect_error('select * from public.suppliers', '42501', 'utente anonimo: accesso negato');

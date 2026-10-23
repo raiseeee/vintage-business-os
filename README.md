@@ -17,6 +17,7 @@ Gestionale per compravendita di abbigliamento vintage e streetwear: fornitori ve
    3. `20261022000003_storage.sql`
    4. `20261022000004_demo_data.sql`
    5. `20261022000005_sales_functions.sql`
+   6. `20261023000001_search.sql` (ricerche salvate)
 
    Se avevi già applicato le prime quattro, **applica solo la quinta** (serve per registrare le vendite).
 
@@ -63,12 +64,13 @@ Le funzioni SQL `load_demo_data()` e `clear_demo_data()` caricano/rimuovono dati
 - Non ancora disponibile: eliminare un fornitore dall'interfaccia.
 
 ## Ricerca fornitori (pagina «Ricerca fornitori»)
-- Scrivi cosa cerchi, il tipo di prodotto (jeans, maglie…) e l'area (Tutta Europa o un Paese): l'app lancia fino a 6 ricerche web con le parole di settore nella lingua del Paese e mostra un elenco di aziende, una per dominio.
-- Ogni risultato ha un'etichetta («Possibile fornitore a monte», «Da capire», «Probabile rivenditore») **basata solo sulle parole del risultato**, con i motivi: è un indizio, non una prova. I probabili rivenditori sono nascosti di default; marketplace e social sono esclusi.
+- Compili: parole libere, tipo di prodotto (jeans, maglie…), area (Tutta Europa o un Paese), profondità (rapida / standard / approfondita: fino a 6, 14 o 30 ricerche) e le **caselle di tipologia** (box miste, vendita al kg, originale/non selezionato, selezionato/crème, balle e pallet, sportswear). Ogni casella aggiunge ricerche mirate nella lingua del Paese; con poco budget sono già selezionate miste, al kg e originale.
+- Le ricerche e le aziende trovate **vengono salvate** (tabelle `search_runs` e `search_results`, applica la migrazione 6). In «Tutte le ricerche» vedi lo storico e l'elenco di tutte le aziende trovate, senza doppioni.
+- Foto d'archivio, file immagine, marketplace, social e grandi negozi di moda sono esclusi. Ogni risultato ha un'etichetta («Possibile fornitore a monte», «Da capire», «Probabile rivenditore») **basata solo sulle parole del risultato**, con i motivi: è un indizio, non una prova. I probabili rivenditori sono nascosti di default.
 - «Aggiungi ai fornitori» crea il fornitore come *origine non verificata* (stato CRM «da contattare»), con la pagina trovata come fonte e la nota «non ancora verificato». Non salva nessuna informazione come documentata.
-- **Serve una chiave API** (Brave Search o Tavily) in `.env.local`: `BRAVE_SEARCH_API_KEY` oppure `TAVILY_API_KEY`. Senza chiave la ricerca è spenta e non mostra nulla di inventato. La chiave resta solo sul server.
-- Le email e i prezzi non vengono letti dai siti: si raccolgono a mano nella scheda, dopo aver aperto il sito.
-- Stato: scritta e testata nelle parti di analisi (lettura risposte, query, classificazione); **non ancora provata con una chiave reale**.
+- **Serve una chiave API** in `.env.local`: `TAVILY_API_KEY` (piano gratuito) oppure `BRAVE_SEARCH_API_KEY`. Senza chiave la ricerca è spenta e non mostra nulla di inventato. La chiave resta solo sul server. Ogni query consuma crediti del servizio.
+- Le email e i prezzi non vengono letti dai siti: si raccolgono a mano nella scheda, dopo aver aperto il sito. Le frasi in altre lingue sono traduzioni di lavoro, da raffinare.
+- Stato: analisi, query, salvataggio e regole del database sono testati; **non ancora provata con una chiave reale**.
 
 ## CRM fornitori (Milestone 5)
 - Pagina **CRM**: prossime azioni ordinate per scadenza (le scadute in rosso) e pipeline per stato (da contattare → contattata → in attesa → risposta ricevuta → campione richiesto → verificata / scartata), con data dell'ultimo contatto.

@@ -16,6 +16,12 @@ export type { WebSearchProvider, WebSearchQuery, WebSearchResult } from "./types
 
 const TIMEOUT_MS = 12_000;
 
+/** Siti che non sono mai fornitori: li escludiamo già a monte per non sprecare risultati. */
+const TAVILY_EXCLUDED = [
+  "shutterstock.com", "istockphoto.com", "gettyimages.com", "alamy.com", "freepik.com", "unsplash.com", "pexels.com",
+  "pinterest.com", "ebay.com", "vinted.com", "etsy.com", "amazon.com", "facebook.com", "instagram.com", "tiktok.com", "youtube.com",
+];
+
 async function request(url: string, init: RequestInit, label: string): Promise<unknown> {
   let res: Response;
   try {
@@ -39,7 +45,8 @@ function brave(key: string): WebSearchProvider {
     async search(query: WebSearchQuery) {
       const url = `https://api.search.brave.com/res/v1/web/search?${new URLSearchParams({
         q: query.text,
-        count: "15",
+        count: "20",
+        result_filter: "web",
       })}`;
       const json = await request(
         url,
@@ -60,7 +67,7 @@ function tavily(key: string): WebSearchProvider {
         {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-          body: JSON.stringify({ query: query.text, max_results: 15, search_depth: "basic" }),
+          body: JSON.stringify({ query: query.text, max_results: 20, search_depth: "basic", include_images: false, exclude_domains: TAVILY_EXCLUDED }),
         },
         "Tavily",
       );
