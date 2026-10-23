@@ -2,7 +2,7 @@
 
 Gestionale per compravendita di abbigliamento vintage e streetwear: fornitori verificabili, lotti, capi, vendite e margini reali.
 
-**Stato: Milestone 5 completata** (CRM fornitori). Tutte le milestone dell'MVP sono fatte; restano la ricerca di fornitori reali e le funzioni future.
+**Stato: Milestone 5 completata** (CRM fornitori). Tutte le milestone dell'MVP sono fatte; restano le funzioni future.
 
 ## Requisiti
 - Node.js 20.19+ (testato con 22) e npm
@@ -17,7 +17,7 @@ Gestionale per compravendita di abbigliamento vintage e streetwear: fornitori ve
    3. `20261022000003_storage.sql`
    4. `20261022000004_demo_data.sql`
    5. `20261022000005_sales_functions.sql`
-   6. `20261023000001_search.sql` (ricerche salvate)
+   6. `20261023000001_search.sql` (tabelle della ricerca rimossa: non usate, applicala comunque per tenere allineato lo schema)
 
    Se avevi già applicato le prime quattro, **applica solo la quinta** (serve per registrare le vendite).
 
@@ -60,17 +60,11 @@ Le funzioni SQL `load_demo_data()` e `clear_demo_data()` caricano/rimuovono dati
 - Lista con filtri per nome, paese, lingua, tipologia di stock, marchio e tipo di fornitore.
 - Scheda con: dati e contatti, ordine minimo e prezzi, **informazioni raggruppate per livello di prova** (documentato / dichiarato / ipotesi), fonti, storico valutazioni.
 - **Punteggio 0-100**, mostrato criterio per criterio: vicinanza alla fonte 30%, trasparenza 25%, ordine minimo 15%, budget 15%, interesse vintage 15%. Il voto di vicinanza ha un tetto per tipo di fornitore (es. origine non verificata: max 2/5), così non si gonfia senza prove. I pesi sono in `src/lib/suppliers/score.ts`.
-- **Ricerca web**: per ora manuale. `src/lib/search/provider.ts` è il punto di integrazione per una futura API; non c'è nessun risultato simulato.
+- **Ricerca fornitori**: fuori dall'app (vedi sotto); nessun risultato simulato.
 - Non ancora disponibile: eliminare un fornitore dall'interfaccia.
 
-## Ricerca fornitori (pagina «Ricerca fornitori»)
-- Compili: parole libere, tipo di prodotto (jeans, maglie…), area (Tutta Europa o un Paese), profondità (rapida / standard / approfondita: fino a 6, 14 o 30 ricerche) e le **caselle di tipologia** (box miste, vendita al kg, originale/non selezionato, selezionato/crème, balle e pallet, sportswear). Ogni casella aggiunge ricerche mirate nella lingua del Paese; con poco budget sono già selezionate miste, al kg e originale.
-- Le ricerche e le aziende trovate **vengono salvate** (tabelle `search_runs` e `search_results`, applica la migrazione 6). In «Tutte le ricerche» vedi lo storico e l'elenco di tutte le aziende trovate, senza doppioni.
-- Foto d'archivio, file immagine, marketplace, social e grandi negozi di moda sono esclusi. Ogni risultato ha un'etichetta («Possibile fornitore a monte», «Da capire», «Probabile rivenditore») **basata solo sulle parole del risultato**, con i motivi: è un indizio, non una prova. I probabili rivenditori sono nascosti di default.
-- «Aggiungi ai fornitori» crea il fornitore come *origine non verificata* (stato CRM «da contattare»), con la pagina trovata come fonte e la nota «non ancora verificato». Non salva nessuna informazione come documentata.
-- **Serve una chiave API** in `.env.local`: `TAVILY_API_KEY` (piano gratuito) oppure `BRAVE_SEARCH_API_KEY`. Senza chiave la ricerca è spenta e non mostra nulla di inventato. La chiave resta solo sul server. Ogni query consuma crediti del servizio.
-- Le email e i prezzi non vengono letti dai siti: si raccolgono a mano nella scheda, dopo aver aperto il sito. Le frasi in altre lingue sono traduzioni di lavoro, da raffinare.
-- Stato: analisi, query, salvataggio e regole del database sono testati; **non ancora provata con una chiave reale**.
+## Ricerca fornitori
+L'app **non cerca fornitori**: i fornitori si trovano fuori (a mano o chiedendo a Claude in chat) e qui si registrano, con le loro fonti, quelli che hai scelto. Una pagina di ricerca web con salvataggio dei risultati è stata provata e poi rimossa (era nel commit `2fae166`, recuperabile da git). La migrazione `20261023000001_search.sql` resta per non rompere la cronologia: le tabelle `search_runs` e `search_results` non sono più usate dall'app.
 
 ## CRM fornitori (Milestone 5)
 - Pagina **CRM**: prossime azioni ordinate per scadenza (le scadute in rosso) e pipeline per stato (da contattare → contattata → in attesa → risposta ricevuta → campione richiesto → verificata / scartata), con data dell'ultimo contatto.
@@ -127,7 +121,6 @@ scripts/test-db.sh    esegue migrazioni e test SQL in locale
 
 ## Da fare / promemoria
 - **Ricerca fornitori e fonti**: l'app non cerca da sola. Prima di comprare servono fornitori veri con fonti verificabili (provenienza, registro imprese, autorizzazioni). Si può fare a mano o chiedendo a Claude di cercarli e riassumere cosa è documentato e cosa solo dichiarato.
-- Nella pagina Fornitori finiranno i fornitori che ti sono piaciuti dalla ricerca (vedi sezione «Ricerca fornitori» della Roadmap).
 - Allegare file (documenti, screenshot) alle fonti dei fornitori.
 - Eliminare un fornitore dall'interfaccia (oggi si rimuovono solo i dati demo).
 

@@ -18,10 +18,9 @@ const future = [
 ];
 
 const research = [
-  { step: "Definire i criteri", desc: "Paese, tipo di stock, marchi, budget e ordine minimo che ti interessano.", status: "Da fare" },
-  { step: "Cercare fornitori reali", desc: "Pagina «Ricerca fornitori»: prodotto, area, tipologie e profondità; ricerche salvate con storico. Richiede una chiave API (Tavily o Brave).", status: "Pronta, da collegare" },
-  { step: "Valutare e scegliere", desc: "Controllare provenienza e prove, poi segnare i fornitori che ti sono piaciuti.", status: "Da fare" },
-  { step: "Portarli nella pagina Fornitori", desc: "Il pulsante «Aggiungi ai fornitori» li salva come origine non verificata, con la pagina trovata come fonte.", status: "Fatto" },
+  { step: "Trovare i fornitori", desc: "Si fa fuori dall'app (a mano o in chat con Claude), con fonti verificabili: nessun dato inventato.", status: "Fuori dall'app" },
+  { step: "Registrarli in Supplier Finder", desc: "Qui si salvano solo i fornitori che hai scelto, con le fonti e il livello di prova.", status: "Fatto" },
+  { step: "Seguirli nel CRM", desc: "Stato dei contatti, prossime azioni e storico, fino ai lotti acquistati.", status: "Fatto" },
 ];
 
 export default function RoadmapPage() {
