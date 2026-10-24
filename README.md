@@ -54,14 +54,14 @@ npm run build
 - Il bucket foto `item-photos` è privato; i file stanno in `<user_id>/<item_id>/<file>`.
 
 ## Dati demo
-Le funzioni SQL `load_demo_data()` e `clear_demo_data()` caricano/rimuovono dati di esempio marcati `[DEMO]` / `DEMO-…`, con domini `example.com` e nessuna azienda o marca reale. Comprendono 2 fornitori, il lotto `DEMO-L1` con 4 capi e una vendita. Si caricano e si rimuovono dal pulsante in fondo alla pagina *Supplier Finder*; i dati reali non vengono toccati.
+Le funzioni SQL `load_demo_data()` e `clear_demo_data()` caricano/rimuovono dati di esempio marcati `[DEMO]` / `DEMO-…`, con domini `example.com` e nessuna azienda o marca reale. Comprendono 2 fornitori, il lotto `DEMO-L1` con 4 capi e una vendita. Si caricano e si rimuovono dal pulsante in fondo alla pagina *Supplier*; i dati reali non vengono toccati.
 
-## Supplier Finder (Milestone 3)
+## Supplier (Milestone 3)
 - Lista con filtri per nome, paese, lingua, tipologia di stock, marchio e tipo di fornitore.
 - Scheda con: dati e contatti, ordine minimo e prezzi, **informazioni raggruppate per livello di prova** (documentato / dichiarato / ipotesi), fonti, storico valutazioni.
 - **Punteggio 0-100**, mostrato criterio per criterio: vicinanza alla fonte 30%, trasparenza 25%, ordine minimo 15%, budget 15%, interesse vintage 15%. Il voto di vicinanza ha un tetto per tipo di fornitore (es. origine non verificata: max 2/5), così non si gonfia senza prove. I pesi sono in `src/lib/suppliers/score.ts`.
 - **Ricerca fornitori**: fuori dall'app (vedi sotto); nessun risultato simulato.
-- Non ancora disponibile: eliminare un fornitore dall'interfaccia.
+- Un fornitore si elimina dalla sua scheda (in fondo): se ha lotti collegati va prima eliminato il lotto; fonti, valutazioni e contatti vengono rimossi con lui.
 
 ## Ricerca fornitori
 L'app **non cerca fornitori**: i fornitori si trovano fuori (a mano o chiedendo a Claude in chat) e qui si registrano, con le loro fonti, quelli che hai scelto. Una pagina di ricerca web con salvataggio dei risultati è stata provata e poi rimossa (era nel commit `2fae166`, recuperabile da git). La migrazione `20261023000001_search.sql` resta per non rompere la cronologia: le tabelle `search_runs` e `search_results` non sono più usate dall'app.
@@ -115,14 +115,13 @@ scripts/test-db.sh    esegue migrazioni e test SQL in locale
 ## Milestone
 1. Progetto avviabile, layout, dashboard (fatto)
 2. Supabase: migrazioni SQL, RLS per utente, autenticazione (fatto)
-3. Supplier Finder: anagrafica, fonti, punteggio trasparente, dati demo (fatto)
+3. Supplier: anagrafica, fonti, punteggio trasparente, dati demo (fatto)
 4. Lotti e capi: inventario, vendite, profitti, CSV, dashboard collegata (fatto)
 5. CRM fornitori: stati, storico contatti, prossime azioni (fatto)
 
 ## Da fare / promemoria
 - **Ricerca fornitori e fonti**: l'app non cerca da sola. Prima di comprare servono fornitori veri con fonti verificabili (provenienza, registro imprese, autorizzazioni). Si può fare a mano o chiedendo a Claude di cercarli e riassumere cosa è documentato e cosa solo dichiarato.
 - Allegare file (documenti, screenshot) alle fonti dei fornitori.
-- Eliminare un fornitore dall'interfaccia (oggi si rimuovono solo i dati demo).
 
 ## Roadmap futura (non implementata)
 Casella email, email dei fornitori in app, invii multipli con controlli anti-spam, ricerche pianificate e notifiche, API di ricerca web, sito pubblico/multiutenza/abbonamenti.

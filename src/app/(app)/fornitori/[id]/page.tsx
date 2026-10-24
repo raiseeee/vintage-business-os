@@ -34,6 +34,7 @@ import {
   addSource,
   deleteClaim,
   deleteContact,
+  deleteSupplier,
   deleteSource,
   updateCrm,
   updateSupplier,
@@ -397,6 +398,17 @@ export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[
               <SupplierForm action={updateSupplier.bind(null, supplier.id)} supplier={supplier} submitLabel="Salva modifiche" />
             </div>
           </details>
+        </Section>
+
+        <Section title="Elimina fornitore" description="Rimuove anche fonti, informazioni, valutazioni e contatti. Non si può annullare.">
+          <ActionForm
+            action={deleteSupplier.bind(null, supplier.id)}
+            submitLabel="Elimina fornitore"
+            pendingLabel="Eliminazione…"
+            successMessage={null}
+            variant="danger"
+            confirm={`Eliminare «${supplier.name}» e tutti i suoi dati? Non si può annullare.`}
+          />
         </Section>
       </div>
     </>

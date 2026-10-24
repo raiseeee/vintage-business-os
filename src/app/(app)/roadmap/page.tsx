@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/PagePlaceholder";
 const milestones = [
   { name: "Milestone 1", desc: "Progetto avviabile, layout, navigazione, dashboard, logica margini testata", status: "Completata" },
   { name: "Milestone 2", desc: "Supabase: migrazioni SQL, RLS per utente, autenticazione", status: "Completata" },
-  { name: "Milestone 3", desc: "Supplier Finder: anagrafica, fonti, punteggio trasparente", status: "Completata" },
+  { name: "Milestone 3", desc: "Supplier: anagrafica, fonti, punteggio trasparente", status: "Completata" },
   { name: "Milestone 4", desc: "Lotti e capi: inventario, vendite, profitti, CSV", status: "Completata" },
   { name: "Milestone 5", desc: "CRM fornitori: stati, storico contatti, prossime azioni, valutazioni", status: "Completata" },
 ];
@@ -19,7 +19,7 @@ const future = [
 
 const research = [
   { step: "Trovare i fornitori", desc: "Si fa fuori dall'app (a mano o in chat con Claude), con fonti verificabili: nessun dato inventato.", status: "Fuori dall'app" },
-  { step: "Registrarli in Supplier Finder", desc: "Qui si salvano solo i fornitori che hai scelto, con le fonti e il livello di prova.", status: "Fatto" },
+  { step: "Registrarli in Supplier", desc: "Qui si salvano solo i fornitori che hai scelto, con le fonti e il livello di prova.", status: "Fatto" },
   { step: "Seguirli nel CRM", desc: "Stato dei contatti, prossime azioni e storico, fino ai lotti acquistati.", status: "Fatto" },
 ];
 

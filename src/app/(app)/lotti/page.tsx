@@ -73,7 +73,7 @@ export default async function LottiPage(props: PageProps<"/lotti">) {
         <div className="rounded-lg border border-dashed border-stone-300 bg-white p-8 text-center">
           <p className="text-sm font-medium text-stone-900">Non hai ancora registrato nessun lotto.</p>
           <p className="mt-1 text-sm text-stone-600">
-            Serve almeno un fornitore: aggiungilo da Supplier Finder, poi registra qui il tuo primo acquisto.
+            Serve almeno un fornitore: aggiungilo da Supplier, poi registra qui il tuo primo acquisto.
           </p>
         </div>
       ) : (

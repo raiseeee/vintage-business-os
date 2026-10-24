@@ -14,7 +14,7 @@ import type { SupplierFilters } from "@/lib/suppliers/types";
 import { clearDemoData, createSupplier, loadDemoData } from "./actions";
 import { SupplierForm } from "./SupplierForm";
 
-export const metadata = { title: "Supplier Finder · Vintage Business OS" };
+export const metadata = { title: "Supplier · Vintage Business OS" };
 
 const FILTER_KEYS = ["q", "country", "language", "stock", "brand", "type"] as const;
 
@@ -45,12 +45,12 @@ export default async function FornitoriPage(props: PageProps<"/fornitori">) {
     <>
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <PageHeader
-          title="Supplier Finder"
+          title="Supplier"
           description="Fornitori con fonti verificabili: separa ciò che è documentato da ciò che è solo dichiarato o ipotizzato."
         />
         <ModalButton
-          label="Nuovo fornitore"
-          title="Nuovo fornitore"
+          label="Aggiungi fornitore"
+          title="Aggiungi fornitore"
           description="Registra solo ciò che sai. Fonti, prove e valutazione si aggiungono nella scheda dopo il salvataggio."
           defaultOpen={pick(params.nuovo) === "1"}
         >

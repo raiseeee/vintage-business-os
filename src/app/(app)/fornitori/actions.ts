@@ -219,3 +219,22 @@ export async function deleteContact(
   revalidatePath(`/fornitori/${supplierId}`);
   return success;
 }
+
+/** Elimina il fornitore con fonti, informazioni, valutazioni e contatti. Se ha lotti collegati si ferma. */
+export async function deleteSupplier(supplierId: string): Promise<FormState> {
+  if (!validId(supplierId)) return fail("Fornitore non valido");
+  const supabase = await createClient();
+  const { error } = await supabase.from("suppliers").delete().eq("id", supplierId);
+  if (error) {
+    return fail(
+      error.code === "23503"
+        ? "Questo fornitore ha dei lotti collegati: eliminali prima dalla pagina Acquisti e lotti."
+        : dbErrorMessage(error),
+    );
+  }
+
+  revalidatePath("/fornitori");
+  revalidatePath("/crm");
+  revalidatePath("/dashboard");
+  redirect("/fornitori");
+}
