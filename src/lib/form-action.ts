@@ -7,6 +7,10 @@ export type FormState = {
   ok: boolean;
   /** Valori inviati, restituiti in caso di errore per non far perdere ciò che è stato scritto. */
   values?: Record<string, string>;
+  /** Messaggio di successo calcolato dall'azione (al posto di quello fisso del form). */
+  message?: string;
+  /** Id del record creato, quando serve al chiamante. */
+  itemId?: string;
 };
 
 /** Legge i valori testuali del form (i file e gli altri tipi vengono ignorati). */

@@ -26,7 +26,7 @@ export const lotSchema = z.object({
   notes: optionalText,
 });
 
-const conditionField = z
+export const conditionField = z
   .string()
   .trim()
   .transform((s) => (s === "" ? null : s))

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 
 /**
  * Pulsante + finestra modale (<dialog> nativo: focus intrappolato, Esc per chiudere).
@@ -21,9 +21,10 @@ export function ModalButton({
   description?: string;
   children: ReactNode;
   defaultOpen?: boolean;
-  variant?: "primary" | "link";
+  variant?: "primary" | "secondary" | "link";
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -32,10 +33,11 @@ export function ModalButton({
     if (defaultOpen && dialog && !dialog.open) dialog.showModal();
   }, [defaultOpen]);
 
-  const trigger =
-    variant === "primary"
-      ? "rounded-md bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700"
-      : "font-medium text-stone-900 underline";
+  const trigger = {
+    primary: "rounded-md bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700",
+    secondary: "rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50",
+    link: "font-medium text-stone-900 underline",
+  }[variant];
 
   return (
     <>
@@ -44,7 +46,7 @@ export function ModalButton({
       </button>
       <dialog
         ref={ref}
-        aria-labelledby="modal-title"
+        aria-labelledby={titleId}
         onClose={() => {
           if (defaultOpen) router.replace(pathname);
         }}
@@ -55,7 +57,7 @@ export function ModalButton({
       >
         <div className="flex items-start justify-between gap-4 border-b border-stone-200 px-5 py-4">
           <div>
-            <h2 id="modal-title" className="text-lg font-semibold text-stone-900">{title}</h2>
+            <h2 id={titleId} className="text-lg font-semibold text-stone-900">{title}</h2>
             {description && <p className="mt-1 text-sm text-stone-600">{description}</p>}
           </div>
           <button

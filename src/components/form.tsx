@@ -7,6 +7,10 @@ export type FormState = {
   error: string | null;
   ok: boolean;
   values?: Record<string, string>;
+  /** Messaggio di successo calcolato dall'azione (al posto di quello fisso del form). */
+  message?: string;
+  /** Id del record creato, quando serve al chiamante. */
+  itemId?: string;
 };
 
 type ClientState = FormState & { n: number };
@@ -82,13 +86,13 @@ export function ActionForm({
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <SubmitButton label={submitLabel} pendingLabel={pendingLabel} variant={variant} />
         {state.error && (
-          <p role="alert" className="text-sm text-red-700">
+          <p role="alert" className="whitespace-pre-line text-sm text-red-700">
             {state.error}
           </p>
         )}
-        {state.ok && successMessage && (
+        {state.ok && (state.message ?? successMessage) && (
           <p role="status" className="text-sm text-green-700">
-            {successMessage}
+            {state.message ?? successMessage}
           </p>
         )}
       </div>

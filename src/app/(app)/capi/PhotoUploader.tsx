@@ -2,15 +2,10 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { PHOTO_BUCKET, PHOTO_MAX_BYTES, PHOTO_TYPES } from "@/lib/business/constants";
-import { createClient } from "@/lib/supabase/client";
-import { registerPhoto } from "./actions";
+import { PHOTO_MAX_BYTES } from "@/lib/business/constants";
+import { uploadPhotos } from "./uploadPhotos";
 
-/**
- * Carica le foto direttamente nello storage dal browser (nessun limite di dimensione
- * delle richieste verso il server), poi le registra nel database.
- * Percorso: <user_id>/<capo>/<id casuale>.<estensione>
- */
+/** Aggiunge foto a un capo già esistente (scheda del capo). */
 export function PhotoUploader({ itemId, userId }: { itemId: string; userId: string }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -24,39 +19,7 @@ export function PhotoUploader({ itemId, userId }: { itemId: string; userId: stri
     setErrors([]);
     setDone(0);
 
-    const supabase = createClient();
-    const problems: string[] = [];
-    let uploaded = 0;
-
-    for (const file of Array.from(files)) {
-      const ext = PHOTO_TYPES[file.type];
-      if (!ext) {
-        problems.push(`${file.name}: formato non supportato (usa JPG, PNG o WebP).`);
-        continue;
-      }
-      if (file.size > PHOTO_MAX_BYTES) {
-        problems.push(`${file.name}: supera i ${PHOTO_MAX_BYTES / 1024 / 1024} MB.`);
-        continue;
-      }
-
-      const path = `${userId}/${itemId}/${crypto.randomUUID()}.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from(PHOTO_BUCKET)
-        .upload(path, file, { contentType: file.type, upsert: false });
-      if (uploadError) {
-        problems.push(`${file.name}: caricamento non riuscito.`);
-        continue;
-      }
-
-      const result = await registerPhoto(itemId, path);
-      if (result.error) {
-        // Il file non è stato registrato: lo si toglie per non lasciare file orfani.
-        await supabase.storage.from(PHOTO_BUCKET).remove([path]);
-        problems.push(`${file.name}: ${result.error}`);
-        continue;
-      }
-      uploaded += 1;
-    }
+    const { uploaded, problems } = await uploadPhotos(itemId, userId, Array.from(files));
 
     setErrors(problems);
     setDone(uploaded);

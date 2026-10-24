@@ -76,7 +76,8 @@ L'app **non cerca fornitori**: i fornitori si trovano fuori (a mano o chiedendo 
 - **Capi**: codice univoco, marca, categoria, taglia, condizione, stato, prezzo previsto, foto. Si possono creare 1 alla volta o tanti vuoti insieme (`L-001-001`, `-002`…) dalla scheda del lotto.
 - **Stati**: da controllare, da fotografare, pronto, pubblicato, venduto, reso. «Venduto» si ottiene solo registrando una vendita; «reso» con il pulsante dedicato.
 - **Vendita**: canale, data, prezzo incassato, commissioni, spedizione in uscita, costi extra. Registrare una vendita e cambiare lo stato del capo avviene in un'unica operazione del database. Un capo reso e poi rivenduto sostituisce la vecchia vendita.
-- **Foto**: caricate dal browser direttamente nello storage privato (JPG, PNG, WebP, max 10 MB), poi registrate nel database.
+- **Foto**: caricate dal browser direttamente nello storage privato (JPG, PNG, WebP, max 10 MB), poi registrate nel database. Si possono aggiungere già alla creazione del capo (campo «Foto» del modulo) o dopo dalla scheda. Se una foto fallisce, il capo resta creato e te lo dice.
+- **Importazione CSV** (pulsante «Importa CSV» in Capi): scegli il lotto e un file con una riga per capo (colonne `marca, categoria, taglia, condizione, prezzo previsto, note`, tutte facoltative; c'è il modello da scaricare). L'app assegna i codici in ordine (`L-001-001`, `-002`…, dal numero successivo a quelli già nel lotto) e lo stato «da controllare»; le foto si aggiungono dopo dalla scheda. Tutto o niente: se una riga è sbagliata non entra nulla e ti dice quale riga. Massimo 500 capi, file fino a circa 900 KB.
 - **Profitto** per capo (ricavo netto − costo attribuito), per lotto e per fornitore; dashboard con capitale investito, valore stock, vendite, costi, margine realizzato e saldo di cassa.
 - **Esportazione CSV** di capi, lotti e vendite (pulsanti in dashboard e nelle liste). Formato per Excel italiano: separatore `;`, importi con la virgola, accenti corretti; i testi che sembrano formule sono neutralizzati.
 - Le liste leggono i dati a pagine fino in fondo, quindi i totali non si fermano a 1000 righe.
@@ -124,7 +125,7 @@ scripts/test-db.sh    esegue migrazioni e test SQL in locale
 - Allegare file (documenti, screenshot) alle fonti dei fornitori.
 
 ## Roadmap futura (non implementata)
-Casella email, email dei fornitori in app, invii multipli con controlli anti-spam, ricerche pianificate e notifiche, API di ricerca web, sito pubblico/multiutenza/abbonamenti.
+Collegamento ai siti di vendita (Vinted, Depop, eBay) per preparare gli annunci dai capi pronti (da verificare cosa permette ogni sito), casella email, email dei fornitori in app, invii multipli con controlli anti-spam, ricerche pianificate e notifiche, API di ricerca web, sito pubblico/multiutenza/abbonamenti.
 
 ## Deployment
 Previsto su Vercel: importa il repository e imposta le due variabili di `.env.example` in *Project Settings → Environment Variables*. Le istruzioni verificate arrivano a fine MVP.

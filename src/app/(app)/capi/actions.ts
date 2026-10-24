@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { PHOTO_BUCKET } from "@/lib/business/constants";
 import { fetchAll } from "@/lib/business/paginate";
+import { IMPORT_MAX_BYTES, parseItemImport } from "@/lib/business/import";
 import {
   bulkItemsSchema,
   itemCreateSchema,
@@ -46,7 +47,32 @@ export async function createItem(_prev: FormState, formData: FormData): Promise<
   }
 
   revalidateItems(undefined, parsed.data.lot_id);
-  redirect(`/capi/${data.id}`);
+  return { error: null, ok: true, itemId: data.id };
+}
+
+type Supabase = Awaited<ReturnType<typeof createClient>>;
+
+/** Prossimi codici liberi del lotto: <codice lotto>-001, -002… dal numero successivo al più alto usato. */
+async function nextItemCodes(
+  supabase: Supabase,
+  lotId: string,
+  count: number,
+): Promise<string[] | null> {
+  const { data: lot, error: lotError } = await supabase
+    .from("purchase_lots")
+    .select("code")
+    .eq("id", lotId)
+    .maybeSingle();
+  if (lotError || !lot) return null;
+
+  const existing = await fetchAll<{ code: string }>((from, to) =>
+    supabase.from("items").select("code").eq("lot_id", lotId).order("id").range(from, to),
+  );
+
+  const pattern = new RegExp(`^${lot.code.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}-(\\d+)$`);
+  const used = existing.map((e) => Number(pattern.exec(e.code)?.[1] ?? 0));
+  const start = Math.max(0, ...used) + 1;
+  return Array.from({ length: count }, (_, i) => `${lot.code}-${String(start + i).padStart(3, "0")}`);
 }
 
 /** Crea N capi vuoti con codici progressivi (<codice lotto>-001, -002…), da completare poi. */
@@ -56,28 +82,10 @@ export async function createItemsBulk(_prev: FormState, formData: FormData): Pro
   const { lot_id, count } = parsed.data;
 
   const supabase = await createClient();
-  const { data: lot, error: lotError } = await supabase
-    .from("purchase_lots")
-    .select("code")
-    .eq("id", lot_id)
-    .maybeSingle();
-  if (lotError || !lot) return fail("Lotto non trovato", formData);
+  const codes = await nextItemCodes(supabase, lot_id, count);
+  if (!codes) return fail("Lotto non trovato", formData);
 
-  const existing = await fetchAll<{ code: string }>((from, to) =>
-    supabase.from("items").select("code").eq("lot_id", lot_id).order("id").range(from, to),
-  );
-
-  // Riparte dal numero successivo al più alto già usato nel lotto.
-  const pattern = new RegExp(`^${lot.code.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}-(\\d+)$`);
-  const used = existing.map((e) => Number(pattern.exec(e.code)?.[1] ?? 0));
-  const start = Math.max(0, ...used) + 1;
-
-  const rows = Array.from({ length: count }, (_, i) => ({
-    lot_id,
-    code: `${lot.code}-${String(start + i).padStart(3, "0")}`,
-    status: "da_controllare" as const,
-  }));
-
+  const rows = codes.map((code) => ({ lot_id, code, status: "da_controllare" as const }));
   const { error } = await supabase.from("items").insert(rows);
   if (error) {
     return fail(error.code === "23505" ? DUPLICATE_CODE : dbErrorMessage(error), formData);
@@ -85,6 +93,42 @@ export async function createItemsBulk(_prev: FormState, formData: FormData): Pro
 
   revalidateItems(undefined, lot_id);
   return { error: null, ok: true };
+}
+
+/**
+ * Importa i capi da un CSV nel lotto scelto: codici progressivi del lotto e stato «da controllare».
+ * Tutto o niente: se una riga non è valida non viene importato nulla.
+ */
+export async function importItems(_prev: FormState, formData: FormData): Promise<FormState> {
+  const lotId = String(formData.get("lot_id") ?? "");
+  if (!validId(lotId)) return fail("Scegli il lotto di provenienza.");
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return fail("Scegli un file CSV da importare.");
+  if (file.size > IMPORT_MAX_BYTES) return fail("File troppo grande (massimo circa 900 KB).");
+
+  const result = parseItemImport(await file.text());
+  if (result.errors.length > 0) {
+    const shown = result.errors.slice(0, 10);
+    const more = result.errors.length - shown.length;
+    return fail(`Nessun capo importato:\n${shown.join("\n")}${more > 0 ? `\n… e altri ${more} errori` : ""}`);
+  }
+
+  const supabase = await createClient();
+  const codes = await nextItemCodes(supabase, lotId, result.items.length);
+  if (!codes) return fail("Lotto non trovato.");
+
+  const rows = result.items.map((item, i) => ({ ...item, lot_id: lotId, code: codes[i], status: "da_controllare" as const }));
+  const { error } = await supabase.from("items").insert(rows);
+  if (error) return fail(error.code === "23505" ? DUPLICATE_CODE : dbErrorMessage(error));
+
+  revalidateItems(undefined, lotId);
+  const ignored = result.ignoredColumns.length > 0 ? ` Colonne ignorate: ${result.ignoredColumns.join(", ")}.` : "";
+  return {
+    error: null,
+    ok: true,
+    message: `Importati ${rows.length} capi: da ${codes[0]} a ${codes[codes.length - 1]}, stato «da controllare».${ignored}`,
+  };
 }
 
 export async function updateItem(

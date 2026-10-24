@@ -12,6 +12,7 @@ const future = [
   "Collegamento a una casella email",
   "Visualizzazione e organizzazione in app delle email dei fornitori",
   "Invio di email personalizzate a più destinatari, con controlli anti-spam e rispetto delle regole applicabili",
+  "Collegamento ai siti di vendita (Vinted, Depop, eBay…) per preparare gli annunci dai capi pronti: titolo, descrizione, prezzo e foto. Per quanto ne so, Vinted e Depop non offrono un'API pubblica ai venditori, quindi all'inizio sarebbe un annuncio da copiare e incollare; la pubblicazione automatica è da verificare sito per sito",
   "Ricerche pianificate e notifiche",
   "Integrazione con un'API di ricerca web",
   "Sito pubblico, multiutenza e abbonamenti",
