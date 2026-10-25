@@ -36,7 +36,7 @@ SHARED="20261025000001_shared_business.sql"
 
 # 1) Tutte le migrazioni precedenti: il database com'era prima dell'attività condivisa.
 for f in "$ROOT"/supabase/migrations/*.sql; do
-  [ "$(basename "$f")" = "$SHARED" ] && continue
+  [[ "$(basename "$f")" < "$SHARED" ]] || continue
   echo ">> migrazione $(basename "$f")"
   "${PSQL[@]}" -f "$f"
 done
@@ -55,8 +55,22 @@ echo ">> migrazione $SHARED"
 # 4) Test del nuovo modello.
 "${PSQL[@]}" -f "$ROOT/supabase/tests/02_shared_business.sql"
 
+# 4b) Migrazioni successive all'attività condivisa, poi i loro test.
+for f in "$ROOT"/supabase/migrations/*.sql; do
+  [[ "$(basename "$f")" > "$SHARED" ]] || continue
+  echo ">> migrazione $(basename "$f")"
+  "${PSQL[@]}" -f "$f"
+done
+"${PSQL[@]}" -f "$ROOT/supabase/tests/04_inventory.sql"
+
 # 5) Rollback sulla copia: i dati ci sono ancora e il vecchio modello funziona di nuovo.
 echo ">> rollback (su copia)"
 RB=("$PGBIN/psql" -h "$TMP" -U postgres -d vintage_rollback -v ON_ERROR_STOP=1 -q -X)
 "${RB[@]}" -f "$ROOT/supabase/rollback/20261025000001_shared_business_down.sql"
 "${RB[@]}" -f "$ROOT/supabase/tests/03_rollback.sql"
+# 6) Rollback dell'inventario (alla fine, sul database di prova): la vendita resta, spariscono tabella e colonna.
+SALES_BEFORE="$("${PSQL[@]}" -t -A -c "select count(*) from public.sales")"
+"${PSQL[@]}" -f "$ROOT/supabase/rollback/20261026000001_inventory_down.sql"
+"${PSQL[@]}" -c "select test.expect_equal((select count(*) from information_schema.columns where table_name = 'sales' and column_name = 'materials_cost_cents'), 0, 'rollback inventario: colonna rimossa')" >/dev/null
+"${PSQL[@]}" -c "select test.expect_equal((select count(*) from public.sales), $SALES_BEFORE, 'rollback inventario: le vendite restano')" >/dev/null
+echo '=== TUTTI I TEST SQL SUPERATI ==='

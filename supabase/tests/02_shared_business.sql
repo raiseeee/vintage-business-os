@@ -373,4 +373,4 @@ delete from public.business_members where user_id = :uid_c;
 select test.expect_error(format($q$delete from public.business_members where user_id = %L$q$, :uid_d), '23514',
   'l''ultimo titolare non si può eliminare');
 
-\echo '=== TUTTI I TEST SQL SUPERATI ==='
+\echo '=== test 02 (attività condivisa) superati ==='

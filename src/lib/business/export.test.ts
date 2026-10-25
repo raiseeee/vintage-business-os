@@ -76,18 +76,18 @@ describe("esportazione capi", () => {
     const sold = cells(rows[1]);
     expect(sold[0]).toBe("L-001-001");
     expect(sold[7]).toBe("Venduto");
-    expect(sold[16]).toBe("36,00"); // ricavo netto
-    expect(sold[17]).toBe("23,00"); // profitto
+    expect(sold[17]).toBe("36,00"); // ricavo netto
+    expect(sold[18]).toBe("23,00"); // profitto
     const stock = cells(rows[2]);
-    expect(stock[17]).toBe(""); // nessun profitto
-    expect(stock[18]).toBe("sì"); // demo
+    expect(stock[18]).toBe(""); // nessun profitto
+    expect(stock[19]).toBe("sì"); // demo
   });
 
   it("un capo reso non ha profitto anche se ha una vendita precedente", () => {
     const returned = cells(lines(buildItemsCsv(data))[3]);
     expect(returned[7]).toBe("Reso");
-    expect(returned[16]).toBe("25,00"); // ricavo netto della vecchia vendita
-    expect(returned[17]).toBe(""); // ma nessun profitto
+    expect(returned[17]).toBe("25,00"); // ricavo netto della vecchia vendita
+    expect(returned[18]).toBe(""); // ma nessun profitto
   });
 
   it("racchiude tra virgolette il nome del fornitore che contiene il separatore", () => {
@@ -100,9 +100,9 @@ describe("esportazione vendite", () => {
     const rows = lines(buildSalesCsv(data));
     expect(rows).toHaveLength(3);
     expect(cells(rows[1])[0]).toBe("2026-10-10");
-    expect(cells(rows[1])[12]).toBe("23,00");
+    expect(cells(rows[1])[13]).toBe("23,00");
     expect(cells(rows[2])[4]).toBe("Reso");
-    expect(cells(rows[2])[12]).toBe("");
+    expect(cells(rows[2])[13]).toBe("");
   });
 });
 

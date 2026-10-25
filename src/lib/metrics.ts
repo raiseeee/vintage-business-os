@@ -40,6 +40,8 @@ export interface Sale {
   outboundShipping: number;
   /** Altri costi legati a questa vendita. */
   extraCosts: number;
+  /** Materiali di consumo per capo (sacchetti, scatole…), congelati al momento della vendita. */
+  materialsCost?: number;
 }
 
 export interface Item {
@@ -58,7 +60,7 @@ export interface DashboardMetrics {
   stockValue: number;
   /** Incassi lordi dei capi venduti. */
   salesRevenue: number;
-  /** Costi di vendita (commissioni + spedizione in uscita + extra). */
+  /** Costi di vendita (commissioni + spedizione in uscita + extra + materiali per capo). */
   saleCosts: number;
   /** Costo di acquisto attribuito ai soli capi venduti. */
   costOfGoodsSold: number;
@@ -91,7 +93,7 @@ export function allocatedItemCost(lot: Lot): number {
 }
 
 export function saleNetRevenue(sale: Sale): number {
-  return sale.price - sale.fees - sale.outboundShipping - sale.extraCosts;
+  return sale.price - sale.fees - sale.outboundShipping - sale.extraCosts - (sale.materialsCost ?? 0);
 }
 
 /** Profitto di un capo venduto, oppure null se non è venduto. */
@@ -117,7 +119,7 @@ export function computeDashboard(lots: Lot[], items: Item[]): DashboardMetrics {
       soldCount += 1;
       salesRevenue += item.sale.price;
       saleCosts +=
-        item.sale.fees + item.sale.outboundShipping + item.sale.extraCosts;
+        item.sale.fees + item.sale.outboundShipping + item.sale.extraCosts + (item.sale.materialsCost ?? 0);
       const lot = lotById.get(item.lotId);
       if (lot) costOfGoodsSold += allocatedItemCost(lot);
     } else if (item.status !== "reso") {

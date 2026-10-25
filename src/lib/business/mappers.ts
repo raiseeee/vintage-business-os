@@ -19,6 +19,7 @@ export function toMetricSale(row: SaleRow): Sale {
     fees: row.fees_cents,
     outboundShipping: row.outbound_shipping_cents,
     extraCosts: row.extra_costs_cents,
+    materialsCost: row.materials_cost_cents ?? 0,
   };
 }
 

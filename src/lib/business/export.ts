@@ -72,7 +72,7 @@ export function buildItemsCsv(data: BusinessData): string {
   const header = [
     "Codice capo", "Lotto", "Fornitore", "Marca", "Categoria", "Taglia", "Condizione", "Stato",
     "Prezzo previsto (€)", "Costo attribuito (€)", "Canale", "Data vendita", "Prezzo incassato (€)",
-    "Commissioni (€)", "Spedizione in uscita (€)", "Costi extra (€)", "Ricavo netto (€)", "Profitto (€)",
+    "Commissioni (€)", "Spedizione in uscita (€)", "Costi extra (€)", "Materiali (€)", "Ricavo netto (€)", "Profitto (€)",
     "Demo", "Note",
   ];
 
@@ -101,6 +101,7 @@ export function buildItemsCsv(data: BusinessData): string {
         sale ? { cents: sale.fees_cents } : null,
         sale ? { cents: sale.outbound_shipping_cents } : null,
         sale ? { cents: sale.extra_costs_cents } : null,
+        sale ? { cents: sale.materials_cost_cents ?? 0 } : null,
         net !== null ? { cents: net } : null,
         profit !== null ? { cents: profit } : null,
         yesNo(item.is_demo),
@@ -117,7 +118,7 @@ export function buildSalesCsv(data: BusinessData): string {
 
   const header = [
     "Data vendita", "Codice capo", "Lotto", "Fornitore", "Stato capo", "Canale", "Prezzo incassato (€)",
-    "Commissioni (€)", "Spedizione in uscita (€)", "Costi extra (€)", "Ricavo netto (€)",
+    "Commissioni (€)", "Spedizione in uscita (€)", "Costi extra (€)", "Materiali (€)", "Ricavo netto (€)",
     "Costo attribuito (€)", "Profitto (€)", "Note",
   ];
 
@@ -139,6 +140,7 @@ export function buildSalesCsv(data: BusinessData): string {
         { cents: sale.fees_cents },
         { cents: sale.outbound_shipping_cents },
         { cents: sale.extra_costs_cents },
+        { cents: sale.materials_cost_cents ?? 0 },
         { cents: saleNetRevenue(toMetricSale(sale)) },
         { cents: allocatedItemCost(ml) },
         // Un capo reso non ha profitto: la vendita non conta nei ricavi.

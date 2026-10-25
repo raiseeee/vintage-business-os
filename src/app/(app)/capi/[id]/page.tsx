@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ActionForm, Field } from "@/components/form";
 import { ItemStatusBadge, Section, Stat, Tag, formatDate, toneOf } from "@/components/ui";
 import { CHANNEL_SUGGESTIONS } from "@/lib/business/constants";
-import { toMetricItems, toMetricLot } from "@/lib/business/mappers";
+import { toMetricItems, toMetricLot, toMetricSale } from "@/lib/business/mappers";
 import {
   getItem,
   getItemPhotos,
@@ -145,9 +145,15 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
                 <dd className="text-right tabular-nums">− {formatEuro(sale.outbound_shipping_cents)}</dd>
                 <dt className="text-stone-600">Costi extra</dt>
                 <dd className="text-right tabular-nums">− {formatEuro(sale.extra_costs_cents)}</dd>
+                {(sale.materials_cost_cents ?? 0) > 0 && (
+                  <>
+                    <dt className="text-stone-600">Materiali (sacchetti, scatole…)</dt>
+                    <dd className="text-right tabular-nums">− {formatEuro(sale.materials_cost_cents ?? 0)}</dd>
+                  </>
+                )}
                 <dt className="border-t border-stone-200 pt-1 font-medium">Ricavo netto</dt>
                 <dd className="border-t border-stone-200 pt-1 text-right font-medium tabular-nums">
-                  {formatEuro(saleNetRevenue({ price: sale.price_cents, fees: sale.fees_cents, outboundShipping: sale.outbound_shipping_cents, extraCosts: sale.extra_costs_cents }))}
+                  {formatEuro(saleNetRevenue(toMetricSale(sale)))}
                 </dd>
                 <dt className="text-stone-600">Costo attribuito del lotto</dt>
                 <dd className="text-right tabular-nums">− {formatEuro(unitCost)}</dd>

@@ -40,6 +40,8 @@ export interface SaleRow {
   fees_cents: number;
   outbound_shipping_cents: number;
   extra_costs_cents: number;
+  /** Materiali per capo congelati alla vendita (assente finché non si applica la migrazione dell'inventario). */
+  materials_cost_cents?: number;
   notes: string | null;
 }
 

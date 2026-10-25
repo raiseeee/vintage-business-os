@@ -3,6 +3,8 @@ import { PageHeader } from "@/components/PagePlaceholder";
 import { Stat, Tag, formatDate, toneOf } from "@/components/ui";
 import { getBusinessData } from "@/lib/business/queries";
 import { computeLotStats } from "@/lib/business/lotStats";
+import { investmentsTotal } from "@/lib/inventory/calc";
+import { getInventory } from "@/lib/inventory/queries";
 import { formatEuro } from "@/lib/metrics";
 import { bpToText } from "@/lib/profit";
 
@@ -11,7 +13,8 @@ export const metadata = { title: "Statistiche · Vintage Business OS" };
 const toneClass = { neutral: "text-stone-700", good: "text-green-800", bad: "text-red-800" };
 
 export default async function StatistichePage() {
-  const { suppliers, lots, items, sales } = await getBusinessData();
+  const [{ suppliers, lots, items, sales }, inventory] = await Promise.all([getBusinessData(), getInventory()]);
+  const investments = investmentsTotal(inventory.rows);
   const supplierName = new Map(suppliers.map((s) => [s.id, s.name]));
   const rows = computeLotStats(lots, items, sales).sort((a, b) => b.lot.purchased_at.localeCompare(a.lot.purchased_at));
 
@@ -19,6 +22,7 @@ export default async function StatistichePage() {
     (t, r) => ({ cost: t.cost + r.totalCost, net: t.net + r.netRevenue, profit: t.profit + r.profit, sold: t.sold + r.sold, registered: t.registered + r.registered }),
     { cost: 0, net: 0, profit: 0, sold: 0, registered: 0 },
   );
+  const afterInvestments = total.profit - investments;
   const hasDemo = lots.some((l) => l.is_demo);
 
   return (
@@ -31,8 +35,19 @@ export default async function StatistichePage() {
       <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Stat label="Speso nei lotti" value={formatEuro(total.cost)} hint={`${rows.length} lotti`} />
         <Stat label="Incassi netti" value={formatEuro(total.net)} hint="Dopo commissioni e spedizioni" />
-        <Stat label="Profitto" value={formatEuro(total.profit)} tone={toneOf(total.profit)} hint="Sui capi venduti, costo del lotto incluso" />
+        <Stat label="Profitto" value={formatEuro(total.profit)} tone={toneOf(total.profit)} hint="Sui capi venduti: costo del lotto e materiali inclusi" />
         <Stat label="Capi venduti" value={`${total.sold}/${total.registered}`} hint="Su quelli registrati" />
+        {investments > 0 && (
+          <>
+            <Stat label="Investimenti (attrezzature)" value={formatEuro(investments)} hint="Dalla pagina Inventario" />
+            <Stat
+              label="Risultato dopo gli investimenti"
+              value={formatEuro(afterInvestments)}
+              tone={toneOf(afterInvestments)}
+              hint={afterInvestments >= 0 ? "Hai già recuperato le attrezzature" : "Quanto manca per recuperarle"}
+            />
+          </>
+        )}
       </div>
 
       {hasDemo && (

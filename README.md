@@ -19,6 +19,7 @@ Gestionale per compravendita di abbigliamento vintage e streetwear: fornitori ve
    5. `20261022000005_sales_functions.sql`
    6. `20261023000001_search.sql` (tabelle della ricerca rimossa: non usate, applicala comunque per tenere allineato lo schema)
    7. `20261025000001_shared_business.sql` — **attività condivisa** (più account sugli stessi dati). Su un database con dati già inseriti **non applicarla prima di aver letto la sezione «Attività condivisa e collaboratori»**.
+   8. `20261026000001_inventory.sql` — **inventario** (materiali per capo e attrezzature). Si applica dopo la 7, con un normale copia-e-incolla nello SQL Editor; rollback in `supabase/rollback/20261026000001_inventory_down.sql`.
 
    Se avevi già applicato le prime quattro, **applica solo la quinta** (serve per registrare le vendite).
 
@@ -116,6 +117,17 @@ L'app **non cerca fornitori**: i fornitori si trovano fuori (a mano o chiedendo 
 - **Profitto** per capo (ricavo netto − costo attribuito), per lotto e per fornitore; dashboard con capitale investito, valore stock, vendite, costi, margine realizzato e saldo di cassa.
 - **Esportazione CSV** di capi, lotti e vendite (pulsanti in dashboard e nelle liste). Formato per Excel italiano: separatore `;`, importi con la virgola, accenti corretti; i testi che sembrano formule sono neutralizzati.
 - Le liste leggono i dati a pagine fino in fondo, quindi i totali non si fermano a 1000 righe.
+
+## Inventario e calcolatore
+
+Pagina **Inventario**: le spese fisse dell'attività, senza l'affitto.
+- **Materiali di consumo** (sacchetti, scatole…): inserisci costo totale e quantità; il costo unitario è calcolato (100 sacchetti a 10 € → 0,10 €). Indichi quanti ne usa un capo (anche 0,5). Quelli «in uso» formano il **costo materiali per capo**.
+- Quel costo viene **congelato su ogni vendita** al momento della registrazione (`sales.materials_cost_cents`): cambiare dopo i prezzi non modifica i profitti già registrati. Le vendite fatte prima di compilare l'inventario restano senza materiali. Quando finisci una confezione e ne compri un'altra, spegni la vecchia («Smetti di contare») per non contarle due volte.
+- **Attrezzature** (stampante etichette…): non entrano nel costo dei capi. Compaiono nelle Statistiche come investimento e come «Risultato dopo gli investimenti» (profitto − investimenti). Nessun ammortamento.
+- **Lavaggio e costi di un lotto** restano negli «altri costi» del lotto, non vanno in inventario (si conterebbero due volte).
+- Tutti i membri aggiungono e modificano; eliminare solo i titolari.
+- **Calcolatore**: scegli un lotto e si compilano costo per capo (già con spedizione in entrata e altri costi del lotto), materiali dall'inventario e prezzo medio previsto dei capi. Link «Calcola la redditività» nella scheda del lotto.
+- L'app funziona anche prima della migrazione: l'Inventario mostra come applicarla e i profitti restano come prima.
 
 ## Calcolatore e statistiche
 - **Calcolatore** (menu «Calcolatore», e link «Calcola il profitto» nella scheda di un capo non venduto): inserisci costi, prezzo di vendita previsto, sconto, commissione (% e fissa) e spedizione a tuo carico. Ottieni ricavo netto, profitto, margine (sul prezzo incassato), ROI (sui costi) e il **prezzo minimo per non andare in perdita**. Le formule sono scritte nella pagina e nei test (`src/lib/profit.ts`). Le commissioni non sono precompilate: le imposti tu e si ricordano nel browser.

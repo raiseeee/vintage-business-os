@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { bpToText, computeProfit, parsePercentToBp, type ProfitInput } from "@/lib/profit";
 import { formatEuro } from "@/lib/metrics";
-import { parseEuroToCents } from "@/lib/money";
+import { centsToInput, parseEuroToCents } from "@/lib/money";
 
 const inputClass =
   "mt-1 w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm focus:border-stone-900 focus:outline-none";
@@ -15,10 +15,10 @@ type Values = Record<
 >;
 
 const EURO_FIELDS: { name: keyof Values; label: string; hint?: string }[] = [
-  { name: "purchase", label: "Prezzo d'acquisto del capo (€)", hint: "Dal lotto: costo del lotto diviso i capi." },
+  { name: "purchase", label: "Costo del capo (€)", hint: "Da lotto: costo del lotto diviso i capi, già con spedizione in entrata e altri costi del lotto." },
   { name: "inboundShipping", label: "Spedizione dal fornitore, per capo (€)", hint: "Già inclusa nel costo del lotto? Allora lascia 0 per non contarla due volte." },
   { name: "prep", label: "Lavaggio, riparazione, preparazione (€)" },
-  { name: "packaging", label: "Imballaggio (€)" },
+  { name: "packaging", label: "Imballaggio e materiali (€)", hint: "Dall'Inventario: materiali per capo (sacchetti, scatole…)." },
   { name: "otherCosts", label: "Altri costi (€)" },
 ];
 
@@ -35,12 +35,51 @@ function loadFees(): Pick<Values, "fee" | "feeFixed" | "outboundShipping"> | nul
   }
 }
 
-export function Calculator({ initial }: { initial: Partial<Values> }) {
+export interface LotOption {
+  id: string;
+  label: string;
+  /** Costo del lotto diviso i capi dichiarati (già comprende spedizione in entrata e altri costi del lotto). */
+  costPerItem: number;
+  avgExpectedPrice: number | null;
+}
+
+export function Calculator({
+  initial,
+  lots,
+  materialsPerItem,
+  initialLotId,
+}: {
+  initial: Partial<Values>;
+  lots: LotOption[];
+  /** Materiali per capo dall'inventario (centesimi). */
+  materialsPerItem: number;
+  initialLotId: string;
+}) {
+  const materialsText = materialsPerItem > 0 ? centsToInput(materialsPerItem) : "";
+
+  function fromLot(lot: LotOption | undefined): Partial<Values> {
+    if (!lot) return {};
+    return {
+      purchase: centsToInput(lot.costPerItem),
+      inboundShipping: "",
+      otherCosts: "",
+      packaging: materialsText,
+      ...(lot.avgExpectedPrice !== null ? { salePrice: centsToInput(lot.avgExpectedPrice) } : {}),
+    };
+  }
+
+  const [lotId, setLotId] = useState(initialLotId);
   const [v, setV] = useState<Values>({
-    purchase: "", inboundShipping: "", prep: "", packaging: "", otherCosts: "",
+    purchase: "", inboundShipping: "", prep: "", packaging: materialsText, otherCosts: "",
     salePrice: "", discount: "", fee: "", feeFixed: "", outboundShipping: "",
+    ...fromLot(lots.find((l) => l.id === initialLotId)),
     ...initial,
   });
+
+  const pickLot = (id: string) => {
+    setLotId(id);
+    if (id) setV((cur) => ({ ...cur, ...fromLot(lots.find((l) => l.id === id)) }));
+  };
 
   // Le commissioni cambiano poco: si ricordano su questo dispositivo (solo comodità, non è un dato dell'attività).
   useEffect(() => {
@@ -93,6 +132,18 @@ export function Calculator({ initial }: { initial: Partial<Values> }) {
       <div className="space-y-6">
         <section className="rounded-lg border border-stone-200 bg-white p-5">
           <h2 className="text-base font-semibold text-stone-900">Costi del capo</h2>
+          <div className="mt-3">
+            <label htmlFor="lot" className="block text-sm font-medium text-stone-700">Parti da un lotto</label>
+            <select id="lot" value={lotId} onChange={(e) => pickLot(e.target.value)} className={inputClass}>
+              <option value="">Nessuno: compilo a mano</option>
+              {lots.map((l) => (
+                <option key={l.id} value={l.id}>{l.label}</option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-stone-500">
+              Compila il costo per capo (costo del lotto diviso i capi dichiarati), i materiali dall&apos;Inventario e, se hai messo i prezzi previsti dei capi, il prezzo medio previsto. Puoi sempre modificare i campi.
+            </p>
+          </div>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
             {EURO_FIELDS.map((f) => (
               <div key={f.name}>

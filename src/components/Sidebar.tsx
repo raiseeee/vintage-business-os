@@ -10,6 +10,7 @@ const NAV = [
   { href: "/crm", label: "CRM fornitori" },
   { href: "/lotti", label: "Acquisti e lotti" },
   { href: "/capi", label: "Capi" },
+  { href: "/inventario", label: "Inventario" },
   { href: "/statistiche", label: "Statistiche" },
   { href: "/calcolatore", label: "Calcolatore" },
   { href: "/roadmap", label: "Roadmap" },

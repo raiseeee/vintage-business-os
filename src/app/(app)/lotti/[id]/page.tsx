@@ -54,6 +54,10 @@ export default async function LottoDetailPage(props: PageProps<"/lotti/[id]">) {
           {" · acquistato il "}
           {formatDate(lot.purchased_at)}
           {lot.weight_kg !== null && ` · ${lot.weight_kg} kg`}
+          {" · "}
+          <Link href={`/calcolatore?lotto=${lot.id}`} className="underline underline-offset-2 hover:text-stone-900">
+            Calcola la redditività
+          </Link>
         </p>
       </header>
 

@@ -163,3 +163,20 @@ describe("riepiloghi per lotto e per fornitore", () => {
     expect(summarizeBySupplier([orphan], []).size).toBe(0);
   });
 });
+
+describe("materiali congelati sulla vendita", () => {
+  const lot = { id: "l", purchaseCost: 10000, inboundShipping: 0, otherCosts: 0, quantity: 10 };
+  const sale = { price: 4000, fees: 300, outboundShipping: 400, extraCosts: 0 };
+  it("riducono il ricavo netto e il profitto", () => {
+    const item = (materialsCost?: number) => ({ id: "i", lotId: "l", status: "venduto" as const, expectedPrice: null, sale: { ...sale, materialsCost } });
+    expect(saleNetRevenue({ ...sale })).toBe(3300);
+    expect(saleNetRevenue({ ...sale, materialsCost: 40 })).toBe(3260);
+    expect(itemProfit(item(40), lot)).toBe(3260 - 1000);
+    expect(itemProfit(item(), lot)).toBe(3300 - 1000);
+  });
+  it("entrano nei costi di vendita della dashboard", () => {
+    const m = computeDashboard([lot], [{ id: "i", lotId: "l", status: "venduto", expectedPrice: null, sale: { ...sale, materialsCost: 40 } }]);
+    expect(m.saleCosts).toBe(740);
+    expect(m.realizedMargin).toBe(4000 - 740 - 1000);
+  });
+});

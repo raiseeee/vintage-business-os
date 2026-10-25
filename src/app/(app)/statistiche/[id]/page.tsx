@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { ItemStatusBadge, Stat, Tag, formatDate, toneOf } from "@/components/ui";
 import { computeItemStats, computeLotStats } from "@/lib/business/lotStats";
 import { getBusinessData } from "@/lib/business/queries";
-import { formatEuro } from "@/lib/metrics";
+import { toMetricSale } from "@/lib/business/mappers";
+import { formatEuro, saleNetRevenue } from "@/lib/metrics";
 import { bpToText } from "@/lib/profit";
 import { uuidSchema } from "@/lib/suppliers/schemas";
 
@@ -81,7 +82,7 @@ export default async function StatisticheLottoPage(props: PageProps<"/statistich
                     {sale ? formatEuro(sale.price_cents) : item.expected_price_cents !== null ? <span className="text-stone-500">{formatEuro(item.expected_price_cents)} prev.</span> : "—"}
                   </td>
                   <td className="px-4 py-3 text-right tabular-nums">
-                    {sale ? formatEuro(sale.price_cents - sale.fees_cents - sale.outbound_shipping_cents - sale.extra_costs_cents) : "—"}
+                    {sale ? formatEuro(saleNetRevenue(toMetricSale(sale))) : "—"}
                   </td>
                   <td className={`px-4 py-3 text-right font-medium tabular-nums ${profit === null ? "text-stone-400" : toneClass[toneOf(profit)]}`}>
                     {profit === null ? "—" : formatEuro(profit)}
