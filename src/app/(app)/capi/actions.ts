@@ -201,7 +201,7 @@ export async function deleteItem(id: string): Promise<FormState> {
   if (paths.length > 0) await supabase.storage.from(PHOTO_BUCKET).remove(paths);
 
   revalidateItems(undefined, item?.lot_id);
-  redirect("/capi");
+  redirect(item?.lot_id ? `/capi?lot=${item.lot_id}` : "/capi");
 }
 
 export async function recordSale(

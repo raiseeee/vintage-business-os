@@ -48,8 +48,8 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
 
   return (
     <>
-      <Link href="/capi" className="mb-3 inline-block text-sm text-stone-600 hover:text-stone-900">
-        ← Tutti i capi
+      <Link href={`/capi?lot=${item.lot_id}`} className="mb-3 inline-block text-sm text-stone-600 hover:text-stone-900">
+        ← {lot ? `Capi del lotto ${lot.code}` : "Tutti i capi"}
       </Link>
 
       <header className="mb-6">
@@ -90,6 +90,10 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
       </div>
 
       <div className="mt-5 space-y-5">
+        <Section title="Dati del capo">
+          <ItemForm action={updateItem.bind(null, item.id)} item={item} submitLabel="Salva modifiche" />
+        </Section>
+
         <Section title="Foto" description="Le foto sono private: le vedi solo tu.">
           {photos.length === 0 ? (
             <p className="text-sm text-stone-500">Nessuna foto.</p>
@@ -210,10 +214,6 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
             </div>
             <Field as="textarea" label="Note" name="notes" rows={2} defaultValue={sale?.notes ?? ""} />
           </ActionForm>
-        </Section>
-
-        <Section title="Dati del capo">
-          <ItemForm action={updateItem.bind(null, item.id)} item={item} submitLabel="Salva modifiche" />
         </Section>
 
         {canDelete && (
