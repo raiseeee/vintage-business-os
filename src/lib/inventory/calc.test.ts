@@ -48,3 +48,10 @@ describe("inventorySchema", () => {
     expect(inventorySchema.safeParse({ ...base, per_item_qty: "-1" }).success).toBe(false);
   });
 });
+
+describe("inventorySchema senza i campi nascosti", () => {
+  it("un'attrezzatura senza quantità per capo e senza «in uso» è valida", () => {
+    const r = inventorySchema.safeParse({ kind: "attrezzatura", name: "Stampante", total_cost_cents: "200,00", quantity: "1", purchased_at: "2026-10-01", notes: "" });
+    expect(r.success && r.data).toMatchObject({ per_item_qty: 0, in_use: false });
+  });
+});

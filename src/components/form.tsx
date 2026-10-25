@@ -17,6 +17,11 @@ type ClientState = FormState & { n: number };
 
 const ValuesContext = createContext<Record<string, string> | undefined>(undefined);
 
+/** Valori appena inviati (in caso di errore), per i campi che cambiano in base a un'altra scelta. */
+export function useSubmittedValues() {
+  return useContext(ValuesContext);
+}
+
 function SubmitButton({
   label,
   pendingLabel,
@@ -117,6 +122,7 @@ export function Field({
   placeholder,
   list,
   rows = 3,
+  onChange,
 }: {
   label: string;
   name: string;
@@ -130,6 +136,8 @@ export function Field({
   /** Id di un <datalist> con suggerimenti per il campo di testo. */
   list?: string;
   rows?: number;
+  /** Chiamata col nuovo valore quando l'utente cambia il campo. */
+  onChange?: (value: string) => void;
 }) {
   const submitted = useContext(ValuesContext);
   const value = submitted?.[name] ?? defaultValue;
@@ -144,7 +152,7 @@ export function Field({
       {as === "textarea" ? (
         <textarea id={id} name={name} rows={rows} defaultValue={value} placeholder={placeholder} className={controlClass} />
       ) : as === "select" ? (
-        <select id={id} name={name} defaultValue={value} className={controlClass}>
+        <select id={id} name={name} defaultValue={value} className={controlClass} onChange={onChange ? (e) => onChange(e.target.value) : undefined}>
           {options?.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
