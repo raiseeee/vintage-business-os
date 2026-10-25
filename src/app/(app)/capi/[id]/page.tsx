@@ -70,6 +70,17 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
               <Link href={`/fornitori/${supplier.id}`} className="underline underline-offset-2 hover:text-stone-900">{supplier.name}</Link>
             </>
           )}
+          {!isSold && (
+            <>
+              {" · "}
+              <Link
+                href={`/calcolatore?acquisto=${encodeURIComponent(centsToInput(unitCost))}&vendita=${encodeURIComponent(centsToInput(item.expected_price_cents))}`}
+                className="underline underline-offset-2 hover:text-stone-900"
+              >
+                Calcola il profitto
+              </Link>
+            </>
+          )}
         </p>
       </header>
 

@@ -82,6 +82,10 @@ L'app **non cerca fornitori**: i fornitori si trovano fuori (a mano o chiedendo 
 - **Esportazione CSV** di capi, lotti e vendite (pulsanti in dashboard e nelle liste). Formato per Excel italiano: separatore `;`, importi con la virgola, accenti corretti; i testi che sembrano formule sono neutralizzati.
 - Le liste leggono i dati a pagine fino in fondo, quindi i totali non si fermano a 1000 righe.
 
+## Calcolatore e statistiche
+- **Calcolatore** (menu «Calcolatore», e link «Calcola il profitto» nella scheda di un capo non venduto): inserisci costi, prezzo di vendita previsto, sconto, commissione (% e fissa) e spedizione a tuo carico. Ottieni ricavo netto, profitto, margine (sul prezzo incassato), ROI (sui costi) e il **prezzo minimo per non andare in perdita**. Le formule sono scritte nella pagina e nei test (`src/lib/profit.ts`). Le commissioni non sono precompilate: le imposti tu e si ricordano nel browser.
+- **Statistiche** (menu «Statistiche»): margine, profitto medio, venduti su registrati e giorni medi per marca, categoria, lotto o canale, **solo dalle tue vendite registrate**. Sotto 5 vendite compare «pochi dati». I giorni vanno dall'acquisto del lotto alla vendita (non esiste una data di pubblicazione). Nessuna previsione di mercato: senza una fonte di dati lecita su Vinted non sarebbe affidabile.
+
 **Margine realizzato** = vendite − costi di vendita − costo dei soli capi venduti. **Saldo di cassa** = incassi netti − costo dell'intero capitale investito: resta negativo finché non hai recuperato quanto speso.
 
 ## Struttura
