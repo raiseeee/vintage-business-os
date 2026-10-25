@@ -1,87 +1,92 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/PagePlaceholder";
+import { Stat, Tag, formatDate, toneOf } from "@/components/ui";
 import { getBusinessData } from "@/lib/business/queries";
-import { GROUP_KEYS, GROUP_LABELS, SMALL_SAMPLE, computeGroupStats, type GroupKey } from "@/lib/business/stats";
+import { computeLotStats } from "@/lib/business/lotStats";
 import { formatEuro } from "@/lib/metrics";
 import { bpToText } from "@/lib/profit";
-import { toneOf } from "@/components/ui";
 
 export const metadata = { title: "Statistiche · Vintage Business OS" };
 
 const toneClass = { neutral: "text-stone-700", good: "text-green-800", bad: "text-red-800" };
 
-export default async function StatistichePage(props: PageProps<"/statistiche">) {
-  const sp = await props.searchParams;
-  const raw = Array.isArray(sp.per) ? sp.per[0] : sp.per;
-  const key: GroupKey = (GROUP_KEYS as readonly string[]).includes(raw ?? "") ? (raw as GroupKey) : "marca";
+export default async function StatistichePage() {
+  const { suppliers, lots, items, sales } = await getBusinessData();
+  const supplierName = new Map(suppliers.map((s) => [s.id, s.name]));
+  const rows = computeLotStats(lots, items, sales).sort((a, b) => b.lot.purchased_at.localeCompare(a.lot.purchased_at));
 
-  const { lots, items, sales } = await getBusinessData();
-  const rows = computeGroupStats(key, lots, items, sales);
-  const hasDemo = items.some((i) => i.is_demo) || lots.some((l) => l.is_demo);
+  const total = rows.reduce(
+    (t, r) => ({ cost: t.cost + r.totalCost, net: t.net + r.netRevenue, profit: t.profit + r.profit, sold: t.sold + r.sold, registered: t.registered + r.registered }),
+    { cost: 0, net: 0, profit: 0, sold: 0, registered: 0 },
+  );
+  const hasDemo = lots.some((l) => l.is_demo);
 
   return (
     <>
       <PageHeader
-        title="Statistiche delle vendite"
-        description="Cosa ti rende di più, calcolato solo dalle tue vendite registrate. Nessuna stima di mercato."
+        title="Statistiche"
+        description="Lotto per lotto: quanto hai speso, quanto è rientrato e quanto hai guadagnato. Clicca un lotto per vedere i suoi capi."
       />
 
-      <div className="mb-4 flex flex-wrap gap-2">
-        {GROUP_KEYS.map((k) => (
-          <Link
-            key={k}
-            href={`/statistiche?per=${k}`}
-            className={`rounded-full px-3 py-1 text-sm ${k === key ? "bg-stone-900 text-white" : "bg-white text-stone-700 ring-1 ring-stone-200 hover:bg-stone-50"}`}
-          >
-            Per {GROUP_LABELS[k].toLowerCase()}
-          </Link>
-        ))}
+      <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Stat label="Speso nei lotti" value={formatEuro(total.cost)} hint={`${rows.length} lotti`} />
+        <Stat label="Incassi netti" value={formatEuro(total.net)} hint="Dopo commissioni e spedizioni" />
+        <Stat label="Profitto" value={formatEuro(total.profit)} tone={toneOf(total.profit)} hint="Sui capi venduti, costo del lotto incluso" />
+        <Stat label="Capi venduti" value={`${total.sold}/${total.registered}`} hint="Su quelli registrati" />
       </div>
 
       {hasDemo && (
         <p className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">
-          Nei dati ci sono anche esempi DEMO: finché non li rimuovi (pagina Supplier, in fondo) rientrano nei numeri.
+          Nei dati ci sono anche esempi DEMO (lotto DEMO-L1): rientrano nei numeri finché non li rimuovi dalla pagina Supplier.
         </p>
       )}
 
       {rows.length === 0 ? (
         <div className="rounded-lg border border-dashed border-stone-300 bg-white p-8 text-center">
-          <p className="text-sm font-medium text-stone-900">Non ci sono ancora vendite da analizzare.</p>
-          <p className="mt-1 text-sm text-stone-600">Quando registri le vendite dei capi, qui compaiono margini e tempi per {GROUP_LABELS[key].toLowerCase()}.</p>
+          <p className="text-sm font-medium text-stone-900">Non ci sono ancora lotti.</p>
+          <p className="mt-1 text-sm text-stone-600">
+            Registra un acquisto in <Link href="/lotti" className="underline">Acquisti e lotti</Link>: le statistiche compaiono qui.
+          </p>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-stone-200 bg-white">
-          <table className="w-full min-w-[820px] text-left text-sm">
+          <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="border-b border-stone-200 bg-stone-50 text-xs uppercase tracking-wide text-stone-500">
               <tr>
-                <th className="px-4 py-3 font-medium">{GROUP_LABELS[key]}</th>
+                <th className="px-4 py-3 font-medium">Lotto</th>
                 <th className="px-4 py-3 text-right font-medium">Venduti</th>
-                {key !== "canale" && <th className="px-4 py-3 text-right font-medium">Venduti su registrati</th>}
-                <th className="px-4 py-3 text-right font-medium">Incassi</th>
+                <th className="px-4 py-3 text-right font-medium">Costo lotto</th>
+                <th className="px-4 py-3 text-right font-medium">Incassi netti</th>
+                <th className="px-4 py-3 text-right font-medium">Rientrato</th>
                 <th className="px-4 py-3 text-right font-medium">Profitto</th>
-                <th className="px-4 py-3 text-right font-medium">Profitto medio</th>
                 <th className="px-4 py-3 text-right font-medium">Margine</th>
                 <th className="px-4 py-3 text-right font-medium">Giorni medi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">
               {rows.map((r) => (
-                <tr key={r.label} className="hover:bg-stone-50">
-                  <td className="px-4 py-3 font-medium text-stone-900">
-                    {r.label}
-                    {r.smallSample && <span className="ml-2 rounded-full bg-stone-100 px-2 py-0.5 text-xs font-normal text-stone-600">pochi dati</span>}
+                <tr key={r.lot.id} className="hover:bg-stone-50">
+                  <td className="px-4 py-3">
+                    <Link href={`/statistiche/${r.lot.id}`} className="font-medium text-stone-900 underline-offset-2 hover:underline">
+                      {r.lot.code}
+                    </Link>
+                    {r.lot.is_demo && <span className="ml-2"><Tag>DEMO</Tag></span>}
+                    <p className="text-xs text-stone-500">
+                      {supplierName.get(r.lot.supplier_id) ?? "Fornitore sconosciuto"} · {formatDate(r.lot.purchased_at)}
+                    </p>
                   </td>
-                  <td className="px-4 py-3 text-right tabular-nums">{r.sold}</td>
-                  {key !== "canale" && (
-                    <td className="px-4 py-3 text-right tabular-nums text-stone-700">
-                      {r.registered !== null ? `${r.sold}/${r.registered}` : "—"} <span className="text-xs text-stone-500">({bpToText(r.sellThroughBp)})</span>
-                    </td>
-                  )}
-                  <td className="px-4 py-3 text-right tabular-nums">{formatEuro(r.revenue)}</td>
-                  <td className={`px-4 py-3 text-right font-medium tabular-nums ${toneClass[toneOf(r.profit)]}`}>{formatEuro(r.profit)}</td>
-                  <td className={`px-4 py-3 text-right tabular-nums ${toneClass[toneOf(r.avgProfit)]}`}>{formatEuro(r.avgProfit)}</td>
+                  <td className="px-4 py-3 text-right tabular-nums">
+                    {r.sold}/{r.registered}
+                    {r.registered < r.lot.quantity && <span className="block text-xs text-stone-500">su {r.lot.quantity} dichiarati</span>}
+                  </td>
+                  <td className="px-4 py-3 text-right tabular-nums">{formatEuro(r.totalCost)}</td>
+                  <td className="px-4 py-3 text-right tabular-nums">{formatEuro(r.netRevenue)}</td>
+                  <td className="px-4 py-3 text-right tabular-nums">{bpToText(r.recoveredBp)}</td>
+                  <td className={`px-4 py-3 text-right font-medium tabular-nums ${toneClass[toneOf(r.sold > 0 ? r.profit : 0)]}`}>
+                    {r.sold > 0 ? formatEuro(r.profit) : "—"}
+                  </td>
                   <td className="px-4 py-3 text-right tabular-nums">{bpToText(r.marginBp)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums">{r.avgDays !== null ? r.avgDays : "—"}</td>
+                  <td className="px-4 py-3 text-right tabular-nums">{r.avgDays ?? "—"}</td>
                 </tr>
               ))}
             </tbody>
@@ -90,9 +95,9 @@ export default async function StatistichePage(props: PageProps<"/statistiche">) 
       )}
 
       <div className="mt-3 max-w-3xl space-y-1 text-xs text-stone-500">
-        <p><strong>Profitto</strong> = incassi − commissioni e spedizione − costo attribuito del capo (costo del lotto diviso i capi dichiarati). <strong>Margine</strong> = profitto / incassi.</p>
-        <p><strong>Giorni medi</strong> = dall&apos;acquisto del lotto alla vendita: non esiste una data di pubblicazione, quindi include il tempo per preparare e mettere online il capo.</p>
-        <p><strong>Venduti su registrati</strong> = capi venduti sui capi registrati di quel gruppo (resi esclusi). «Pochi dati» compare sotto {SMALL_SAMPLE} vendite: sono indizi, non tendenze.</p>
+        <p><strong>Rientrato</strong> = incassi netti / costo dell&apos;intero lotto: sopra il 100% il lotto si è ripagato. <strong>Profitto</strong> = incassi netti dei capi venduti − il loro costo (costo del lotto diviso i capi dichiarati). <strong>Margine</strong> = profitto / incassi.</p>
+        <p><strong>Giorni medi</strong> = dall&apos;acquisto del lotto alla vendita (include il tempo per preparare e pubblicare).</p>
+        <p>Vuoi vedere altro? <Link href="/statistiche/analisi" className="underline">Analisi per marca, categoria e canale</Link>.</p>
       </div>
     </>
   );
