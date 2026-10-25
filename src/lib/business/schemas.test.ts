@@ -94,6 +94,17 @@ describe("saleSchema", () => {
   });
 });
 
+describe("saleSchema con la finestra «Segna venduto»", () => {
+  it("accetta il form rapido, che non invia costi né note", () => {
+    const r = saleSchema.safeParse({ channel: "Vinted", sold_at: "2026-10-25", price_cents: "45" });
+    expect(r.success && r.data).toMatchObject({ price_cents: 4500, fees_cents: 0, outbound_shipping_cents: 0, extra_costs_cents: 0, notes: null });
+  });
+  it("richiede comunque il prezzo e il canale", () => {
+    expect(saleSchema.safeParse({ channel: "Vinted", sold_at: "2026-10-25" }).success).toBe(false);
+    expect(saleSchema.safeParse({ sold_at: "2026-10-25", price_cents: "45" }).success).toBe(false);
+  });
+});
+
 describe("photoPathSchema", () => {
   const schema = photoPathSchema(uuid, uuid2);
 

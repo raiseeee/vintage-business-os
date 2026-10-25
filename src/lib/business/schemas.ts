@@ -56,14 +56,19 @@ export const publishSchema = z.object({
   channel: z.string().trim().min(1, "Indica dove l'hai messo in vendita").max(60, "Canale troppo lungo"),
 });
 
+/** Un campo facoltativo che il form non invia (es. la finestra «Segna venduto») vale come campo vuoto. */
+function missingAsEmpty<T extends z.ZodType>(schema: T) {
+  return z.preprocess((v) => v ?? "", schema);
+}
+
 export const saleSchema = z.object({
   channel: z.string().trim().min(1, "Indica il canale di vendita").max(60, "Canale troppo lungo"),
   sold_at: requiredDate,
   price_cents: requiredEuro,
-  fees_cents: euroOrZero,
-  outbound_shipping_cents: euroOrZero,
-  extra_costs_cents: euroOrZero,
-  notes: optionalText,
+  fees_cents: missingAsEmpty(euroOrZero),
+  outbound_shipping_cents: missingAsEmpty(euroOrZero),
+  extra_costs_cents: missingAsEmpty(euroOrZero),
+  notes: missingAsEmpty(optionalText),
 });
 
 /** Il percorso è <id attività>/<id capo>/<file>. */
