@@ -18,6 +18,7 @@ import { getMembership } from "@/lib/team/membership";
 import { uuidSchema } from "@/lib/suppliers/schemas";
 import { deleteItem, deletePhoto, markReturned, recordSale, undoSale, updateItem } from "../actions";
 import { ItemForm } from "../ItemForm";
+import { QuickAction } from "../QuickAction";
 import { PhotoUploader } from "../PhotoUploader";
 
 export const metadata = { title: "Capo · Vintage Business OS" };
@@ -58,7 +59,9 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-semibold text-stone-900">{item.code}</h1>
           <ItemStatusBadge status={item.status} />
+          {item.status === "pubblicato" && item.listing_channel && <Tag>su {item.listing_channel}</Tag>}
           {item.is_demo && <Tag>DEMO</Tag>}
+          <QuickAction item={item} variant="secondary" />
         </div>
         <p className="mt-1 text-sm text-stone-600">
           {[item.brand, item.category, item.size].filter(Boolean).join(" · ") || "Nessun dettaglio"}

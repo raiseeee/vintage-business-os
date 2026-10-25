@@ -3,9 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { PHOTO_BUCKET } from "@/lib/business/constants";
+import { NO_PHOTO_MESSAGE, statusAfterPhoto, statusForRequest, type ItemStatusKey } from "@/lib/business/status";
 import { fetchAll } from "@/lib/business/paginate";
 import { IMPORT_MAX_BYTES, parseItemImport } from "@/lib/business/import";
 import {
+  publishSchema,
   bulkItemsSchema,
   itemCreateSchema,
   itemFieldsSchema,
@@ -39,8 +41,13 @@ export async function createItem(_prev: FormState, formData: FormData): Promise<
   const parsed = parseForm(itemCreateSchema, formData);
   if (!parsed.ok) return fail(parsed.error, formData);
 
+  // Senza foto un capo non può essere «pronto» né «pubblicato». Se le foto vengono caricate subito dopo
+  // (has_photos) lo stato scelto si rispetta: la prima foto, se serve, lo porta comunque a «pronto».
+  const withPhotos = formData.get("has_photos") === "1";
+  const { status, adjusted } = statusForRequest(parsed.data.status as ItemStatusKey, withPhotos ? 1 : 0);
+
   const supabase = await createClient();
-  const { data, error } = await supabase.from("items").insert(parsed.data).select("id").single();
+  const { data, error } = await supabase.from("items").insert({ ...parsed.data, status }).select("id").single();
   if (error || !data) {
     return fail(
       error?.code === "23505" ? DUPLICATE_CODE : error ? dbErrorMessage(error) : "Operazione non riuscita. Riprova.",
@@ -49,7 +56,7 @@ export async function createItem(_prev: FormState, formData: FormData): Promise<
   }
 
   revalidateItems(undefined, parsed.data.lot_id);
-  return { error: null, ok: true, itemId: data.id };
+  return { error: null, ok: true, itemId: data.id, ...(adjusted ? { message: NO_PHOTO_MESSAGE } : {}) };
 }
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
@@ -152,7 +159,16 @@ export async function updateItem(
 
   // Un capo venduto resta tale finché non si annulla la vendita o si segna come reso.
   const update: Record<string, unknown> = { ...parsed.data };
-  if (current.status === "venduto") delete update.status;
+  let adjusted = false;
+  if (current.status === "venduto") {
+    delete update.status;
+  } else {
+    // Senza foto un capo non può essere «pronto» né «pubblicato»: resta «da fotografare».
+    const { count } = await supabase.from("item_photos").select("id", { count: "exact", head: true }).eq("item_id", id);
+    const result = statusForRequest(parsed.data.status as ItemStatusKey, count ?? 0);
+    update.status = result.status;
+    adjusted = result.adjusted;
+  }
 
   const { error } = await supabase.from("items").update(update).eq("id", id);
   if (error) {
@@ -160,7 +176,7 @@ export async function updateItem(
   }
 
   revalidateItems(id, current.lot_id);
-  return success;
+  return adjusted ? { error: null, ok: true, message: NO_PHOTO_MESSAGE } : success;
 }
 
 export async function deleteItem(id: string): Promise<FormState> {
@@ -267,8 +283,46 @@ export async function registerPhoto(itemId: string, path: string): Promise<FormS
     .insert({ item_id: itemId, storage_path: path, position: count ?? 0 });
   if (error) return fail(dbErrorMessage(error));
 
+  // La prima foto porta il capo «da controllare» o «da fotografare» a «pronto per la vendita».
+  const { data: current } = await supabase.from("items").select("status").eq("id", itemId).maybeSingle();
+  const next = current ? statusAfterPhoto(current.status as ItemStatusKey) : null;
+  if (next) await supabase.from("items").update({ status: next }).eq("id", itemId).eq("status", current!.status);
+
   revalidatePath(`/capi/${itemId}`);
   revalidatePath("/capi");
+  revalidatePath("/lotti");
+  revalidatePath("/dashboard");
+  return success;
+}
+
+/**
+ * Mette «in vendita» un capo pronto: chiede dove e lo porta a «pubblicato».
+ * Il canale resta sul capo e viene proposto quando poi registri la vendita.
+ */
+export async function publishItem(itemId: string, _prev: FormState, formData: FormData): Promise<FormState> {
+  if (!validId(itemId)) return fail("Capo non valido");
+  const parsed = parseForm(publishSchema, formData);
+  if (!parsed.ok) return fail(parsed.error, formData);
+
+  const supabase = await createClient();
+  const { data: current } = await supabase.from("items").select("status, lot_id").eq("id", itemId).maybeSingle();
+  if (!current) return fail("Capo non trovato", formData);
+  if (current.status !== "pronto" && current.status !== "pubblicato") {
+    return fail("Solo un capo «pronto per la vendita» si può pubblicare.", formData);
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  let { error } = await supabase
+    .from("items")
+    .update({ status: "pubblicato", listing_channel: parsed.data.channel, listed_at: today })
+    .eq("id", itemId);
+  // Database senza la migrazione della pubblicazione: il capo diventa comunque «pubblicato».
+  if (error && (error.code === "42703" || error.code === "PGRST204")) {
+    ({ error } = await supabase.from("items").update({ status: "pubblicato" }).eq("id", itemId));
+  }
+  if (error) return fail(dbErrorMessage(error), formData);
+
+  revalidateItems(itemId, current.lot_id);
   return success;
 }
 

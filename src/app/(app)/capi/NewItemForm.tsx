@@ -28,6 +28,8 @@ export function NewItemForm({
       .getAll("photos")
       .filter((f): f is File => f instanceof File && f.size > 0);
     formData.delete("photos");
+    // Dice al server che le foto arrivano subito dopo: lo stato scelto non va riportato a «da fotografare».
+    if (files.length > 0) formData.set("has_photos", "1");
 
     const created = await createItem(prev, formData);
     if (!created.ok || !created.itemId) return created;

@@ -63,6 +63,7 @@ for f in "$ROOT"/supabase/migrations/*.sql; do
 done
 "${PSQL[@]}" -f "$ROOT/supabase/tests/04_inventory.sql"
 "${PSQL[@]}" -f "$ROOT/supabase/tests/05_inventory_stock.sql"
+"${PSQL[@]}" -f "$ROOT/supabase/tests/06_item_listing.sql"
 
 # 5) Rollback sulla copia: i dati ci sono ancora e il vecchio modello funziona di nuovo.
 echo ">> rollback (su copia)"
@@ -71,6 +72,7 @@ RB=("$PGBIN/psql" -h "$TMP" -U postgres -d vintage_rollback -v ON_ERROR_STOP=1 -
 "${RB[@]}" -f "$ROOT/supabase/tests/03_rollback.sql"
 # 6) Rollback dell'inventario (alla fine, sul database di prova): la vendita resta, spariscono tabella e colonna.
 SALES_BEFORE="$("${PSQL[@]}" -t -A -c "select count(*) from public.sales")"
+"${PSQL[@]}" -f "$ROOT/supabase/rollback/20261028000001_item_listing_down.sql"
 "${PSQL[@]}" -f "$ROOT/supabase/rollback/20261027000001_inventory_stock_down.sql"
 "${PSQL[@]}" -f "$ROOT/supabase/rollback/20261026000001_inventory_down.sql"
 "${PSQL[@]}" -c "select test.expect_equal((select count(*) from information_schema.columns where table_name = 'sales' and column_name = 'materials_cost_cents'), 0, 'rollback inventario: colonna rimossa')" >/dev/null

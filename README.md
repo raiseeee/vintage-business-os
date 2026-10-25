@@ -21,6 +21,7 @@ Gestionale per compravendita di abbigliamento vintage e streetwear: fornitori ve
    7. `20261025000001_shared_business.sql` — **attività condivisa** (più account sugli stessi dati). Su un database con dati già inseriti **non applicarla prima di aver letto la sezione «Attività condivisa e collaboratori»**.
    8. `20261026000001_inventory.sql` — **inventario** (materiali per capo e attrezzature). Si applica dopo la 7, con un normale copia-e-incolla nello SQL Editor; rollback in `supabase/rollback/20261026000001_inventory_down.sql`.
    9. `20261027000001_inventory_stock.sql` — **giacenza dei materiali** (quanti ne restano, es. 99/100). Si applica dopo la 8; rollback in `supabase/rollback/20261027000001_inventory_stock_down.sql`.
+   10. `20261028000001_item_listing.sql` — dove/quando un capo è stato pubblicato (canale). Si applica dopo la 9; rollback in `supabase/rollback/20261028000001_item_listing_down.sql`. Senza questa migrazione il flusso funziona lo stesso, ma il canale non viene ricordato.
 
    Se avevi già applicato le prime quattro, **applica solo la quinta** (serve per registrare le vendite).
 
@@ -118,6 +119,15 @@ L'app **non cerca fornitori**: i fornitori si trovano fuori (a mano o chiedendo 
 - **Profitto** per capo (ricavo netto − costo attribuito), per lotto e per fornitore; dashboard con capitale investito, valore stock, vendite, costi, margine realizzato e saldo di cassa.
 - **Esportazione CSV** di capi, lotti e vendite (pulsanti in dashboard e nelle liste). Formato per Excel italiano: separatore `;`, importi con la virgola, accenti corretti; i testi che sembrano formule sono neutralizzati.
 - Le liste leggono i dati a pagine fino in fondo, quindi i totali non si fermano a 1000 righe.
+
+## Capi: lotto, stati e passaggi automatici
+
+- **Capi** parte dalla scelta del lotto (con il riepilogo degli stati dei suoi capi); scelto il lotto vedi i suoi capi. «Vedi tutti i capi insieme» per cercare senza conoscere il lotto.
+- **Senza foto** un capo non può essere «Pronto per la vendita» né «Pubblicato»: se lo imposti, resta **«Da fotografare»** (te lo dice).
+- **Con la prima foto** un capo «Da controllare» o «Da fotografare» passa da solo a **«Pronto per la vendita»**.
+- **Pronto per la vendita → pulsante «Pubblica»**: si apre una finestra che chiede *dove* l'hai messo in vendita; il capo diventa «Pubblicato» e il canale resta registrato.
+- **Pubblicato → pulsante «Segna venduto»**: la finestra chiede il prezzo di vendita (canale e data già compilati; commissioni e spedizione facoltative); il capo diventa «Venduto» con la sua vendita.
+- I pulsanti sono nella lista dei capi e nella scheda del capo. Collaboratori e titolari li usano allo stesso modo (nessuna eliminazione coinvolta).
 
 ## Inventario e calcolatore
 

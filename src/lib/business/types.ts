@@ -26,6 +26,9 @@ export interface ItemRow {
   condition: (typeof ITEM_CONDITIONS)[number] | null;
   status: (typeof ITEM_STATUSES)[number];
   expected_price_cents: number | null;
+  /** Dove è stato messo in vendita (assente finché non si applica la migrazione della pubblicazione). */
+  listing_channel?: string | null;
+  listed_at?: string | null;
   notes: string | null;
   is_demo: boolean;
   created_at: string;

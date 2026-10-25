@@ -51,6 +51,11 @@ export const bulkItemsSchema = z.object({
   count: positiveInt.refine((n) => n <= 200, "Massimo 200 capi alla volta"),
 });
 
+/** Dove è stato messo in vendita un capo (passaggio «Pronto» → «Pubblicato»). */
+export const publishSchema = z.object({
+  channel: z.string().trim().min(1, "Indica dove l'hai messo in vendita").max(60, "Canale troppo lungo"),
+});
+
 export const saleSchema = z.object({
   channel: z.string().trim().min(1, "Indica il canale di vendita").max(60, "Canale troppo lungo"),
   sold_at: requiredDate,
