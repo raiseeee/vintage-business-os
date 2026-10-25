@@ -6,7 +6,7 @@ import { ITEM_STATUSES, ITEM_STATUS_LABELS } from "@/lib/business/constants";
 import { toMetricItems, toMetricLot } from "@/lib/business/mappers";
 import { getBusinessData, getFirstPhotoUrls } from "@/lib/business/queries";
 import { formatDate } from "@/components/ui";
-import { formatEuro, itemProfit } from "@/lib/metrics";
+import { allocatedItemCost, formatEuro, itemProfit } from "@/lib/metrics";
 import { getMembership } from "@/lib/team/membership";
 import { ImportForm } from "./ImportForm";
 import { NewItemForm } from "./NewItemForm";
@@ -259,6 +259,7 @@ export default async function CapiPage(props: PageProps<"/capi">) {
                   <th className="px-4 py-3 font-medium">Capo</th>
                   <th className="px-4 py-3 font-medium">Stato</th>
                   <th className="px-4 py-3 font-medium">Lotto</th>
+                  <th className="px-4 py-3 text-right font-medium">Costo unitario</th>
                   <th className="px-4 py-3 text-right font-medium">Previsto</th>
                   <th className="px-4 py-3 text-right font-medium">Profitto</th>
                   <th className="px-4 py-3 text-right font-medium"><span className="sr-only">Azione</span></th>
@@ -290,6 +291,7 @@ export default async function CapiPage(props: PageProps<"/capi">) {
                         {i.status === "pubblicato" && i.listing_channel && <div className="mt-1 text-xs text-stone-500">su {i.listing_channel}</div>}
                       </td>
                       <td className="px-4 py-2 text-stone-700">{lot?.code ?? "—"}</td>
+                      <td className="px-4 py-2 text-right tabular-nums">{formatEuro(allocatedItemCost(metricLotById.get(i.lot_id)!))}</td>
                       <td className="px-4 py-2 text-right tabular-nums">{i.expected_price_cents !== null ? formatEuro(i.expected_price_cents) : "—"}</td>
                       <td className={`px-4 py-2 text-right tabular-nums ${profit === null ? "text-stone-400" : toneClass[toneOf(profit)]}`}>
                         {profit === null ? "—" : formatEuro(profit)}

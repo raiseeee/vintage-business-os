@@ -17,10 +17,9 @@ export function LotForm({
   return (
     <ActionForm action={action} submitLabel={submitLabel} className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Fornitore (facoltativo)" name="supplier_name" defaultValue={lot?.supplier_name ?? ""} hint="Da chi hai comprato il lotto: solo un promemoria." />
         <Field label="Codice lotto" name="code" required defaultValue={lot?.code ?? defaults?.code ?? ""} hint="Univoco. Lo usi per i codici dei capi." />
         <Field label="Data di acquisto" name="purchased_at" type="date" required defaultValue={lot?.purchased_at ?? defaults?.purchasedAt ?? ""} />
-        <Field label="Quantità di capi" name="quantity" required defaultValue={lot?.quantity?.toString() ?? ""} hint="Numero di capi dichiarato all'acquisto: il costo si divide per questo numero." />
+        <Field label="Quantità di capi" name="quantity" required defaultValue={lot?.quantity?.toString() ?? ""} hint="Alla creazione del lotto i capi vengono creati in automatico. Il costo si divide per questo numero." />
       </div>
 
       <fieldset className="grid gap-4 sm:grid-cols-3">

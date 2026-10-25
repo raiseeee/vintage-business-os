@@ -37,7 +37,21 @@ export async function createLot(_prev: FormState, formData: FormData): Promise<F
     );
   }
 
+  // Crea subito i capi del lotto (<codice>-001, -002…), da completare poi.
+  const total = Math.min(parsed.data.quantity, 1000);
+  const pad = Math.max(3, String(total).length);
+  const rows = Array.from({ length: total }, (_, i) => ({
+    lot_id: data.id,
+    code: `${parsed.data.code}-${String(i + 1).padStart(pad, "0")}`,
+    status: "da_controllare" as const,
+  }));
+  for (let i = 0; i < rows.length; i += 200) {
+    const { error: itemsError } = await supabase.from("items").insert(rows.slice(i, i + 200));
+    if (itemsError) break; // il lotto c'è: i capi mancanti si aggiungono dalla sua pagina
+  }
+
   revalidateLots();
+  revalidatePath("/capi");
   redirect(`/lotti/${data.id}`);
 }
 
