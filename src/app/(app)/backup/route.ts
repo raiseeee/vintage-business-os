@@ -6,11 +6,6 @@ export const dynamic = "force-dynamic";
 
 /** Tabelle dell'attività incluse nel backup (le foto: solo i percorsi, i file restano nello storage). */
 const TABLES = [
-  "suppliers",
-  "supplier_sources",
-  "supplier_claims",
-  "supplier_evaluations",
-  "contact_log",
   "purchase_lots",
   "items",
   "item_photos",

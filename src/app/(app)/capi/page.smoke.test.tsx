@@ -15,12 +15,11 @@ vi.mock("./uploadPhotos", () => ({ uploadPhotos: async () => ({ uploaded: 0, pro
 vi.mock("@/lib/team/membership", () => ({ getMembership: async () => ({ businessId: "b1", role: "owner" }) }));
 
 const lot = (id: string, code: string, quantity = 5): LotRow =>
-  ({ id, supplier_id: "s1", code, purchased_at: "2026-10-01", purchase_cost_cents: 10000, inbound_shipping_cents: 0, other_costs_cents: 0, quantity, weight_kg: null, notes: null, is_demo: false, created_at: "" });
+  ({ id, supplier_name: "Fornitore Uno", code, purchased_at: "2026-10-01", purchase_cost_cents: 10000, inbound_shipping_cents: 0, other_costs_cents: 0, quantity, weight_kg: null, notes: null, created_at: "" });
 const item = (id: string, lot_id: string, status: ItemRow["status"], extra: Partial<ItemRow> = {}): ItemRow =>
-  ({ id, lot_id, code: id.toUpperCase(), brand: null, category: null, size: null, condition: null, status, expected_price_cents: 4500, notes: null, is_demo: false, created_at: "", ...extra });
+  ({ id, lot_id, code: id.toUpperCase(), brand: null, category: null, size: null, condition: null, status, expected_price_cents: 4500, notes: null, created_at: "", ...extra });
 
 const data: BusinessData = {
-  suppliers: [{ id: "s1", name: "Fornitore Uno" }],
   lots: [lot("l1", "L1"), lot("l2", "L2")],
   items: [
     item("a-1", "l1", "da_fotografare"),

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ModalButton } from "@/components/Modal";
 import { PageHeader } from "@/components/PagePlaceholder";
-import { Tag, formatDate, toneOf } from "@/components/ui";
+import { formatDate, toneOf } from "@/components/ui";
 import { toMetricItems, toMetricLot } from "@/lib/business/mappers";
 import { getBusinessData } from "@/lib/business/queries";
 import { todayIso } from "@/lib/dates";
@@ -15,11 +15,9 @@ const toneClass = { neutral: "text-stone-700", good: "text-green-800", bad: "tex
 
 export default async function LottiPage(props: PageProps<"/lotti">) {
   const params = await props.searchParams;
-  const preselected = Array.isArray(params.fornitore) ? params.fornitore[0] : params.fornitore;
   const openNew = (Array.isArray(params.nuovo) ? params.nuovo[0] : params.nuovo) === "1";
-  const { suppliers, lots, items, sales } = await getBusinessData();
+  const { lots, items, sales } = await getBusinessData();
 
-  const supplierName = new Map(suppliers.map((s) => [s.id, s.name]));
   const summaries = summarizeByLot(lots.map(toMetricLot), toMetricItems(items, sales));
   const registered = new Map<string, number>();
   for (const i of items) registered.set(i.lot_id, (registered.get(i.lot_id) ?? 0) + 1);
@@ -48,23 +46,14 @@ export default async function LottiPage(props: PageProps<"/lotti">) {
             description="Registra un acquisto. I costi del lotto si ripartiscono sui capi; quelli di vendita si inseriscono sul singolo capo."
             defaultOpen={openNew}
           >
-            {suppliers.length === 0 ? (
-              <p className="text-sm text-stone-700">
-                Per registrare un lotto serve almeno un fornitore:{" "}
-                <Link href="/fornitori?nuovo=1" className="font-medium text-stone-900 underline">aggiungine uno</Link>.
-              </p>
-            ) : (
-              <LotForm
-                action={createLot}
-                suppliers={suppliers.map((s) => ({ id: s.id, name: s.name }))}
-                defaults={{
-                  code: `L-${String(lots.length + 1).padStart(3, "0")}`,
-                  supplierId: preselected,
-                  purchasedAt: todayIso(),
-                }}
-                submitLabel="Crea lotto"
-              />
-            )}
+            <LotForm
+              action={createLot}
+              defaults={{
+                code: `L-${String(lots.length + 1).padStart(3, "0")}`,
+                purchasedAt: todayIso(),
+              }}
+              submitLabel="Crea lotto"
+            />
           </ModalButton>
         </div>
       </div>
@@ -73,7 +62,7 @@ export default async function LottiPage(props: PageProps<"/lotti">) {
         <div className="rounded-lg border border-dashed border-stone-300 bg-white p-8 text-center">
           <p className="text-sm font-medium text-stone-900">Non hai ancora registrato nessun lotto.</p>
           <p className="mt-1 text-sm text-stone-600">
-            Serve almeno un fornitore: aggiungilo da Supplier, poi registra qui il tuo primo acquisto.
+            Registra qui il tuo primo acquisto con «Nuovo lotto».
           </p>
         </div>
       ) : (
@@ -102,10 +91,9 @@ export default async function LottiPage(props: PageProps<"/lotti">) {
                       </Link>
                       <div className="mt-1 flex items-center gap-1 text-xs text-stone-500">
                         {formatDate(lot.purchased_at)}
-                        {lot.is_demo && <Tag>DEMO</Tag>}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-stone-700">{supplierName.get(lot.supplier_id) ?? "—"}</td>
+                    <td className="px-4 py-3 text-stone-700">{lot.supplier_name ?? "—"}</td>
                     <td className="px-4 py-3 text-right tabular-nums text-stone-700">
                       {n}/{lot.quantity}
                     </td>

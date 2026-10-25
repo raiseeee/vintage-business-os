@@ -3,7 +3,8 @@ import type { ITEM_CONDITIONS, ITEM_STATUSES } from "./constants";
 /** Righe del database (nomi delle colonne come in SQL). */
 export interface LotRow {
   id: string;
-  supplier_id: string;
+  /** Da chi hai comprato il lotto (testo libero, facoltativo). */
+  supplier_name?: string | null;
   code: string;
   purchased_at: string;
   purchase_cost_cents: number;
@@ -12,7 +13,6 @@ export interface LotRow {
   quantity: number;
   weight_kg: number | null;
   notes: string | null;
-  is_demo: boolean;
   created_at: string;
 }
 
@@ -30,7 +30,6 @@ export interface ItemRow {
   listing_channel?: string | null;
   listed_at?: string | null;
   notes: string | null;
-  is_demo: boolean;
   created_at: string;
 }
 
@@ -55,14 +54,8 @@ export interface PhotoRow {
   position: number;
 }
 
-export interface SupplierName {
-  id: string;
-  name: string;
-}
-
 /** Tutti i dati dell'attività, letti in una volta (uso personale, qualche migliaio di righe al massimo). */
 export interface BusinessData {
-  suppliers: SupplierName[];
   lots: LotRow[];
   items: ItemRow[];
   sales: SaleRow[];

@@ -19,9 +19,7 @@ export type ItemStatus =
 
 export interface Lot {
   id: string;
-  /** Fornitore del lotto: serve solo per i riepiloghi per fornitore. */
-  supplierId?: string;
-  /** Prezzo pagato al fornitore per la merce. */
+  /** Prezzo pagato per la merce. */
   purchaseCost: number;
   /** Spedizione/dogana per ricevere il lotto. */
   inboundShipping: number;
@@ -153,30 +151,6 @@ export function summarizeByLot(lots: Lot[], items: Item[]): Map<string, Dashboar
       computeDashboard(
         [lot],
         items.filter((i) => i.lotId === lot.id),
-      ),
-    );
-  }
-  return result;
-}
-
-/** Riepilogo per fornitore (chiave = supplierId), sommando tutti i suoi lotti. */
-export function summarizeBySupplier(lots: Lot[], items: Item[]): Map<string, DashboardMetrics> {
-  const lotsBySupplier = new Map<string, Lot[]>();
-  for (const lot of lots) {
-    if (!lot.supplierId) continue;
-    const list = lotsBySupplier.get(lot.supplierId) ?? [];
-    list.push(lot);
-    lotsBySupplier.set(lot.supplierId, list);
-  }
-
-  const result = new Map<string, DashboardMetrics>();
-  for (const [supplierId, supplierLots] of lotsBySupplier) {
-    const ids = new Set(supplierLots.map((l) => l.id));
-    result.set(
-      supplierId,
-      computeDashboard(
-        supplierLots,
-        items.filter((i) => ids.has(i.lotId)),
       ),
     );
   }

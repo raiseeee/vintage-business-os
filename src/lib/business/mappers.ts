@@ -5,7 +5,6 @@ import type { ItemRow, LotRow, SaleRow } from "./types";
 export function toMetricLot(row: LotRow): Lot {
   return {
     id: row.id,
-    supplierId: row.supplier_id,
     purchaseCost: row.purchase_cost_cents,
     inboundShipping: row.inbound_shipping_cents,
     otherCosts: row.other_costs_cents,

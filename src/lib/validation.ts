@@ -138,3 +138,6 @@ export const shortText = z
   .trim()
   .max(100, "Testo troppo lungo (max 100 caratteri)")
   .transform((s) => (s === "" ? null : s));
+
+/** Identificativo (uuid) valido. */
+export const uuidSchema = z.uuid();

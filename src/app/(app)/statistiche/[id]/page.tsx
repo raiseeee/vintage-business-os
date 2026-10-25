@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ItemStatusBadge, Stat, Tag, formatDate, toneOf } from "@/components/ui";
+import { ItemStatusBadge, Stat, formatDate, toneOf } from "@/components/ui";
 import { computeItemStats, computeLotStats } from "@/lib/business/lotStats";
 import { getBusinessData } from "@/lib/business/queries";
 import { toMetricSale } from "@/lib/business/mappers";
 import { formatEuro, saleNetRevenue } from "@/lib/metrics";
 import { bpToText } from "@/lib/profit";
-import { uuidSchema } from "@/lib/suppliers/schemas";
+import { uuidSchema } from "@/lib/validation";
 
 export const metadata = { title: "Statistiche lotto · Vintage Business OS" };
 
@@ -16,13 +16,12 @@ export default async function StatisticheLottoPage(props: PageProps<"/statistich
   const { id } = await props.params;
   if (!uuidSchema.safeParse(id).success) notFound();
 
-  const { suppliers, lots, items, sales } = await getBusinessData();
+  const { lots, items, sales } = await getBusinessData();
   const lot = lots.find((l) => l.id === id);
   if (!lot) notFound();
 
   const [row] = computeLotStats([lot], items.filter((i) => i.lot_id === id), sales);
   const itemRows = computeItemStats(lot, items, sales);
-  const supplier = suppliers.find((s) => s.id === lot.supplier_id);
 
   return (
     <>
@@ -32,10 +31,9 @@ export default async function StatisticheLottoPage(props: PageProps<"/statistich
       <header className="mb-6">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-semibold text-stone-900">Statistiche del lotto {lot.code}</h1>
-          {lot.is_demo && <Tag>DEMO</Tag>}
         </div>
         <p className="mt-1 text-sm text-stone-600">
-          {supplier?.name ?? "Fornitore sconosciuto"} · acquistato il {formatDate(lot.purchased_at)} ·{" "}
+          {lot.supplier_name ? `${lot.supplier_name} · ` : ""}acquistato il {formatDate(lot.purchased_at)} ·{" "}
           <Link href={`/lotti/${lot.id}`} className="underline underline-offset-2 hover:text-stone-900">scheda del lotto</Link>
         </p>
       </header>

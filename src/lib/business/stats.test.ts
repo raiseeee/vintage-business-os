@@ -3,12 +3,12 @@ import { computeGroupStats } from "./stats";
 import type { ItemRow, LotRow, SaleRow } from "./types";
 
 const lot = (id: string, code: string, cost: number, qty: number, at = "2026-01-01"): LotRow => ({
-  id, supplier_id: "s", code, purchased_at: at, purchase_cost_cents: cost, inbound_shipping_cents: 0,
-  other_costs_cents: 0, quantity: qty, weight_kg: null, notes: null, is_demo: false, created_at: "",
+  id, supplier_name: null, code, purchased_at: at, purchase_cost_cents: cost, inbound_shipping_cents: 0,
+  other_costs_cents: 0, quantity: qty, weight_kg: null, notes: null, created_at: "",
 });
 const item = (id: string, lot_id: string, brand: string | null, status: ItemRow["status"]): ItemRow => ({
   id, lot_id, code: id, brand, category: "Felpa", size: null, condition: null, status,
-  expected_price_cents: null, notes: null, is_demo: false, created_at: "",
+  expected_price_cents: null, notes: null, created_at: "",
 });
 const sale = (item_id: string, price: number, fees: number, sold_at: string, channel = "Vinted"): SaleRow => ({
   id: item_id, item_id, channel, sold_at, price_cents: price, fees_cents: fees,

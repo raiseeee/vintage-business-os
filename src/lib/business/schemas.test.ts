@@ -11,7 +11,7 @@ const uuid = "123e4567-e89b-42d3-a456-426614174000";
 const uuid2 = "223e4567-e89b-42d3-a456-426614174000";
 
 const lot = {
-  supplier_id: uuid,
+  supplier_name: "Mercato di Prato",
   code: "L-001",
   purchased_at: "2026-10-22",
   purchase_cost_cents: "150,00",
@@ -43,7 +43,7 @@ describe("lotSchema", () => {
     expect(lotSchema.safeParse({ ...lot, purchased_at: "2026-02-31" }).success).toBe(false);
     expect(lotSchema.safeParse({ ...lot, code: "=cmd|x" }).success).toBe(false);
     expect(lotSchema.safeParse({ ...lot, code: "" }).success).toBe(false);
-    expect(lotSchema.safeParse({ ...lot, supplier_id: "non-uuid" }).success).toBe(false);
+    expect(lotSchema.safeParse({ ...lot, supplier_name: "x".repeat(121) }).success).toBe(false);
   });
 });
 

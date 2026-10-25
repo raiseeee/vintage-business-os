@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ModalButton } from "@/components/Modal";
 import { PageHeader } from "@/components/PagePlaceholder";
-import { ItemStatusBadge, Tag, toneOf } from "@/components/ui";
+import { ItemStatusBadge, toneOf } from "@/components/ui";
 import { ITEM_STATUSES, ITEM_STATUS_LABELS } from "@/lib/business/constants";
 import { toMetricItems, toMetricLot } from "@/lib/business/mappers";
 import { getBusinessData, getFirstPhotoUrls } from "@/lib/business/queries";
@@ -38,8 +38,7 @@ export default async function CapiPage(props: PageProps<"/capi">) {
   const status = pick(params.status);
   const lotFilter = pick(params.lot);
 
-  const { suppliers, lots, items, sales } = await getBusinessData();
-  const supplierName = new Map(suppliers.map((s) => [s.id, s.name]));
+  const { lots, items, sales } = await getBusinessData();
   const lotById = new Map(lots.map((l) => [l.id, l]));
   const metricLotById = new Map(lots.map((l) => [l.id, toMetricLot(l)]));
   const metricItemById = new Map(toMetricItems(items, sales).map((i) => [i.id, i]));
@@ -91,7 +90,7 @@ export default async function CapiPage(props: PageProps<"/capi">) {
           title={currentLot ? `Capi del lotto ${currentLot.code}` : "Capi"}
           description={
             currentLot
-              ? `${supplierName.get(currentLot.supplier_id) ?? "Fornitore sconosciuto"} · acquistato il ${formatDate(currentLot.purchased_at)}`
+              ? `${currentLot.supplier_name ? `${currentLot.supplier_name} · ` : ""}acquistato il ${formatDate(currentLot.purchased_at)}`
               : choosingLot
                 ? "Scegli un lotto per vedere i suoi capi."
                 : "Tutti i capi, di tutti i lotti."
@@ -162,8 +161,7 @@ export default async function CapiPage(props: PageProps<"/capi">) {
                       <tr key={l.id} className="hover:bg-stone-50">
                         <td className="px-4 py-3">
                           <Link href={`/capi?lot=${l.id}`} className="font-medium text-stone-900 underline-offset-2 hover:underline">{l.code}</Link>
-                          {l.is_demo && <span className="ml-2"><Tag>DEMO</Tag></span>}
-                          <p className="text-xs text-stone-500">{supplierName.get(l.supplier_id) ?? "Fornitore sconosciuto"} · {formatDate(l.purchased_at)}</p>
+                          <p className="text-xs text-stone-500">{l.supplier_name ? `${l.supplier_name} · ` : ""}{formatDate(l.purchased_at)}</p>
                         </td>
                         <td className="px-4 py-3 text-right tabular-nums">
                           {own.length}
@@ -285,7 +283,6 @@ export default async function CapiPage(props: PageProps<"/capi">) {
                         <Link href={`/capi/${i.id}`} className="font-medium text-stone-900 hover:underline">{i.code}</Link>
                         <div className="text-xs text-stone-500">
                           {[i.brand, i.category, i.size].filter(Boolean).join(" · ") || "—"}
-                          {i.is_demo && <> <Tag>DEMO</Tag></>}
                         </div>
                       </td>
                       <td className="px-4 py-2">

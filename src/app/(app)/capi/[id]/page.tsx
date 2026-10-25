@@ -9,13 +9,12 @@ import {
   getItemPhotos,
   getLot,
   getSaleForItem,
-  getSupplierNames,
 } from "@/lib/business/queries";
 import { todayIso } from "@/lib/dates";
 import { allocatedItemCost, formatEuro, itemProfit, saleNetRevenue } from "@/lib/metrics";
 import { centsToInput } from "@/lib/money";
 import { getMembership } from "@/lib/team/membership";
-import { uuidSchema } from "@/lib/suppliers/schemas";
+import { uuidSchema } from "@/lib/validation";
 import { deleteItem, deletePhoto, markReturned, recordSale, undoSale, updateItem } from "../actions";
 import { ItemForm } from "../ItemForm";
 import { QuickAction } from "../QuickAction";
@@ -32,15 +31,13 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
 
   const membership = await getMembership();
   const canDelete = membership?.role === "owner";
-  const [lot, sale, photos, suppliers] = await Promise.all([
+  const [lot, sale, photos] = await Promise.all([
     getLot(item.lot_id),
     getSaleForItem(id),
     getItemPhotos(id),
-    getSupplierNames(),
   ]);
   if (!lot || !membership) notFound();
 
-  const supplier = suppliers.find((s) => s.id === lot.supplier_id);
   const metricLot = toMetricLot(lot);
   const [metricItem] = toMetricItems([item], sale ? [sale] : []);
   const profit = itemProfit(metricItem, metricLot);
@@ -60,19 +57,13 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
           <h1 className="text-2xl font-semibold text-stone-900">{item.code}</h1>
           <ItemStatusBadge status={item.status} />
           {item.status === "pubblicato" && item.listing_channel && <Tag>su {item.listing_channel}</Tag>}
-          {item.is_demo && <Tag>DEMO</Tag>}
           <QuickAction item={item} variant="secondary" />
         </div>
         <p className="mt-1 text-sm text-stone-600">
           {[item.brand, item.category, item.size].filter(Boolean).join(" · ") || "Nessun dettaglio"}
           {" · lotto "}
           <Link href={`/lotti/${lot.id}`} className="underline underline-offset-2 hover:text-stone-900">{lot.code}</Link>
-          {supplier && (
-            <>
-              {" · "}
-              <Link href={`/fornitori/${supplier.id}`} className="underline underline-offset-2 hover:text-stone-900">{supplier.name}</Link>
-            </>
-          )}
+          {lot.supplier_name && ` · ${lot.supplier_name}`}
           {!isSold && (
             <>
               {" · "}

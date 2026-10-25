@@ -17,7 +17,6 @@ import { isOwner, OWNER_ONLY_MESSAGE } from "@/lib/team/membership";
 function revalidateLots(lotId?: string) {
   revalidatePath("/lotti");
   revalidatePath("/dashboard");
-  revalidatePath("/fornitori");
   if (lotId) revalidatePath(`/lotti/${lotId}`);
 }
 

@@ -3,12 +3,12 @@ import { computeItemStats, computeLotStats } from "./lotStats";
 import type { ItemRow, LotRow, SaleRow } from "./types";
 
 const lot = {
-  id: "l1", supplier_id: "s1", code: "L1", purchased_at: "2026-10-01",
+  id: "l1", supplier_name: null, code: "L1", purchased_at: "2026-10-01",
   purchase_cost_cents: 8000, inbound_shipping_cents: 1500, other_costs_cents: 500, quantity: 10,
-  weight_kg: null, notes: null, is_demo: false, created_at: "",
+  weight_kg: null, notes: null, created_at: "",
 } as LotRow;
 const item = (id: string, status: ItemRow["status"], lot_id = "l1") =>
-  ({ id, lot_id, code: id, status, brand: null, category: null, size: null, condition: null, expected_price_cents: null, notes: null, is_demo: false, created_at: "" }) as ItemRow;
+  ({ id, lot_id, code: id, status, brand: null, category: null, size: null, condition: null, expected_price_cents: null, notes: null, created_at: "" }) as ItemRow;
 const sale = (item_id: string, price: number, sold_at = "2026-10-11"): SaleRow =>
   ({ id: "s" + item_id, item_id, channel: "Vinted", sold_at, price_cents: price, fees_cents: 200, outbound_shipping_cents: 300, extra_costs_cents: 0, notes: null });
 

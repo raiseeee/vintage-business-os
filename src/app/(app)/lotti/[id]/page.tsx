@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActionForm, Field } from "@/components/form";
-import { ItemStatusBadge, Section, Stat, Tag, formatDate, toneOf } from "@/components/ui";
+import { ItemStatusBadge, Section, Stat, formatDate, toneOf } from "@/components/ui";
 import { toMetricItems, toMetricLot } from "@/lib/business/mappers";
 import { getBusinessData } from "@/lib/business/queries";
 import { allocatedItemCost, computeDashboard, formatEuro, itemProfit } from "@/lib/metrics";
-import { uuidSchema } from "@/lib/suppliers/schemas";
+import { uuidSchema } from "@/lib/validation";
 import { createItemsBulk } from "../../capi/actions";
 import { deleteLot, updateLot } from "../actions";
 import { LotForm } from "../LotForm";
@@ -20,11 +20,10 @@ export default async function LottoDetailPage(props: PageProps<"/lotti/[id]">) {
   const { id } = await props.params;
   if (!uuidSchema.safeParse(id).success) notFound();
 
-  const { suppliers, lots, items, sales } = await getBusinessData();
+  const { lots, items, sales } = await getBusinessData();
   const lot = lots.find((l) => l.id === id);
   if (!lot) notFound();
 
-  const supplier = suppliers.find((s) => s.id === lot.supplier_id);
   const lotItems = items.filter((i) => i.lot_id === id).sort((a, b) => a.code.localeCompare(b.code));
   const metricLot = toMetricLot(lot);
   const metricItems = toMetricItems(lotItems, sales);
@@ -41,16 +40,9 @@ export default async function LottoDetailPage(props: PageProps<"/lotti/[id]">) {
       <header className="mb-6">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-semibold text-stone-900">Lotto {lot.code}</h1>
-          {lot.is_demo && <Tag>DEMO</Tag>}
         </div>
         <p className="mt-1 text-sm text-stone-600">
-          {supplier ? (
-            <Link href={`/fornitori/${supplier.id}`} className="underline underline-offset-2 hover:text-stone-900">
-              {supplier.name}
-            </Link>
-          ) : (
-            "Fornitore sconosciuto"
-          )}
+          {lot.supplier_name ?? "Fornitore non indicato"}
           {" · acquistato il "}
           {formatDate(lot.purchased_at)}
           {lot.weight_kg !== null && ` · ${lot.weight_kg} kg`}
@@ -150,7 +142,7 @@ export default async function LottoDetailPage(props: PageProps<"/lotti/[id]">) {
               Apri il modulo di modifica
             </summary>
             <div className="mt-4">
-              <LotForm action={updateLot.bind(null, lot.id)} suppliers={suppliers} lot={lot} submitLabel="Salva modifiche" />
+              <LotForm action={updateLot.bind(null, lot.id)} lot={lot} submitLabel="Salva modifiche" />
             </div>
             <div className="mt-6 border-t border-stone-100 pt-4">
               {canDelete && (

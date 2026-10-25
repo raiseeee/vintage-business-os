@@ -2,16 +2,13 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { PHOTO_BUCKET } from "./constants";
 import { fetchAll } from "./paginate";
-import type { BusinessData, ItemRow, LotRow, PhotoRow, SaleRow, SupplierName } from "./types";
+import type { BusinessData, ItemRow, LotRow, PhotoRow, SaleRow } from "./types";
 
 /** Tutti i dati dell'attività: bastano per dashboard, liste ed esportazioni (uso personale). */
 export async function getBusinessData(): Promise<BusinessData> {
   const supabase = await createClient();
 
-  const [suppliers, lots, items, sales] = await Promise.all([
-    fetchAll<SupplierName>((from, to) =>
-      supabase.from("suppliers").select("id, name").order("id").range(from, to),
-    ),
+  const [lots, items, sales] = await Promise.all([
     fetchAll<LotRow>((from, to) =>
       supabase.from("purchase_lots").select("*").order("id").range(from, to),
     ),
@@ -23,7 +20,7 @@ export async function getBusinessData(): Promise<BusinessData> {
     ),
   ]);
 
-  return { suppliers, lots, items, sales };
+  return { lots, items, sales };
 }
 
 export async function getItem(id: string): Promise<ItemRow | null> {
@@ -105,14 +102,6 @@ export async function getFirstPhotoUrls(itemIds: string[]): Promise<Map<string, 
     if (url) result.set(itemId, url);
   }
   return result;
-}
-
-/** Elenco dei fornitori (id e nome) in ordine alfabetico, per i menu di scelta. */
-export async function getSupplierNames(): Promise<SupplierName[]> {
-  const supabase = await createClient();
-  return fetchAll<SupplierName>((from, to) =>
-    supabase.from("suppliers").select("id, name").order("name").order("id").range(from, to),
-  );
 }
 
 export async function getLotCount(): Promise<number> {

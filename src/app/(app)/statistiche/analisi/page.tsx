@@ -17,7 +17,6 @@ export default async function StatistichePage(props: PageProps<"/statistiche/ana
 
   const { lots, items, sales } = await getBusinessData();
   const rows = computeGroupStats(key, lots, items, sales);
-  const hasDemo = items.some((i) => i.is_demo) || lots.some((l) => l.is_demo);
 
   return (
     <>
@@ -39,12 +38,6 @@ export default async function StatistichePage(props: PageProps<"/statistiche/ana
           </Link>
         ))}
       </div>
-
-      {hasDemo && (
-        <p className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">
-          Nei dati ci sono anche esempi DEMO: finché non li rimuovi (pagina Supplier, in fondo) rientrano nei numeri.
-        </p>
-      )}
 
       {rows.length === 0 ? (
         <div className="rounded-lg border border-dashed border-stone-300 bg-white p-8 text-center">

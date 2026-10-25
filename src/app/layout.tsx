@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Vintage Business OS",
   description:
-    "Gestionale per compravendita di abbigliamento vintage e streetwear: fornitori, stock, vendite e margini.",
+    "Gestionale per compravendita di abbigliamento vintage e streetwear: lotti, stock, vendite e margini.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -3,22 +3,21 @@ import { PageHeader } from "@/components/PagePlaceholder";
 import { Stat, toneOf } from "@/components/ui";
 import { toMetricItems, toMetricLot } from "@/lib/business/mappers";
 import { getBusinessData } from "@/lib/business/queries";
-import { computeDashboard, formatEuro, summarizeBySupplier } from "@/lib/metrics";
+import { computeDashboard, formatEuro, summarizeByLot } from "@/lib/metrics";
 
 export const metadata = { title: "Dashboard · Vintage Business OS" };
 
 const toneClass = { neutral: "text-stone-700", good: "text-green-800", bad: "text-red-800" };
 
 export default async function DashboardPage() {
-  const { suppliers, lots, items, sales } = await getBusinessData();
+  const { lots, items, sales } = await getBusinessData();
 
   const metricLots = lots.map(toMetricLot);
   const metricItems = toMetricItems(items, sales);
   const m = computeDashboard(metricLots, metricItems);
 
-  const supplierName = new Map(suppliers.map((s) => [s.id, s.name]));
-  const bySupplier = [...summarizeBySupplier(metricLots, metricItems).entries()]
-    .map(([id, metrics]) => ({ id, name: supplierName.get(id) ?? "—", metrics }))
+  const byLot = lots
+    .map((lot) => ({ lot, metrics: summarizeByLot(metricLots, metricItems).get(lot.id)! }))
     .sort((a, b) => b.metrics.realizedMargin - a.metrics.realizedMargin);
 
   const empty = lots.length === 0;
@@ -32,8 +31,7 @@ export default async function DashboardPage() {
 
       {empty && (
         <div className="mb-6 rounded-md border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700">
-          Non hai ancora registrato nessun acquisto: i valori sono a zero. Per iniziare,{" "}
-          <Link href="/fornitori?nuovo=1" className="font-medium text-stone-900 underline">aggiungi un fornitore</Link>, poi{" "}
+          Non hai ancora registrato nessun acquisto: i valori sono a zero. Per iniziare{" "}
           <Link href="/lotti?nuovo=1" className="font-medium text-stone-900 underline">registra un lotto</Link>.
         </div>
       )}
@@ -48,15 +46,15 @@ export default async function DashboardPage() {
       </div>
 
       <section className="mt-8">
-        <h2 className="mb-3 text-base font-semibold text-stone-900">Risultati per fornitore</h2>
-        {bySupplier.length === 0 ? (
+        <h2 className="mb-3 text-base font-semibold text-stone-900">Risultati per lotto</h2>
+        {byLot.length === 0 ? (
           <p className="text-sm text-stone-500">Nessun acquisto registrato.</p>
         ) : (
           <div className="overflow-x-auto rounded-lg border border-stone-200 bg-white">
             <table className="w-full min-w-[640px] text-left text-sm">
               <thead className="border-b border-stone-200 bg-stone-50 text-xs uppercase tracking-wide text-stone-500">
                 <tr>
-                  <th className="px-4 py-3 font-medium">Fornitore</th>
+                  <th className="px-4 py-3 font-medium">Lotto</th>
                   <th className="px-4 py-3 text-right font-medium">Investito</th>
                   <th className="px-4 py-3 text-right font-medium">Venduti</th>
                   <th className="px-4 py-3 text-right font-medium">Vendite</th>
@@ -65,10 +63,11 @@ export default async function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
-                {bySupplier.map(({ id, name, metrics }) => (
-                  <tr key={id} className="hover:bg-stone-50">
+                {byLot.map(({ lot, metrics }) => (
+                  <tr key={lot.id} className="hover:bg-stone-50">
                     <td className="px-4 py-3">
-                      <Link href={`/fornitori/${id}`} className="font-medium text-stone-900 hover:underline">{name}</Link>
+                      <Link href={`/lotti/${lot.id}`} className="font-medium text-stone-900 hover:underline">{lot.code}</Link>
+                      {lot.supplier_name && <p className="text-xs text-stone-500">{lot.supplier_name}</p>}
                     </td>
                     <td className="px-4 py-3 text-right tabular-nums">{formatEuro(metrics.capitalInvested)}</td>
                     <td className="px-4 py-3 text-right tabular-nums">{metrics.soldCount}</td>
@@ -96,7 +95,7 @@ export default async function DashboardPage() {
           ))}
         </div>
         <p className="mt-2 text-xs text-stone-500">
-          Il backup JSON contiene tutte le tabelle (le foto solo come percorsi): è un archivio, non un ripristino automatico. File per Excel: separatore «;», importi con la virgola. Gli importi della dashboard sono quelli reali dei lotti e delle vendite registrate (i dati demo sono inclusi finché non li rimuovi).
+          Il backup JSON contiene tutte le tabelle (le foto solo come percorsi): è un archivio, non un ripristino automatico. File per Excel: separatore «;», importi con la virgola. Gli importi della dashboard sono quelli reali dei lotti e delle vendite registrate.
         </p>
       </section>
     </>

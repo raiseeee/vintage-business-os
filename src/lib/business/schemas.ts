@@ -15,7 +15,7 @@ import { ITEM_CONDITIONS, MANUAL_ITEM_STATUSES } from "./constants";
 const uuid = z.uuid("Elemento non valido");
 
 export const lotSchema = z.object({
-  supplier_id: uuid,
+  supplier_name: missingAsEmpty(shortText),
   code: codeField,
   purchased_at: requiredDate,
   purchase_cost_cents: requiredEuro,

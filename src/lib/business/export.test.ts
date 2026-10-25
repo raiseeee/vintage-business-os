@@ -3,18 +3,17 @@ import { buildCsv, buildItemsCsv, buildLotsCsv, buildSalesCsv } from "./export";
 import type { BusinessData } from "./types";
 
 const data: BusinessData = {
-  suppliers: [{ id: "s1", name: "Fornitore; Uno" }],
   lots: [
     {
-      id: "l1", supplier_id: "s1", code: "L-001", purchased_at: "2026-10-01",
+      id: "l1", supplier_name: "Fornitore; Uno", code: "L-001", purchased_at: "2026-10-01",
       purchase_cost_cents: 10000, inbound_shipping_cents: 2000, other_costs_cents: 1000,
-      quantity: 10, weight_kg: 8.5, notes: "=SOMMA(1;2)", is_demo: false, created_at: "2026-10-01T10:00:00Z",
+      quantity: 10, weight_kg: 8.5, notes: "=SOMMA(1;2)", created_at: "2026-10-01T10:00:00Z",
     },
   ],
   items: [
-    { id: "i1", lot_id: "l1", code: "L-001-001", brand: "Marca", category: "Felpa", size: "L", condition: "buona", status: "venduto", expected_price_cents: 4000, notes: null, is_demo: false, created_at: "" },
-    { id: "i2", lot_id: "l1", code: "L-001-002", brand: null, category: null, size: null, condition: null, status: "pronto", expected_price_cents: 3000, notes: null, is_demo: true, created_at: "" },
-    { id: "i3", lot_id: "l1", code: "L-001-003", brand: null, category: null, size: null, condition: null, status: "reso", expected_price_cents: 2000, notes: null, is_demo: false, created_at: "" },
+    { id: "i1", lot_id: "l1", code: "L-001-001", brand: "Marca", category: "Felpa", size: "L", condition: "buona", status: "venduto", expected_price_cents: 4000, notes: null, created_at: "" },
+    { id: "i2", lot_id: "l1", code: "L-001-002", brand: null, category: null, size: null, condition: null, status: "pronto", expected_price_cents: 3000, notes: null, created_at: "" },
+    { id: "i3", lot_id: "l1", code: "L-001-003", brand: null, category: null, size: null, condition: null, status: "reso", expected_price_cents: 2000, notes: null, created_at: "" },
   ],
   sales: [
     { id: "x1", item_id: "i1", channel: "Vinted", sold_at: "2026-10-10", price_cents: 4500, fees_cents: 300, outbound_shipping_cents: 500, extra_costs_cents: 100, notes: null },
@@ -50,7 +49,7 @@ function cells(line: string): string[] {
 describe("esportazione lotti", () => {
   it("riporta costi, costo per capo, margine e saldo di cassa", () => {
     const [header, row] = lines(buildLotsCsv(data));
-    expect(cells(header)).toHaveLength(18);
+    expect(cells(header)).toHaveLength(17);
     const c = cells(row);
     expect(c[0]).toBe("L-001");
     expect(c[5]).toBe("100,00"); // merce
@@ -80,7 +79,6 @@ describe("esportazione capi", () => {
     expect(sold[18]).toBe("23,00"); // profitto
     const stock = cells(rows[2]);
     expect(stock[18]).toBe(""); // nessun profitto
-    expect(stock[19]).toBe("sì"); // demo
   });
 
   it("un capo reso non ha profitto anche se ha una vendita precedente", () => {
@@ -115,7 +113,7 @@ describe("buildCsv", () => {
   });
 
   it("con nessun dato produce solo l'intestazione", () => {
-    const empty: BusinessData = { suppliers: [], lots: [], items: [], sales: [] };
+    const empty: BusinessData = { lots: [], items: [], sales: [] };
     for (const kind of ["capi", "lotti", "vendite"] as const) {
       expect(lines(buildCsv(kind, empty))).toHaveLength(1);
     }

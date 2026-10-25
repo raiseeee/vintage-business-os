@@ -33,6 +33,7 @@ PSQL+=(-d vintage_test)
 "${PSQL[@]}" -f "$ROOT/supabase/tests/00_harness.sql"
 
 SHARED="20261025000001_shared_business.sql"
+REMOVE="20261029000001_remove_suppliers.sql"
 
 # 1) Tutte le migrazioni precedenti: il database com'era prima dell'attività condivisa.
 for f in "$ROOT"/supabase/migrations/*.sql; do
@@ -58,12 +59,22 @@ echo ">> migrazione $SHARED"
 # 4b) Migrazioni successive all'attività condivisa, poi i loro test.
 for f in "$ROOT"/supabase/migrations/*.sql; do
   [[ "$(basename "$f")" > "$SHARED" ]] || continue
+  [[ "$(basename "$f")" < "$REMOVE" ]] || continue
   echo ">> migrazione $(basename "$f")"
   "${PSQL[@]}" -f "$f"
 done
 "${PSQL[@]}" -f "$ROOT/supabase/tests/04_inventory.sql"
 "${PSQL[@]}" -f "$ROOT/supabase/tests/05_inventory_stock.sql"
 "${PSQL[@]}" -f "$ROOT/supabase/tests/06_item_listing.sql"
+
+# 4c) Rimozione di fornitori e CRM (irreversibile: nessun rollback, si ripristina il backup).
+# Conteggi dei dati veri (non demo) prima della migrazione: devono restare identici.
+LOTS_BEFORE="$("${PSQL[@]}" -t -A -c "select count(*) from public.purchase_lots where not is_demo")"
+ITEMS_BEFORE="$("${PSQL[@]}" -t -A -c "select count(*) from public.items where not is_demo")"
+SALES_BEFORE_RM="$("${PSQL[@]}" -t -A -c "select count(*) from public.sales s join public.items i on i.id = s.item_id where not i.is_demo")"
+echo ">> migrazione $REMOVE"
+"${PSQL[@]}" -f "$ROOT/supabase/migrations/$REMOVE"
+"${PSQL[@]}" -v lots_before="$LOTS_BEFORE" -v items_before="$ITEMS_BEFORE" -v sales_before="$SALES_BEFORE_RM" -f "$ROOT/supabase/tests/07_remove_suppliers.sql"
 
 # 5) Rollback sulla copia: i dati ci sono ancora e il vecchio modello funziona di nuovo.
 echo ">> rollback (su copia)"

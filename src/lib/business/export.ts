@@ -13,11 +13,8 @@ import type { BusinessData } from "./types";
 export type ExportKind = "capi" | "lotti" | "vendite";
 export const EXPORT_KINDS: ExportKind[] = ["capi", "lotti", "vendite"];
 
-const yesNo = (v: boolean) => (v ? "sì" : "no");
-
 function lookups(data: BusinessData) {
   return {
-    supplierName: new Map(data.suppliers.map((s) => [s.id, s.name])),
     lotById: new Map(data.lots.map((l) => [l.id, l])),
     saleByItem: new Map(data.sales.map((s) => [s.item_id, s])),
     metricItems: new Map(toMetricItems(data.items, data.sales).map((i) => [i.id, i])),
@@ -25,14 +22,13 @@ function lookups(data: BusinessData) {
 }
 
 export function buildLotsCsv(data: BusinessData): string {
-  const { supplierName } = lookups(data);
   const metricItems = toMetricItems(data.items, data.sales);
 
   const header = [
     "Codice lotto", "Fornitore", "Data acquisto", "Quantità dichiarata", "Capi registrati",
     "Merce (€)", "Spedizione in entrata (€)", "Altri costi (€)", "Costo totale (€)", "Costo per capo (€)",
     "Peso (kg)", "Capi venduti", "Incassi (€)", "Costi di vendita (€)", "Margine realizzato (€)",
-    "Saldo cassa (€)", "Demo", "Note",
+    "Saldo cassa (€)", "Note",
   ];
 
   const rows: CsvCell[][] = [...data.lots]
@@ -43,7 +39,7 @@ export function buildLotsCsv(data: BusinessData): string {
       const m = computeDashboard([ml], items);
       return [
         lot.code,
-        supplierName.get(lot.supplier_id) ?? "",
+        lot.supplier_name ?? "",
         lot.purchased_at,
         lot.quantity,
         items.length,
@@ -58,7 +54,6 @@ export function buildLotsCsv(data: BusinessData): string {
         { cents: m.saleCosts },
         { cents: m.realizedMargin },
         { cents: m.cashBalance },
-        yesNo(lot.is_demo),
         lot.notes,
       ];
     });
@@ -67,13 +62,13 @@ export function buildLotsCsv(data: BusinessData): string {
 }
 
 export function buildItemsCsv(data: BusinessData): string {
-  const { supplierName, lotById, saleByItem, metricItems } = lookups(data);
+  const { lotById, saleByItem, metricItems } = lookups(data);
 
   const header = [
     "Codice capo", "Lotto", "Fornitore", "Marca", "Categoria", "Taglia", "Condizione", "Stato",
     "Prezzo previsto (€)", "Costo attribuito (€)", "Canale", "Data vendita", "Prezzo incassato (€)",
     "Commissioni (€)", "Spedizione in uscita (€)", "Costi extra (€)", "Materiali (€)", "Ricavo netto (€)", "Profitto (€)",
-    "Demo", "Note",
+    "Note",
   ];
 
   const rows: CsvCell[][] = [...data.items]
@@ -87,7 +82,7 @@ export function buildItemsCsv(data: BusinessData): string {
       return [
         item.code,
         lot.code,
-        supplierName.get(lot.supplier_id) ?? "",
+        lot.supplier_name ?? "",
         item.brand,
         item.category,
         item.size,
@@ -104,7 +99,6 @@ export function buildItemsCsv(data: BusinessData): string {
         sale ? { cents: sale.materials_cost_cents ?? 0 } : null,
         net !== null ? { cents: net } : null,
         profit !== null ? { cents: profit } : null,
-        yesNo(item.is_demo),
         item.notes,
       ];
     });
@@ -113,7 +107,7 @@ export function buildItemsCsv(data: BusinessData): string {
 }
 
 export function buildSalesCsv(data: BusinessData): string {
-  const { supplierName, lotById, metricItems } = lookups(data);
+  const { lotById, metricItems } = lookups(data);
   const itemById = new Map(data.items.map((i) => [i.id, i]));
 
   const header = [
@@ -133,7 +127,7 @@ export function buildSalesCsv(data: BusinessData): string {
         sale.sold_at,
         item.code,
         lot.code,
-        supplierName.get(lot.supplier_id) ?? "",
+        lot.supplier_name ?? "",
         ITEM_STATUS_LABELS[item.status],
         sale.channel,
         { cents: sale.price_cents },

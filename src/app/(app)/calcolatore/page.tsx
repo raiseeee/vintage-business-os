@@ -20,15 +20,14 @@ export default async function CalcolatorePage(props: PageProps<"/calcolatore">) 
     salePrice: pick(params.vendita).slice(0, 12),
   };
 
-  const [{ suppliers, lots, items }, inventory] = await Promise.all([getBusinessData(), getInventory()]);
-  const supplierName = new Map(suppliers.map((s) => [s.id, s.name]));
+  const [{ lots, items }, inventory] = await Promise.all([getBusinessData(), getInventory()]);
   const lotOptions: LotOption[] = [...lots]
     .sort((a, b) => b.purchased_at.localeCompare(a.purchased_at))
     .map((lot) => {
       const prices = items.filter((i) => i.lot_id === lot.id && i.expected_price_cents !== null).map((i) => i.expected_price_cents as number);
       return {
         id: lot.id,
-        label: `${lot.code} · ${supplierName.get(lot.supplier_id) ?? "fornitore sconosciuto"}`,
+        label: lot.supplier_name ? `${lot.code} · ${lot.supplier_name}` : lot.code,
         costPerItem: allocatedItemCost(toMetricLot(lot)),
         avgExpectedPrice: prices.length > 0 ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) : null,
       };

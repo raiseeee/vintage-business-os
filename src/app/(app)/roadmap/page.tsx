@@ -3,25 +3,14 @@ import { PageHeader } from "@/components/PagePlaceholder";
 const milestones = [
   { name: "Milestone 1", desc: "Progetto avviabile, layout, navigazione, dashboard, logica margini testata", status: "Completata" },
   { name: "Milestone 2", desc: "Supabase: migrazioni SQL, RLS per utente, autenticazione", status: "Completata" },
-  { name: "Milestone 3", desc: "Supplier: anagrafica, fonti, punteggio trasparente", status: "Completata" },
-  { name: "Milestone 4", desc: "Lotti e capi: inventario, vendite, profitti, CSV", status: "Completata" },
-  { name: "Milestone 5", desc: "CRM fornitori: stati, storico contatti, prossime azioni, valutazioni", status: "Completata" },
+  { name: "Milestone 3", desc: "Lotti e capi: stati, foto, vendite, profitti, CSV", status: "Completata" },
+  { name: "Milestone 4", desc: "Statistiche per lotto, calcolatore, inventario dei materiali", status: "Completata" },
+  { name: "Milestone 5", desc: "Attività condivisa: soci titolari e collaboratori", status: "Completata" },
 ];
 
 const future = [
-  "Collegamento a una casella email",
-  "Visualizzazione e organizzazione in app delle email dei fornitori",
-  "Invio di email personalizzate a più destinatari, con controlli anti-spam e rispetto delle regole applicabili",
   "Collegamento ai siti di vendita (Vinted, Depop, eBay…) per preparare gli annunci dai capi pronti: titolo, descrizione, prezzo e foto. Per quanto ne so, Vinted e Depop non offrono un'API pubblica ai venditori, quindi all'inizio sarebbe un annuncio da copiare e incollare; la pubblicazione automatica è da verificare sito per sito",
-  "Ricerche pianificate e notifiche",
-  "Integrazione con un'API di ricerca web",
   "Sito pubblico e abbonamenti (la condivisione tra i soci con ruoli è già fatta: pagina Collaboratori)",
-];
-
-const research = [
-  { step: "Trovare i fornitori", desc: "Si fa fuori dall'app (a mano o in chat con Claude), con fonti verificabili: nessun dato inventato.", status: "Fuori dall'app" },
-  { step: "Registrarli in Supplier", desc: "Qui si salvano solo i fornitori che hai scelto, con le fonti e il livello di prova.", status: "Fatto" },
-  { step: "Seguirli nel CRM", desc: "Stato dei contatti, prossime azioni e storico, fino ai lotti acquistati.", status: "Fatto" },
 ];
 
 export default function RoadmapPage() {
@@ -41,19 +30,6 @@ export default function RoadmapPage() {
               <p className="text-sm text-stone-600">{m.desc}</p>
             </div>
             <span className="shrink-0 rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-medium text-stone-700">{m.status}</span>
-          </li>
-        ))}
-      </ul>
-
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-500">Ricerca fornitori</h2>
-      <ul className="mb-8 divide-y divide-stone-200 rounded-lg border border-stone-200 bg-white">
-        {research.map((r) => (
-          <li key={r.step} className="flex items-start justify-between gap-4 px-5 py-4">
-            <div>
-              <p className="text-sm font-medium text-stone-900">{r.step}</p>
-              <p className="text-sm text-stone-600">{r.desc}</p>
-            </div>
-            <span className="shrink-0 rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-medium text-stone-700">{r.status}</span>
           </li>
         ))}
       </ul>

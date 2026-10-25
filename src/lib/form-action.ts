@@ -1,5 +1,5 @@
 import type { ZodType } from "zod";
-import { uuidSchema } from "@/lib/suppliers/schemas";
+import { uuidSchema } from "@/lib/validation";
 
 /** Esito di una server action collegata a un form. */
 export type FormState = {
@@ -47,12 +47,6 @@ export function validId(id: string): boolean {
  * degli altri errori non si espongono i dettagli interni.
  */
 export function dbErrorMessage(error: { code?: string; message?: string }): string {
-  if (
-    error.code === "23514" &&
-    (error.message?.startsWith("Il tipo") || error.message?.startsWith("Impossibile rimuovere"))
-  ) {
-    return error.message;
-  }
   switch (error.code) {
     case "23514":
       return "Uno dei valori non rispetta i limiti consentiti.";

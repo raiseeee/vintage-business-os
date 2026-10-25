@@ -1,8 +1,8 @@
 # Vintage Business OS
 
-Gestionale per compravendita di abbigliamento vintage e streetwear: fornitori verificabili, lotti, capi, vendite e margini reali.
+Gestionale per compravendita di abbigliamento vintage e streetwear: lotti, capi, vendite e margini reali.
 
-**Stato: Milestone 5 completata** (CRM fornitori). Tutte le milestone dell'MVP sono fatte; restano le funzioni future.
+**Stato: MVP completo** (lotti, capi, vendite, statistiche per lotto, inventario, attività condivisa).
 
 ## Requisiti
 - Node.js 20.19+ (testato con 22) e npm
@@ -15,13 +15,14 @@ Gestionale per compravendita di abbigliamento vintage e streetwear: fornitori ve
    1. `20261022000001_schema.sql`
    2. `20261022000002_rls.sql`
    3. `20261022000003_storage.sql`
-   4. `20261022000004_demo_data.sql`
+   4. `20261022000004_demo_data.sql` (i dati demo sono poi rimossi dalla 11)
    5. `20261022000005_sales_functions.sql`
-   6. `20261023000001_search.sql` (tabelle della ricerca rimossa: non usate, applicala comunque per tenere allineato lo schema)
+   6. `20261023000001_search.sql` (tabelle poi rimosse dalla migrazione 11: applicala comunque per tenere l'ordine)
    7. `20261025000001_shared_business.sql` — **attività condivisa** (più account sugli stessi dati). Su un database con dati già inseriti **non applicarla prima di aver letto la sezione «Attività condivisa e collaboratori»**.
    8. `20261026000001_inventory.sql` — **inventario** (materiali per capo e attrezzature). Si applica dopo la 7, con un normale copia-e-incolla nello SQL Editor; rollback in `supabase/rollback/20261026000001_inventory_down.sql`.
    9. `20261027000001_inventory_stock.sql` — **giacenza dei materiali** (quanti ne restano, es. 99/100). Si applica dopo la 8; rollback in `supabase/rollback/20261027000001_inventory_stock_down.sql`.
    10. `20261028000001_item_listing.sql` — dove/quando un capo è stato pubblicato (canale). Si applica dopo la 9; rollback in `supabase/rollback/20261028000001_item_listing_down.sql`. Senza questa migrazione il flusso funziona lo stesso, ma il canale non viene ricordato.
+   11. `20261029000001_remove_suppliers.sql` — **elimina Supplier, CRM fornitori, ricerche e dati demo dal database. IRREVERSIBILE.** Il nome del fornitore resta solo come testo facoltativo sul lotto (copiato dai fornitori esistenti). Procedura: **(1)** fai il backup (Dashboard → *Backup completo (JSON)* e `pg_dump`); **(2)** `git pull`; **(3)** applicala subito dopo il pull (tra il pull e la migrazione la creazione di un lotto dà errore); **(4)** se i conteggi di lotti, capi o vendite non tornano, la migrazione si annulla da sola. Non esiste un rollback: per tornare indietro si ripristina il backup. Le vecchie procedure di rollback (es. `shared_business_down`) non valgono più dopo questa migrazione.
 
    Se avevi già applicato le prime quattro, **applica solo la quinta** (serve per registrare le vendite).
 
@@ -48,15 +49,15 @@ npm run typecheck
 npm run lint
 npm run build
 ```
-`npm run test:db` crea un cluster Postgres temporaneo, simula le parti di Supabase (ruoli, `auth.uid()`, storage) e verifica oltre 160 casi, in tre fasi (modello a utente singolo → migrazione sui dati esistenti → attività condivisa e rollback): isolamento tra utenti, regola del fornitore "diretto", vincoli sui dati, storage, registrazione e annullamento delle vendite, dati demo. Non sostituisce una prova sul progetto Supabase reale (vedi sotto).
+`npm run test:db` crea un cluster Postgres temporaneo, simula le parti di Supabase (ruoli, `auth.uid()`, storage) e verifica oltre 160 casi, in tre fasi (modello a utente singolo → migrazione sui dati esistenti → attività condivisa e rollback): isolamento tra utenti, vincoli sui dati, storage, registrazione e annullamento delle vendite, rimozione dei fornitori. Non sostituisce una prova sul progetto Supabase reale (vedi sotto).
 
 ## Attività condivisa e collaboratori
 
-Più account lavorano sugli stessi dati (fornitori, CRM, lotti, capi, foto, vendite, statistiche, esportazioni).
+Più account lavorano sugli stessi dati (lotti, capi, foto, vendite, statistiche, esportazioni).
 
 **Ruoli**
-- **Titolare (owner)**: tutti i poteri, compresi eliminare, annullare vendite, dati demo, invitare, rimuovere collaboratori, promuovere. Voi 3 soci siete tutti titolari.
-- **Collaboratore (collaborator)**: vede tutto, crea e modifica (capi, foto, vendite, resi, CRM…). **Non elimina** nulla, non annulla vendite, non gestisce le persone.
+- **Titolare (owner)**: tutti i poteri, compresi eliminare, annullare vendite, invitare, rimuovere collaboratori, promuovere. Voi 3 soci siete tutti titolari.
+- **Collaboratore (collaborator)**: vede tutto, crea e modifica (capi, foto, vendite, resi…). **Non elimina** nulla, non annulla vendite, non gestisce le persone.
 - I permessi li applica il database (RLS + funzioni), non solo l'interfaccia. L'attività non resta mai senza titolare; nessuno può promuovere se stesso.
 
 **Come aggiungere una persona**
@@ -74,13 +75,13 @@ La migrazione assegna tutti i dati attuali all'attività «Vintage Business», c
    - consigliato, copia completa del database: `pg_dump "<connection string di Supabase>" -Fc -f backup.dump` (stringa in *Project Settings → Database → Connection string*; con la password del database). Conserva i file fuori dal progetto. Le foto stanno nello Storage e non sono nel dump: restano dove sono, la migrazione non le sposta né le tocca.
 2. **Aggiorna il codice** (`git pull`) — l'app nuova funziona anche *prima* della migrazione (si comporta come prima).
 3. Incolla `20261025000001_shared_business.sql` nello *SQL Editor* ed eseguila. Se dà errore, non è stato cambiato nulla: leggi il messaggio.
-4. Riapri l'app: dovrebbe comparire **Collaboratori** nel menu. Controlla che fornitori, lotti, capi, foto e vendite siano tutti presenti.
+4. Riapri l'app: dovrebbe comparire **Collaboratori** nel menu. Controlla che lotti, capi, foto e vendite siano tutti presenti.
 5. Le foto già caricate restano nel vecchio percorso e continuano a vedersi; quelle nuove vanno nel percorso dell'attività.
 
 **Rollback**: `supabase/rollback/20261025000001_shared_business_down.sql` (a mano, solo se serve). Riporta al modello a un utente assegnando tutto al primo titolare; le foto caricate col nuovo percorso non sarebbero più raggiungibili, quindi va usato prima di averne caricate di nuove (o dopo averle spostate).
 
 ### Cosa è verificato e cosa no
-- **Verificato in locale** (`npm run test:db`): migrazione sui dati esistenti (conteggi e collegamenti intatti), RLS di titolare/collaboratore/esterno, nessuna auto-promozione, ultimo titolare protetto, inviti (scaduto, revocato, riusato, email sbagliata, già membro), due attività isolate, policy dello Storage (simulato), vendite/annullamenti/demo, eliminazione di un account che non cancella i dati, rollback su una copia.
+- **Verificato in locale** (`npm run test:db`): migrazione sui dati esistenti (conteggi e collegamenti intatti), RLS di titolare/collaboratore/esterno, nessuna auto-promozione, ultimo titolare protetto, inviti (scaduto, revocato, riusato, email sbagliata, già membro), due attività isolate, policy dello Storage (simulato), vendite/annullamenti, eliminazione di un account che non cancella i dati, rollback su una copia.
 - **Da provare su Supabase vero**: le policy dello Storage con il vero servizio (upload/download di una foto da un collaboratore e da un esterno), il claim `email` nel token (usato da `accept_invite`), il login di un secondo account reale, l'impostazione «registrazioni disattivate». Il test locale simula questi pezzi ma non li sostituisce.
 - Chi non è membro non vede nulla anche se ha un account; la service role key non è usata e non va mai messa nell'app.
 
@@ -91,24 +92,6 @@ La migrazione assegna tutti i dati attuali all'attività «Vintage Business», c
 - Le pagine dell'app sono protette due volte: `src/proxy.ts` e il controllo dell'utente in `src/app/(app)/layout.tsx`.
 - Il bucket foto `item-photos` è privato; i file stanno in `<user_id>/<item_id>/<file>`.
 
-## Dati demo
-Le funzioni SQL `load_demo_data()` e `clear_demo_data()` caricano/rimuovono dati di esempio marcati `[DEMO]` / `DEMO-…`, con domini `example.com` e nessuna azienda o marca reale. Comprendono 2 fornitori, il lotto `DEMO-L1` con 4 capi e una vendita. Si caricano e si rimuovono dal pulsante in fondo alla pagina *Supplier*; i dati reali non vengono toccati.
-
-## Supplier (Milestone 3)
-- Lista con filtri per nome, paese, lingua, tipologia di stock, marchio e tipo di fornitore.
-- Scheda con: dati e contatti, ordine minimo e prezzi, **informazioni raggruppate per livello di prova** (documentato / dichiarato / ipotesi), fonti, storico valutazioni.
-- **Punteggio 0-100**, mostrato criterio per criterio: vicinanza alla fonte 30%, trasparenza 25%, ordine minimo 15%, budget 15%, interesse vintage 15%. Il voto di vicinanza ha un tetto per tipo di fornitore (es. origine non verificata: max 2/5), così non si gonfia senza prove. I pesi sono in `src/lib/suppliers/score.ts`.
-- **Ricerca fornitori**: fuori dall'app (vedi sotto); nessun risultato simulato.
-- Un fornitore si elimina dalla sua scheda (in fondo): se ha lotti collegati va prima eliminato il lotto; fonti, valutazioni e contatti vengono rimossi con lui.
-
-## Ricerca fornitori
-L'app **non cerca fornitori**: i fornitori si trovano fuori (a mano o chiedendo a Claude in chat) e qui si registrano, con le loro fonti, quelli che hai scelto. Una pagina di ricerca web con salvataggio dei risultati è stata provata e poi rimossa (era nel commit `2fae166`, recuperabile da git). La migrazione `20261023000001_search.sql` resta per non rompere la cronologia: le tabelle `search_runs` e `search_results` non sono più usate dall'app.
-
-## CRM fornitori (Milestone 5)
-- Pagina **CRM**: prossime azioni ordinate per scadenza (le scadute in rosso) e pipeline per stato (da contattare → contattata → in attesa → risposta ricevuta → campione richiesto → verificata / scartata), con data dell'ultimo contatto.
-- Nella scheda di ogni fornitore, sezione **CRM**: cambi stato, scrivi la prossima azione con data, registri i contatti (canale, data, riassunto) e vedi lo storico.
-- Nessuna migrazione nuova: usa tabelle e policy già presenti. Non invia email: i contatti si registrano a mano.
-
 ## Lotti, capi e vendite (Milestone 4)
 - **Lotti**: fornitore, data, costi (merce, spedizione in entrata, altri), quantità dichiarata, peso. Il costo di ogni capo è il costo totale del lotto diviso la quantità **dichiarata**, così registrare i capi a poco a poco non sposta il costo unitario.
 - **Capi**: codice univoco, marca, categoria, taglia, condizione, stato, prezzo previsto, foto. Si possono creare 1 alla volta o tanti vuoti insieme (`L-001-001`, `-002`…) dalla scheda del lotto.
@@ -116,7 +99,7 @@ L'app **non cerca fornitori**: i fornitori si trovano fuori (a mano o chiedendo 
 - **Vendita**: canale, data, prezzo incassato, commissioni, spedizione in uscita, costi extra. Registrare una vendita e cambiare lo stato del capo avviene in un'unica operazione del database. Un capo reso e poi rivenduto sostituisce la vecchia vendita.
 - **Foto**: caricate dal browser direttamente nello storage privato (JPG, PNG, WebP, max 10 MB), poi registrate nel database. Si possono aggiungere già alla creazione del capo (campo «Foto» del modulo) o dopo dalla scheda. Se una foto fallisce, il capo resta creato e te lo dice.
 - **Importazione CSV** (pulsante «Importa CSV» in Capi): scegli il lotto e un file con una riga per capo (colonne `marca, categoria, taglia, condizione, prezzo previsto, note`, tutte facoltative; c'è il modello da scaricare). L'app assegna i codici in ordine (`L-001-001`, `-002`…, dal numero successivo a quelli già nel lotto) e lo stato «da controllare»; le foto si aggiungono dopo dalla scheda. Tutto o niente: se una riga è sbagliata non entra nulla e ti dice quale riga. Massimo 500 capi, file fino a circa 900 KB.
-- **Profitto** per capo (ricavo netto − costo attribuito), per lotto e per fornitore; dashboard con capitale investito, valore stock, vendite, costi, margine realizzato e saldo di cassa.
+- **Profitto** per capo (ricavo netto − costo attribuito), per lotto; dashboard con capitale investito, valore stock, vendite, costi, margine realizzato e saldo di cassa.
 - **Esportazione CSV** di capi, lotti e vendite (pulsanti in dashboard e nelle liste). Formato per Excel italiano: separatore `;`, importi con la virgola, accenti corretti; i testi che sembrano formule sono neutralizzati.
 - Le liste leggono i dati a pagine fino in fondo, quindi i totali non si fermano a 1000 righe.
 
@@ -155,12 +138,10 @@ src/proxy.ts          protezione delle rotte e rinnovo sessione
 src/lib/supabase/     client server e gestione sessione
 src/lib/env.ts        validazione configurazione
 src/lib/metrics.ts    calcoli in centesimi: costi lotto, profitto capo, dashboard
-src/lib/suppliers/    costanti, validazione zod, punteggio, query
 src/lib/business/     lotti, capi, vendite: validazione, query paginate, esportazione CSV
 src/lib/csv.ts        generatore CSV sicuro per Excel
-src/lib/search/       interfaccia per la futura ricerca web
 src/components/       form (client), elementi UI condivisi
-supabase/migrations/  schema, RLS, storage, dati demo
+supabase/migrations/  schema, RLS, storage, vendite, attività condivisa, inventario
 supabase/tests/       harness e test SQL
 scripts/test-db.sh    esegue migrazioni e test SQL in locale
 ```
@@ -171,24 +152,13 @@ scripts/test-db.sh    esegue migrazioni e test SQL in locale
 - Costo per capo = costo totale lotto / quantità dichiarata.
 - Capi resi: esclusi da ricavi e valore stock finché non rivalutati.
 
-## Regole sui fornitori
-- Un fornitore può essere "raccoglitore diretto" o "grossista documentato" solo con almeno un'informazione di **provenienza documentata**, cioè collegata a una fonte registrata. Lo impone il database, non solo l'interfaccia.
-- Ogni informazione ha un livello di prova: `documentato`, `dichiarato`, `ipotesi`.
-- Il punteggio è l'ultima valutazione (5 criteri, 0-5); i pesi vivranno nel codice.
-
 ## Milestone
 1. Progetto avviabile, layout, dashboard (fatto)
 2. Supabase: migrazioni SQL, RLS per utente, autenticazione (fatto)
-3. Supplier: anagrafica, fonti, punteggio trasparente, dati demo (fatto)
-4. Lotti e capi: inventario, vendite, profitti, CSV, dashboard collegata (fatto)
-5. CRM fornitori: stati, storico contatti, prossime azioni (fatto)
-
-## Da fare / promemoria
-- **Ricerca fornitori e fonti**: l'app non cerca da sola. Prima di comprare servono fornitori veri con fonti verificabili (provenienza, registro imprese, autorizzazioni). Si può fare a mano o chiedendo a Claude di cercarli e riassumere cosa è documentato e cosa solo dichiarato.
-- Allegare file (documenti, screenshot) alle fonti dei fornitori.
+3. Lotti e capi: inventario, vendite, profitti, CSV, dashboard collegata (fatto)
 
 ## Roadmap futura (non implementata)
-Collegamento ai siti di vendita (Vinted, Depop, eBay) per preparare gli annunci dai capi pronti (da verificare cosa permette ogni sito), casella email, email dei fornitori in app, invii multipli con controlli anti-spam, ricerche pianificate e notifiche, API di ricerca web, sito pubblico/multiutenza/abbonamenti.
+Collegamento ai siti di vendita (Vinted, Depop, eBay) per preparare gli annunci dai capi pronti (da verificare cosa permette ogni sito), casella email, sito pubblico/multiutenza/abbonamenti.
 
 ## Deployment
 Previsto su Vercel: importa il repository e imposta le due variabili di `.env.example` in *Project Settings → Environment Variables*. Le istruzioni verificate arrivano a fine MVP.

@@ -1,6 +1,4 @@
 import type { ReactNode } from "react";
-import type { SupplierType } from "@/lib/suppliers/constants";
-import { SUPPLIER_TYPE_LABELS } from "@/lib/suppliers/constants";
 import { ITEM_STATUS_LABELS } from "@/lib/business/constants";
 
 export function Section({
@@ -18,22 +16,6 @@ export function Section({
       {description && <p className="mt-1 text-sm text-stone-600">{description}</p>}
       <div className="mt-4">{children}</div>
     </section>
-  );
-}
-
-const TYPE_STYLES: Record<SupplierType, string> = {
-  raccoglitore_diretto: "bg-green-100 text-green-900",
-  centro_selezione: "bg-teal-100 text-teal-900",
-  grossista_documentato: "bg-blue-100 text-blue-900",
-  rivenditore: "bg-stone-200 text-stone-800",
-  origine_non_verificata: "bg-amber-100 text-amber-900",
-};
-
-export function SupplierTypeBadge({ type }: { type: SupplierType }) {
-  return (
-    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${TYPE_STYLES[type]}`}>
-      {SUPPLIER_TYPE_LABELS[type]}
-    </span>
   );
 }
 

@@ -1,31 +1,23 @@
 import { ActionForm, Field, type FormState } from "@/components/form";
 import { centsToInput } from "@/lib/money";
-import type { LotRow, SupplierName } from "@/lib/business/types";
+import type { LotRow } from "@/lib/business/types";
 
 export function LotForm({
   action,
-  suppliers,
   lot,
   defaults,
   submitLabel,
 }: {
   action: (prev: FormState, formData: FormData) => Promise<FormState>;
-  suppliers: SupplierName[];
   lot?: LotRow;
   /** Valori iniziali per un nuovo lotto. */
-  defaults?: { code?: string; supplierId?: string; purchasedAt?: string };
+  defaults?: { code?: string; purchasedAt?: string };
   submitLabel: string;
 }) {
   return (
     <ActionForm action={action} submitLabel={submitLabel} className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field
-          as="select"
-          label="Fornitore"
-          name="supplier_id"
-          defaultValue={lot?.supplier_id ?? defaults?.supplierId ?? suppliers[0]?.id ?? ""}
-          options={suppliers.map((s) => ({ value: s.id, label: s.name }))}
-        />
+        <Field label="Fornitore (facoltativo)" name="supplier_name" defaultValue={lot?.supplier_name ?? ""} hint="Da chi hai comprato il lotto: solo un promemoria." />
         <Field label="Codice lotto" name="code" required defaultValue={lot?.code ?? defaults?.code ?? ""} hint="Univoco. Lo usi per i codici dei capi." />
         <Field label="Data di acquisto" name="purchased_at" type="date" required defaultValue={lot?.purchased_at ?? defaults?.purchasedAt ?? ""} />
         <Field label="Quantità di capi" name="quantity" required defaultValue={lot?.quantity?.toString() ?? ""} hint="Numero di capi dichiarato all'acquisto: il costo si divide per questo numero." />
