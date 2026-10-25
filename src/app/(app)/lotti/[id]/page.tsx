@@ -9,12 +9,14 @@ import { uuidSchema } from "@/lib/suppliers/schemas";
 import { createItemsBulk } from "../../capi/actions";
 import { deleteLot, updateLot } from "../actions";
 import { LotForm } from "../LotForm";
+import { getMembership } from "@/lib/team/membership";
 
 export const metadata = { title: "Lotto · Vintage Business OS" };
 
 const toneClass = { neutral: "text-stone-700", good: "text-green-800", bad: "text-red-800" };
 
 export default async function LottoDetailPage(props: PageProps<"/lotti/[id]">) {
+  const canDelete = (await getMembership())?.role === "owner";
   const { id } = await props.params;
   if (!uuidSchema.safeParse(id).success) notFound();
 
@@ -147,6 +149,7 @@ export default async function LottoDetailPage(props: PageProps<"/lotti/[id]">) {
               <LotForm action={updateLot.bind(null, lot.id)} suppliers={suppliers} lot={lot} submitLabel="Salva modifiche" />
             </div>
             <div className="mt-6 border-t border-stone-100 pt-4">
+              {canDelete && (
               <ActionForm
                 action={deleteLot.bind(null, lot.id)}
                 submitLabel="Elimina lotto"
@@ -155,6 +158,7 @@ export default async function LottoDetailPage(props: PageProps<"/lotti/[id]">) {
                 variant="danger"
                 confirm="Eliminare definitivamente questo lotto? Si può solo se non contiene capi."
               />
+              )}
             </div>
           </details>
         </Section>

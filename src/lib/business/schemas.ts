@@ -61,13 +61,13 @@ export const saleSchema = z.object({
   notes: optionalText,
 });
 
-/** Percorso di una foto: <user_id>/<item_id>/<file>.<jpg|png|webp> */
-export function photoPathSchema(userId: string, itemId: string) {
+/** Il percorso è <id attività>/<id capo>/<file>. */
+export function photoPathSchema(businessId: string, itemId: string) {
   const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return z
     .string()
     .regex(
-      new RegExp(`^${escape(userId)}/${escape(itemId)}/[A-Za-z0-9-]{8,64}\\.(jpg|png|webp)$`),
+      new RegExp(`^${escape(businessId)}/${escape(itemId)}/[A-Za-z0-9-]{8,64}\\.(jpg|png|webp)$`),
       "Percorso foto non valido",
     );
 }

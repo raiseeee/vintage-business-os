@@ -91,7 +91,7 @@ export function ActionForm({
           </p>
         )}
         {state.ok && (state.message ?? successMessage) && (
-          <p role="status" className="text-sm text-green-700">
+          <p role="status" className="break-all text-sm text-green-700">
             {state.message ?? successMessage}
           </p>
         )}

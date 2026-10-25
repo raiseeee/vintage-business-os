@@ -13,6 +13,7 @@ import { hasDemoData, listSuppliers, type SupplierListItem } from "@/lib/supplie
 import type { SupplierFilters } from "@/lib/suppliers/types";
 import { clearDemoData, createSupplier, loadDemoData } from "./actions";
 import { SupplierForm } from "./SupplierForm";
+import { getMembership } from "@/lib/team/membership";
 
 export const metadata = { title: "Supplier · Vintage Business OS" };
 
@@ -34,6 +35,7 @@ const inputClass =
   "mt-1 w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm focus:border-stone-900 focus:outline-none";
 
 export default async function FornitoriPage(props: PageProps<"/fornitori">) {
+  const canDelete = (await getMembership())?.role === "owner";
   const params = await props.searchParams;
   const filters: SupplierFilters = {};
   for (const key of FILTER_KEYS) filters[key] = pick(params[key]);
@@ -149,6 +151,7 @@ export default async function FornitoriPage(props: PageProps<"/fornitori">) {
         </div>
       )}
 
+      {canDelete && (
       <div className="mt-8 max-w-xl">
         <section className="rounded-lg border border-stone-200 bg-white p-5">
           <h2 className="text-base font-semibold text-stone-900">Dati demo</h2>
@@ -176,6 +179,7 @@ export default async function FornitoriPage(props: PageProps<"/fornitori">) {
           )}
         </section>
       </div>
+      )}
     </>
   );
 }

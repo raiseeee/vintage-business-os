@@ -15,7 +15,9 @@ const NAV = [
   { href: "/roadmap", label: "Roadmap" },
 ];
 
-export function Sidebar({ email }: { email: string }) {
+const OWNER_NAV = [{ href: "/collaboratori", label: "Collaboratori" }];
+
+export function Sidebar({ email, isOwner = false }: { email: string; isOwner?: boolean }) {
   const pathname = usePathname();
 
   return (
@@ -27,7 +29,7 @@ export function Sidebar({ email }: { email: string }) {
         <p className="text-lg font-semibold text-stone-900">Business OS</p>
       </div>
       <nav className="flex gap-1 overflow-x-auto px-3 pb-3 md:flex-col md:overflow-visible">
-        {NAV.map((item) => {
+        {[...NAV, ...(isOwner ? OWNER_NAV : [])].map((item) => {
           const active =
             pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (

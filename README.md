@@ -18,11 +18,12 @@ Gestionale per compravendita di abbigliamento vintage e streetwear: fornitori ve
    4. `20261022000004_demo_data.sql`
    5. `20261022000005_sales_functions.sql`
    6. `20261023000001_search.sql` (tabelle della ricerca rimossa: non usate, applicala comunque per tenere allineato lo schema)
+   7. `20261025000001_shared_business.sql` — **attività condivisa** (più account sugli stessi dati). Su un database con dati già inseriti **non applicarla prima di aver letto la sezione «Attività condivisa e collaboratori»**.
 
    Se avevi già applicato le prime quattro, **applica solo la quinta** (serve per registrare le vendite).
 
    In alternativa, con la [Supabase CLI](https://supabase.com/docs/guides/cli): `supabase link` e `supabase db push`.
-3. **Disattiva le registrazioni pubbliche**: *Authentication → Sign In / Providers* → disattiva *Allow new users to sign up*. L'app è per una sola persona e non ha una pagina di registrazione.
+3. **Disattiva le registrazioni pubbliche**: *Authentication → Sign In / Providers* → disattiva *Allow new users to sign up*. L'app non ha una pagina di registrazione: gli account li crei tu da Supabase. (Anche se qualcuno si registrasse, senza un invito non vede nessun dato.)
 4. **Crea il tuo utente**: *Authentication → Users → Add user* (email + password, con "Auto Confirm User").
 5. Copia l'URL e la publishable key (o anon key) da *Project Settings → API*.
 
@@ -44,7 +45,41 @@ npm run typecheck
 npm run lint
 npm run build
 ```
-`npm run test:db` crea un cluster Postgres temporaneo, simula le parti di Supabase (ruoli, `auth.uid()`, storage) e verifica 53 casi: isolamento tra utenti, regola del fornitore "diretto", vincoli sui dati, storage, registrazione e annullamento delle vendite, dati demo. Non sostituisce una prova sul progetto Supabase reale (vedi sotto).
+`npm run test:db` crea un cluster Postgres temporaneo, simula le parti di Supabase (ruoli, `auth.uid()`, storage) e verifica oltre 160 casi, in tre fasi (modello a utente singolo → migrazione sui dati esistenti → attività condivisa e rollback): isolamento tra utenti, regola del fornitore "diretto", vincoli sui dati, storage, registrazione e annullamento delle vendite, dati demo. Non sostituisce una prova sul progetto Supabase reale (vedi sotto).
+
+## Attività condivisa e collaboratori
+
+Più account lavorano sugli stessi dati (fornitori, CRM, lotti, capi, foto, vendite, statistiche, esportazioni).
+
+**Ruoli**
+- **Titolare (owner)**: tutti i poteri, compresi eliminare, annullare vendite, dati demo, invitare, rimuovere collaboratori, promuovere. Voi 3 soci siete tutti titolari.
+- **Collaboratore (collaborator)**: vede tutto, crea e modifica (capi, foto, vendite, resi, CRM…). **Non elimina** nulla, non annulla vendite, non gestisce le persone.
+- I permessi li applica il database (RLS + funzioni), non solo l'interfaccia. L'attività non resta mai senza titolare; nessuno può promuovere se stesso.
+
+**Come aggiungere una persona**
+1. Crea il suo account: Supabase → *Authentication → Users → Add user* (email + password, *Auto Confirm User*). Così scegli tu la password.
+2. Nell'app, pagina **Collaboratori** (visibile ai titolari) → inserisci la sua email, il ruolo e la scadenza → *Crea invito*.
+3. Copia il link mostrato (si vede **una sola volta**: nel database resta solo l'impronta) e mandaglielo.
+4. La persona apre il link, accede con **quella** email e preme *Accetta*. Un invito vale una volta, scade, è revocabile e non funziona con un'altra email.
+Nessun servizio esterno e nessun costo: le email non vengono inviate dall'app.
+
+### Applicare la migrazione ai dati esistenti (in sicurezza)
+La migrazione assegna tutti i dati attuali all'attività «Vintage Business», con te come titolare, senza perdere né duplicare righe. Se qualcosa non torna (dati di più utenti, conteggi diversi) **si interrompe senza cambiare niente** (è un'unica transazione).
+
+1. **Backup.** Il piano gratuito di Supabase non ha backup automatici:
+   - dalla Dashboard, pulsante **Backup completo (JSON)** (archivio dei dati);
+   - consigliato, copia completa del database: `pg_dump "<connection string di Supabase>" -Fc -f backup.dump` (stringa in *Project Settings → Database → Connection string*; con la password del database). Conserva i file fuori dal progetto. Le foto stanno nello Storage e non sono nel dump: restano dove sono, la migrazione non le sposta né le tocca.
+2. **Aggiorna il codice** (`git pull`) — l'app nuova funziona anche *prima* della migrazione (si comporta come prima).
+3. Incolla `20261025000001_shared_business.sql` nello *SQL Editor* ed eseguila. Se dà errore, non è stato cambiato nulla: leggi il messaggio.
+4. Riapri l'app: dovrebbe comparire **Collaboratori** nel menu. Controlla che fornitori, lotti, capi, foto e vendite siano tutti presenti.
+5. Le foto già caricate restano nel vecchio percorso e continuano a vedersi; quelle nuove vanno nel percorso dell'attività.
+
+**Rollback**: `supabase/rollback/20261025000001_shared_business_down.sql` (a mano, solo se serve). Riporta al modello a un utente assegnando tutto al primo titolare; le foto caricate col nuovo percorso non sarebbero più raggiungibili, quindi va usato prima di averne caricate di nuove (o dopo averle spostate).
+
+### Cosa è verificato e cosa no
+- **Verificato in locale** (`npm run test:db`): migrazione sui dati esistenti (conteggi e collegamenti intatti), RLS di titolare/collaboratore/esterno, nessuna auto-promozione, ultimo titolare protetto, inviti (scaduto, revocato, riusato, email sbagliata, già membro), due attività isolate, policy dello Storage (simulato), vendite/annullamenti/demo, eliminazione di un account che non cancella i dati, rollback su una copia.
+- **Da provare su Supabase vero**: le policy dello Storage con il vero servizio (upload/download di una foto da un collaboratore e da un esterno), il claim `email` nel token (usato da `accept_invite`), il login di un secondo account reale, l'impostazione «registrazioni disattivate». Il test locale simula questi pezzi ma non li sostituisce.
+- Chi non è membro non vede nulla anche se ha un account; la service role key non è usata e non va mai messa nell'app.
 
 ## Sicurezza
 - Nessuna chiave segreta nel repository o nel frontend. La publishable key è pubblica per progetto; i dati sono protetti dalle policy RLS.

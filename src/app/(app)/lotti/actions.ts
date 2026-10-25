@@ -12,6 +12,7 @@ import {
   type FormState,
 } from "@/lib/form-action";
 import { createClient } from "@/lib/supabase/server";
+import { isOwner, OWNER_ONLY_MESSAGE } from "@/lib/team/membership";
 
 function revalidateLots(lotId?: string) {
   revalidatePath("/lotti");
@@ -64,6 +65,7 @@ export async function updateLot(
 }
 
 export async function deleteLot(id: string): Promise<FormState> {
+  if (!(await isOwner())) return fail(OWNER_ONLY_MESSAGE);
   if (!validId(id)) return fail("Lotto non valido");
 
   const supabase = await createClient();

@@ -19,6 +19,7 @@ import {
   sourceSchema,
   supplierSchema,
 } from "@/lib/suppliers/schemas";
+import { isOwner, OWNER_ONLY_MESSAGE } from "@/lib/team/membership";
 
 export async function createSupplier(
   _prev: FormState,
@@ -80,6 +81,7 @@ export async function deleteSource(
   supplierId: string,
   sourceId: string,
 ): Promise<FormState> {
+  if (!(await isOwner())) return fail(OWNER_ONLY_MESSAGE);
   if (!validId(supplierId) || !validId(sourceId)) return fail("Elemento non valido");
   const supabase = await createClient();
   const { error } = await supabase.from("supplier_sources").delete().eq("id", sourceId);
@@ -118,6 +120,7 @@ export async function deleteClaim(
   supplierId: string,
   claimId: string,
 ): Promise<FormState> {
+  if (!(await isOwner())) return fail(OWNER_ONLY_MESSAGE);
   if (!validId(supplierId) || !validId(claimId)) return fail("Elemento non valido");
   const supabase = await createClient();
   const { error } = await supabase.from("supplier_claims").delete().eq("id", claimId);
@@ -147,6 +150,7 @@ export async function addEvaluation(
 }
 
 export async function loadDemoData(): Promise<FormState> {
+  if (!(await isOwner())) return fail(OWNER_ONLY_MESSAGE);
   const supabase = await createClient();
   const { error } = await supabase.rpc("load_demo_data");
   if (error) {
@@ -161,6 +165,7 @@ export async function loadDemoData(): Promise<FormState> {
 }
 
 export async function clearDemoData(): Promise<FormState> {
+  if (!(await isOwner())) return fail(OWNER_ONLY_MESSAGE);
   const supabase = await createClient();
   const { error } = await supabase.rpc("clear_demo_data");
   if (error) return fail("Impossibile rimuovere i dati demo.");
@@ -211,6 +216,7 @@ export async function deleteContact(
   supplierId: string,
   contactId: string,
 ): Promise<FormState> {
+  if (!(await isOwner())) return fail(OWNER_ONLY_MESSAGE);
   if (!validId(supplierId) || !validId(contactId)) return fail("Dati non validi");
   const supabase = await createClient();
   const { error } = await supabase.from("contact_log").delete().eq("id", contactId);
@@ -222,6 +228,7 @@ export async function deleteContact(
 
 /** Elimina il fornitore con fonti, informazioni, valutazioni e contatti. Se ha lotti collegati si ferma. */
 export async function deleteSupplier(supplierId: string): Promise<FormState> {
+  if (!(await isOwner())) return fail(OWNER_ONLY_MESSAGE);
   if (!validId(supplierId)) return fail("Fornitore non valido");
   const supabase = await createClient();
   const { error } = await supabase.from("suppliers").delete().eq("id", supplierId);

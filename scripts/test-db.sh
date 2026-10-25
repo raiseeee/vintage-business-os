@@ -32,9 +32,31 @@ PSQL+=(-d vintage_test)
 
 "${PSQL[@]}" -f "$ROOT/supabase/tests/00_harness.sql"
 
+SHARED="20261025000001_shared_business.sql"
+
+# 1) Tutte le migrazioni precedenti: il database com'era prima dell'attività condivisa.
 for f in "$ROOT"/supabase/migrations/*.sql; do
+  [ "$(basename "$f")" = "$SHARED" ] && continue
   echo ">> migrazione $(basename "$f")"
   "${PSQL[@]}" -f "$f"
 done
 
+# 2) Test del modello a utente singolo: lasciano dati veri dell'utente A (prova della migrazione dei dati).
 "${PSQL[@]}" -f "$ROOT/supabase/tests/01_rls_and_rules.sql"
+
+# 3) Applica l'attività condivisa SUI DATI ESISTENTI e controlla che sia intatto tutto.
+echo ">> migrazione $SHARED"
+"${PSQL[@]}" -f "$ROOT/supabase/migrations/$SHARED"
+
+# Copia del database appena migrato (per provare il rollback sugli stessi dati).
+"$PGBIN/psql" -h "$TMP" -U postgres -d postgres -v ON_ERROR_STOP=1 -q -X \
+  -c "create database vintage_rollback template vintage_test" >/dev/null
+
+# 4) Test del nuovo modello.
+"${PSQL[@]}" -f "$ROOT/supabase/tests/02_shared_business.sql"
+
+# 5) Rollback sulla copia: i dati ci sono ancora e il vecchio modello funziona di nuovo.
+echo ">> rollback (su copia)"
+RB=("$PGBIN/psql" -h "$TMP" -U postgres -d vintage_rollback -v ON_ERROR_STOP=1 -q -X)
+"${RB[@]}" -f "$ROOT/supabase/rollback/20261025000001_shared_business_down.sql"
+"${RB[@]}" -f "$ROOT/supabase/tests/03_rollback.sql"

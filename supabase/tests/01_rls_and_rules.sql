@@ -342,4 +342,4 @@ set local role anon;
 select test.expect_error('select public.load_demo_data()', '42501', 'utente anonimo non può caricare dati demo');
 commit;
 
-\echo '=== TUTTI I TEST SQL SUPERATI ==='
+\echo '=== test 01 (modello a utente singolo) superati ==='

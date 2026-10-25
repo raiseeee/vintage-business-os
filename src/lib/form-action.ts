@@ -60,6 +60,8 @@ export function dbErrorMessage(error: { code?: string; message?: string }): stri
       return "Il dato è collegato ad altri elementi e non può essere modificato o rimosso così.";
     case "23505":
       return "Esiste già un elemento con lo stesso codice o la stessa chiave.";
+    case "42501":
+      return "Non hai il permesso per questa operazione.";
     case "P0002":
       return "Elemento non trovato.";
     default:

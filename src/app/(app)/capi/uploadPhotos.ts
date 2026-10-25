@@ -11,7 +11,7 @@ import { registerPhoto } from "./actions";
  */
 export async function uploadPhotos(
   itemId: string,
-  userId: string,
+  businessId: string,
   files: File[],
 ): Promise<{ uploaded: number; problems: string[] }> {
   const supabase = createClient();
@@ -29,7 +29,7 @@ export async function uploadPhotos(
       continue;
     }
 
-    const path = `${userId}/${itemId}/${crypto.randomUUID()}.${ext}`;
+    const path = `${businessId}/${itemId}/${crypto.randomUUID()}.${ext}`;
     const { error: uploadError } = await supabase.storage
       .from(PHOTO_BUCKET)
       .upload(path, file, { contentType: file.type, upsert: false });

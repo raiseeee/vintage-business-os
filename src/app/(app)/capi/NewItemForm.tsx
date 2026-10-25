@@ -15,11 +15,11 @@ import { uploadPhotos } from "./uploadPhotos";
 export function NewItemForm({
   lots,
   defaults,
-  userId,
+  businessId,
 }: {
   lots: LotRow[];
   defaults: { lotId?: string; code?: string };
-  userId: string;
+  businessId: string;
 }) {
   const router = useRouter();
 
@@ -33,7 +33,7 @@ export function NewItemForm({
     if (!created.ok || !created.itemId) return created;
 
     if (files.length > 0) {
-      const { uploaded, problems } = await uploadPhotos(created.itemId, userId, files);
+      const { uploaded, problems } = await uploadPhotos(created.itemId, businessId, files);
       if (problems.length > 0) {
         // Il capo esiste già: riprovare a crearlo darebbe «codice già esistente».
         return {

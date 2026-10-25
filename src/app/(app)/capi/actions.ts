@@ -21,6 +21,7 @@ import {
   type FormState,
 } from "@/lib/form-action";
 import { createClient } from "@/lib/supabase/server";
+import { getMembership, isOwner, OWNER_ONLY_MESSAGE } from "@/lib/team/membership";
 
 function revalidateItems(itemId?: string, lotId?: string) {
   revalidatePath("/capi");
@@ -162,6 +163,7 @@ export async function updateItem(
 }
 
 export async function deleteItem(id: string): Promise<FormState> {
+  if (!(await isOwner())) return fail(OWNER_ONLY_MESSAGE);
   if (!validId(id)) return fail("Capo non valido");
 
   const supabase = await createClient();
@@ -214,6 +216,7 @@ export async function recordSale(
 }
 
 export async function undoSale(itemId: string): Promise<FormState> {
+  if (!(await isOwner())) return fail(OWNER_ONLY_MESSAGE);
   if (!validId(itemId)) return fail("Capo non valido");
 
   const supabase = await createClient();
@@ -245,11 +248,11 @@ export async function registerPhoto(itemId: string, path: string): Promise<FormS
   if (!validId(itemId)) return fail("Capo non valido");
 
   const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return fail("Sessione scaduta: accedi di nuovo.");
+  const membership = await getMembership();
+  if (!membership) return fail("Sessione scaduta: accedi di nuovo.");
 
-  // Il file deve stare nella cartella dell'utente e di questo capo.
-  if (!photoPathSchema(auth.user.id, itemId).safeParse(path).success) {
+  // Il file deve stare nella cartella dell'attività e di questo capo.
+  if (!photoPathSchema(membership.businessId, itemId).safeParse(path).success) {
     return fail("Percorso foto non valido");
   }
 
@@ -269,6 +272,7 @@ export async function registerPhoto(itemId: string, path: string): Promise<FormS
 }
 
 export async function deletePhoto(itemId: string, photoId: string): Promise<FormState> {
+  if (!(await isOwner())) return fail(OWNER_ONLY_MESSAGE);
   if (!validId(itemId) || !validId(photoId)) return fail("Elemento non valido");
 
   const supabase = await createClient();

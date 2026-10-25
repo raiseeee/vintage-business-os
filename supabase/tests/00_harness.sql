@@ -14,7 +14,7 @@ end;
 $$;
 
 create schema auth;
-create table auth.users (id uuid primary key);
+create table auth.users (id uuid primary key, email text);
 
 create function auth.uid()
 returns uuid
@@ -22,6 +22,17 @@ language sql
 stable
 as $$
   select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
+$$;
+
+-- Come la funzione reale, ma i claim arrivano dalle due impostazioni usate dai test.
+create function auth.jwt()
+returns jsonb
+language sql
+stable
+as $$
+  select jsonb_build_object(
+    'sub', nullif(current_setting('request.jwt.claim.sub', true), ''),
+    'email', nullif(current_setting('request.jwt.claim.email', true), ''))
 $$;
 
 create schema storage;

@@ -6,7 +6,7 @@ import { ITEM_STATUSES, ITEM_STATUS_LABELS } from "@/lib/business/constants";
 import { toMetricItems, toMetricLot } from "@/lib/business/mappers";
 import { getBusinessData, getFirstPhotoUrls } from "@/lib/business/queries";
 import { formatEuro, itemProfit } from "@/lib/metrics";
-import { createClient } from "@/lib/supabase/server";
+import { getMembership } from "@/lib/team/membership";
 import { ImportForm } from "./ImportForm";
 import { NewItemForm } from "./NewItemForm";
 
@@ -67,9 +67,8 @@ export default async function CapiPage(props: PageProps<"/capi">) {
     suggested = `${prefix}${String(Math.max(0, ...used) + 1).padStart(3, "0")}`;
   }
 
-  const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
-  const userId = auth.user?.id ?? "";
+  const membership = await getMembership();
+  const businessId = membership?.businessId ?? "";
 
   const shown = filtered.slice(0, MAX_ROWS);
   const photos = await getFirstPhotoUrls(shown.map((i) => i.id));
@@ -114,7 +113,7 @@ export default async function CapiPage(props: PageProps<"/capi">) {
                 <Link href="/lotti?nuovo=1" className="font-medium text-stone-900 underline">Registra prima un lotto</Link>.
               </p>
             ) : (
-              <NewItemForm lots={sortedLots} defaults={{ lotId: selected?.id, code: suggested }} userId={userId} />
+              <NewItemForm lots={sortedLots} defaults={{ lotId: selected?.id, code: suggested }} businessId={businessId} />
             )}
           </ModalButton>
         </div>

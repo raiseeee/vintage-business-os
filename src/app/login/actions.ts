@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { safeNextPath } from "@/lib/team/next-path";
 
 const credentialsSchema = z.object({
   email: z.email("Inserisci un indirizzo email valido"),
@@ -31,5 +32,6 @@ export async function signIn(
     return { error: "Email o password non corretti" };
   }
 
-  redirect("/dashboard");
+  const next = formData.get("next");
+  redirect(safeNextPath(typeof next === "string" ? next : null));
 }

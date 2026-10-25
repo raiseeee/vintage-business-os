@@ -15,7 +15,7 @@ const future = [
   "Collegamento ai siti di vendita (Vinted, Depop, eBay…) per preparare gli annunci dai capi pronti: titolo, descrizione, prezzo e foto. Per quanto ne so, Vinted e Depop non offrono un'API pubblica ai venditori, quindi all'inizio sarebbe un annuncio da copiare e incollare; la pubblicazione automatica è da verificare sito per sito",
   "Ricerche pianificate e notifiche",
   "Integrazione con un'API di ricerca web",
-  "Sito pubblico, multiutenza e abbonamenti",
+  "Sito pubblico e abbonamenti (la condivisione tra i soci con ruoli è già fatta: pagina Collaboratori)",
 ];
 
 const research = [

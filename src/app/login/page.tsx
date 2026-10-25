@@ -1,9 +1,11 @@
 import { getSupabaseEnv } from "@/lib/env";
+import { safeNextPath } from "@/lib/team/next-path";
 import { LoginForm } from "./LoginForm";
 
 export const metadata = { title: "Accedi · Vintage Business OS" };
 
-export default function LoginPage() {
+export default async function LoginPage(props: PageProps<"/login">) {
+  const { next } = await props.searchParams;
   const configured = getSupabaseEnv() !== null;
 
   return (
@@ -13,7 +15,7 @@ export default function LoginPage() {
         <h1 className="mb-6 text-xl font-semibold text-stone-900">Business OS</h1>
 
         {configured ? (
-          <LoginForm />
+          <LoginForm next={typeof next === "string" ? safeNextPath(next, "") || undefined : undefined} />
         ) : (
           <div className="space-y-2 text-sm text-stone-700">
             <p className="font-medium text-amber-900">Supabase non è ancora configurato.</p>

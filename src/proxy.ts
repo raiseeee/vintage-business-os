@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getSupabaseEnv } from "@/lib/env";
 import { updateSession } from "@/lib/supabase/session";
+import { safeNextPath } from "@/lib/team/next-path";
 
 const LOGIN_PATH = "/login";
 
@@ -26,10 +27,12 @@ export async function proxy(request: NextRequest) {
   const response = getResponse();
 
   if (!isAuthenticated && !isLogin) {
-    return redirectTo(request, LOGIN_PATH, response);
+    // Si ricorda dove voleva andare (es. un link d'invito) per tornarci dopo l'accesso.
+    const target = pathname === "/" ? "" : `?next=${encodeURIComponent(pathname + request.nextUrl.search)}`;
+    return redirectTo(request, LOGIN_PATH + target, response);
   }
   if (isAuthenticated && isLogin) {
-    return redirectTo(request, "/dashboard", response);
+    return redirectTo(request, safeNextPath(request.nextUrl.searchParams.get("next")), response);
   }
   return response;
 }

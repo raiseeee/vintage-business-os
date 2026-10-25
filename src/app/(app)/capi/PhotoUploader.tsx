@@ -6,7 +6,7 @@ import { PHOTO_MAX_BYTES } from "@/lib/business/constants";
 import { uploadPhotos } from "./uploadPhotos";
 
 /** Aggiunge foto a un capo già esistente (scheda del capo). */
-export function PhotoUploader({ itemId, userId }: { itemId: string; userId: string }) {
+export function PhotoUploader({ itemId, businessId }: { itemId: string; businessId: string }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -19,7 +19,7 @@ export function PhotoUploader({ itemId, userId }: { itemId: string; userId: stri
     setErrors([]);
     setDone(0);
 
-    const { uploaded, problems } = await uploadPhotos(itemId, userId, Array.from(files));
+    const { uploaded, problems } = await uploadPhotos(itemId, businessId, Array.from(files));
 
     setErrors(problems);
     setDone(uploaded);

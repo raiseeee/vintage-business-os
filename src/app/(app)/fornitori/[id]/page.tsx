@@ -40,6 +40,7 @@ import {
   updateSupplier,
 } from "../actions";
 import { SupplierForm } from "../SupplierForm";
+import { getMembership } from "@/lib/team/membership";
 
 export const metadata = { title: "Fornitore · Vintage Business OS" };
 
@@ -52,6 +53,7 @@ const EVIDENCE_STYLES: Record<EvidenceLevel, string> = {
 const scoreOptions = [0, 1, 2, 3, 4, 5].map((n) => ({ value: String(n), label: String(n) }));
 
 export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[id]">) {
+  const canDelete = (await getMembership())?.role === "owner";
   const { id } = await props.params;
   if (!uuidSchema.safeParse(id).success) notFound();
 
@@ -240,6 +242,7 @@ export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[
                                 </span>
                               )}
                             </div>
+                            {canDelete && (
                             <ActionForm
                               action={deleteClaim.bind(null, supplier.id, c.id)}
                               submitLabel="Elimina"
@@ -248,6 +251,7 @@ export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[
                               variant="danger"
                               confirm="Eliminare questa informazione?"
                             />
+                            )}
                           </li>
                         );
                       })}
@@ -285,6 +289,7 @@ export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[
                     </p>
                     {s.note && <p className="text-xs text-stone-600">{s.note}</p>}
                   </div>
+                  {canDelete && (
                   <ActionForm
                     action={deleteSource.bind(null, supplier.id, s.id)}
                     submitLabel="Elimina"
@@ -293,6 +298,7 @@ export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[
                     variant="danger"
                     confirm="Eliminare questa fonte?"
                   />
+                  )}
                 </li>
               ))}
             </ul>
@@ -332,6 +338,7 @@ export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[
                     </p>
                     <p className="whitespace-pre-line text-stone-700">{c.summary}</p>
                   </div>
+                  {canDelete && (
                   <ActionForm
                     action={deleteContact.bind(null, supplier.id, c.id)}
                     submitLabel="Elimina"
@@ -340,6 +347,7 @@ export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[
                     variant="danger"
                     confirm="Eliminare questo contatto?"
                   />
+                  )}
                 </li>
               ))}
             </ul>
@@ -400,6 +408,7 @@ export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[
           </details>
         </Section>
 
+        {canDelete && (
         <Section title="Elimina fornitore" description="Rimuove anche fonti, informazioni, valutazioni e contatti. Non si può annullare.">
           <ActionForm
             action={deleteSupplier.bind(null, supplier.id)}
@@ -410,6 +419,7 @@ export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[
             confirm={`Eliminare «${supplier.name}» e tutti i suoi dati? Non si può annullare.`}
           />
         </Section>
+        )}
       </div>
     </>
   );

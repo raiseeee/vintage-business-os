@@ -14,7 +14,7 @@ import {
 import { todayIso } from "@/lib/dates";
 import { allocatedItemCost, formatEuro, itemProfit, saleNetRevenue } from "@/lib/metrics";
 import { centsToInput } from "@/lib/money";
-import { createClient } from "@/lib/supabase/server";
+import { getMembership } from "@/lib/team/membership";
 import { uuidSchema } from "@/lib/suppliers/schemas";
 import { deleteItem, deletePhoto, markReturned, recordSale, undoSale, updateItem } from "../actions";
 import { ItemForm } from "../ItemForm";
@@ -29,15 +29,15 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
   const item = await getItem(id);
   if (!item) notFound();
 
-  const supabase = await createClient();
-  const [lot, sale, photos, suppliers, auth] = await Promise.all([
+  const membership = await getMembership();
+  const canDelete = membership?.role === "owner";
+  const [lot, sale, photos, suppliers] = await Promise.all([
     getLot(item.lot_id),
     getSaleForItem(id),
     getItemPhotos(id),
     getSupplierNames(),
-    supabase.auth.getUser(),
   ]);
-  if (!lot || !auth.data.user) notFound();
+  if (!lot || !membership) notFound();
 
   const supplier = suppliers.find((s) => s.id === lot.supplier_id);
   const metricLot = toMetricLot(lot);
@@ -109,6 +109,7 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
                   ) : (
                     <div className="flex aspect-square w-full items-center justify-center rounded-md bg-stone-100 text-xs text-stone-500">Non disponibile</div>
                   )}
+                  {canDelete && (
                   <ActionForm
                     action={deletePhoto.bind(null, item.id, p.id)}
                     submitLabel="Elimina"
@@ -117,12 +118,13 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
                     variant="danger"
                     confirm="Eliminare questa foto?"
                   />
+                  )}
                 </li>
               ))}
             </ul>
           )}
           <div className="mt-5 border-t border-stone-100 pt-4">
-            <PhotoUploader itemId={item.id} userId={auth.data.user.id} />
+            <PhotoUploader itemId={item.id} businessId={membership.businessId} />
           </div>
         </Section>
 
@@ -168,6 +170,7 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
                     variant="quiet"
                     confirm="Il cliente ha restituito il capo? Uscirà da ricavi e valore dello stock."
                   />
+                  {canDelete && (
                   <ActionForm
                     action={undoSale.bind(null, item.id)}
                     submitLabel="Annulla vendita (inserita per errore)"
@@ -176,6 +179,7 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
                     variant="danger"
                     confirm="Eliminare questa vendita? Il capo tornerà «pronto per la vendita»."
                   />
+                  )}
                 </div>
               )}
             </div>
@@ -212,6 +216,7 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
           <ItemForm action={updateItem.bind(null, item.id)} item={item} submitLabel="Salva modifiche" />
         </Section>
 
+        {canDelete && (
         <Section title="Elimina capo">
           <p className="text-sm text-stone-600">
             Elimina il capo e le sue foto. Non è possibile se ha una vendita registrata: annullala prima.
@@ -225,6 +230,7 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
             confirm="Eliminare definitivamente questo capo e le sue foto?"
           />
         </Section>
+        )}
       </div>
     </>
   );
