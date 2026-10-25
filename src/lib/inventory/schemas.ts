@@ -5,7 +5,8 @@ import { INVENTORY_KINDS } from "./calc";
 /** Numero con la virgola, 0–1000 (es. «0,5» scatole per capo). */
 const perItemQty = z
   .string()
-  .trim()
+  .default("")
+  .transform((s) => s.trim())
   .transform((s, ctx) => {
     if (s === "") return 1;
     const n = Number(s.replace(",", "."));
