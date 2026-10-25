@@ -86,6 +86,9 @@ export default async function DashboardPage() {
       <section className="mt-8">
         <h2 className="mb-3 text-base font-semibold text-stone-900">Esporta i dati</h2>
         <div className="flex flex-wrap gap-2">
+          <a href="/backup" download className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50">
+            Backup completo (JSON)
+          </a>
           {(["capi", "lotti", "vendite"] as const).map((k) => (
             <a key={k} href={`/esporta/${k}`} download className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50">
               CSV {k}
@@ -93,7 +96,7 @@ export default async function DashboardPage() {
           ))}
         </div>
         <p className="mt-2 text-xs text-stone-500">
-          File per Excel: separatore «;», importi con la virgola. Gli importi della dashboard sono quelli reali dei lotti e delle vendite registrate (i dati demo sono inclusi finché non li rimuovi).
+          Il backup JSON contiene tutte le tabelle (le foto solo come percorsi): è un archivio, non un ripristino automatico. File per Excel: separatore «;», importi con la virgola. Gli importi della dashboard sono quelli reali dei lotti e delle vendite registrate (i dati demo sono inclusi finché non li rimuovi).
         </p>
       </section>
     </>
