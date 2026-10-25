@@ -20,6 +20,7 @@ Gestionale per compravendita di abbigliamento vintage e streetwear: fornitori ve
    6. `20261023000001_search.sql` (tabelle della ricerca rimossa: non usate, applicala comunque per tenere allineato lo schema)
    7. `20261025000001_shared_business.sql` — **attività condivisa** (più account sugli stessi dati). Su un database con dati già inseriti **non applicarla prima di aver letto la sezione «Attività condivisa e collaboratori»**.
    8. `20261026000001_inventory.sql` — **inventario** (materiali per capo e attrezzature). Si applica dopo la 7, con un normale copia-e-incolla nello SQL Editor; rollback in `supabase/rollback/20261026000001_inventory_down.sql`.
+   9. `20261027000001_inventory_stock.sql` — **giacenza dei materiali** (quanti ne restano, es. 99/100). Si applica dopo la 8; rollback in `supabase/rollback/20261027000001_inventory_stock_down.sql`.
 
    Se avevi già applicato le prime quattro, **applica solo la quinta** (serve per registrare le vendite).
 
@@ -125,6 +126,7 @@ Pagina **Inventario**: le spese fisse dell'attività, senza l'affitto.
 - Quel costo viene **congelato su ogni vendita** al momento della registrazione (`sales.materials_cost_cents`): cambiare dopo i prezzi non modifica i profitti già registrati. Le vendite fatte prima di compilare l'inventario restano senza materiali. Quando finisci una confezione e ne compri un'altra, spegni la vecchia («Smetti di contare») per non contarle due volte.
 - **Attrezzature** (stampante etichette…): non entrano nel costo dei capi. Compaiono nelle Statistiche come investimento e come «Risultato dopo gli investimenti» (profitto − investimenti). Nessun ammortamento.
 - **Lavaggio e costi di un lotto** restano negli «altri costi» del lotto, non vanno in inventario (si conterebbero due volte).
+- **Giacenza**: la colonna «Rimaste» mostra pezzi rimasti/acquistati (es. 99/100). Ogni vendita consuma i pezzi dei materiali «in uso»; annullare una vendita li restituisce. Le vendite registrate prima della migrazione 9 non hanno consumi, quindi la giacenza parte piena. «Conta nel costo dei capi?» si cambia da Modifica.
 - Tutti i membri aggiungono e modificano; eliminare solo i titolari.
 - **Calcolatore**: scegli un lotto e si compilano costo per capo (già con spedizione in entrata e altri costi del lotto), materiali dall'inventario e prezzo medio previsto dei capi. Link «Calcola la redditività» nella scheda del lotto.
 - L'app funziona anche prima della migrazione: l'Inventario mostra come applicarla e i profitti restano come prima.

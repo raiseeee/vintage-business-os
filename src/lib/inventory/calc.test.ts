@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatUnitEuro, investmentsTotal, materialsCostPerItem, unitCostCents, type InventoryRow } from "./calc";
+import { formatQty, formatUnitEuro, investmentsTotal, materialsCostPerItem, remainingQty, unitCostCents, type InventoryRow } from "./calc";
 
 const row = (o: Partial<InventoryRow>): InventoryRow => ({
   id: "x", kind: "materiale", name: "x", total_cost_cents: 1000, quantity: 100, per_item_qty: 1, in_use: true,
@@ -53,5 +53,15 @@ describe("inventorySchema senza i campi nascosti", () => {
   it("un'attrezzatura senza quantità per capo e senza «in uso» è valida", () => {
     const r = inventorySchema.safeParse({ kind: "attrezzatura", name: "Stampante", total_cost_cents: "200,00", quantity: "1", purchased_at: "2026-10-01", notes: "" });
     expect(r.success && r.data).toMatchObject({ per_item_qty: 0, in_use: false });
+  });
+});
+
+describe("giacenza", () => {
+  it("rimasti = acquistati − consumati", () => expect(remainingQty({ quantity: 100 }, 1)).toBe(99));
+  it("mai sotto zero", () => expect(remainingQty({ quantity: 10 }, 12)).toBe(0));
+  it("accetta consumi frazionari", () => expect(remainingQty({ quantity: 50 }, 0.5)).toBe(49.5));
+  it("formatta senza decimali inutili", () => {
+    expect(formatQty(99)).toBe("99");
+    expect(formatQty(49.5)).toBe("49,5");
   });
 });

@@ -92,4 +92,16 @@ begin
 end;
 $$;
 
+create function test.expect_numeric(p_actual numeric, p_expected numeric, p_label text)
+returns void
+language plpgsql
+as $$
+begin
+  if p_actual is distinct from p_expected then
+    raise exception 'FAIL  %: atteso %, ottenuto %', p_label, p_expected, p_actual;
+  end if;
+  raise notice 'OK    %', p_label;
+end;
+$$;
+
 grant execute on all functions in schema test to anon, authenticated;

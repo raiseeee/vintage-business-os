@@ -28,6 +28,7 @@ function revalidateItems(itemId?: string, lotId?: string) {
   revalidatePath("/lotti");
   revalidatePath("/dashboard");
   revalidatePath("/fornitori");
+  revalidatePath("/inventario");
   if (itemId) revalidatePath(`/capi/${itemId}`);
   if (lotId) revalidatePath(`/lotti/${lotId}`);
 }

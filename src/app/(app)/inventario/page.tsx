@@ -4,23 +4,25 @@ import { PageHeader } from "@/components/PagePlaceholder";
 import { Section, Stat, Tag, formatDate } from "@/components/ui";
 import { todayIso } from "@/lib/dates";
 import {
+  formatQty,
   formatUnitEuro,
   investmentsTotal,
   materialsCostPerItem,
   perItemCostCents,
+  remainingQty,
   unitCostCents,
 } from "@/lib/inventory/calc";
 import { getInventory } from "@/lib/inventory/queries";
 import { formatEuro } from "@/lib/metrics";
 import { getMembership } from "@/lib/team/membership";
-import { createInventoryItem, deleteInventoryItem, setInUse, updateInventoryItem } from "./actions";
+import { createInventoryItem, deleteInventoryItem, updateInventoryItem } from "./actions";
 import { InventoryForm } from "./InventoryForm";
 
 export const metadata = { title: "Inventario · Vintage Business OS" };
 
 export default async function InventarioPage() {
   const canDelete = (await getMembership())?.role === "owner";
-  const { rows, available } = await getInventory();
+  const { rows, available, used, stockTracked } = await getInventory();
   const today = todayIso();
 
   if (!available) {
@@ -57,10 +59,7 @@ export default async function InventarioPage() {
       </div>
 
       <div className="space-y-6">
-        <Section
-          title="Materiali di consumo"
-          description="Sacchetti, scatole, etichette… Il costo di un capo è il costo unitario × quantità per capo. Il valore viene congelato al momento della vendita: cambiare i prezzi dopo non modifica i profitti già registrati."
-        >
+        <Section title="Materiali di consumo">
           {materials.length === 0 ? (
             <p className="text-sm text-stone-600">Nessun materiale. Esempio: 100 sacchetti a 10 € → 0,10 € l&apos;uno, per ogni capo spedito.</p>
           ) : (
@@ -70,7 +69,7 @@ export default async function InventarioPage() {
                   <tr>
                     <th className="py-2 pr-4 font-medium">Voce</th>
                     <th className="py-2 pr-4 text-right font-medium">Costo totale</th>
-                    <th className="py-2 pr-4 text-right font-medium">Quantità</th>
+                    <th className="py-2 pr-4 text-right font-medium">{stockTracked ? "Rimaste" : "Quantità"}</th>
                     <th className="py-2 pr-4 text-right font-medium">Costo unitario</th>
                     <th className="py-2 pr-4 text-right font-medium">Per capo</th>
                     <th className="py-2 pr-4 text-right font-medium">Costo per capo</th>
@@ -86,21 +85,25 @@ export default async function InventarioPage() {
                         <p className="text-xs text-stone-500">Acquistato il {formatDate(r.purchased_at)}</p>
                       </td>
                       <td className="py-3 pr-4 text-right tabular-nums">{formatEuro(r.total_cost_cents)}</td>
-                      <td className="py-3 pr-4 text-right tabular-nums">{r.quantity}</td>
+                      <td className="py-3 pr-4 text-right tabular-nums">
+                        {stockTracked ? (
+                          <>
+                            <span className={remainingQty(r, used[r.id] ?? 0) === 0 ? "font-medium text-red-800" : ""}>
+                              {formatQty(remainingQty(r, used[r.id] ?? 0))}
+                            </span>
+                            /{formatQty(r.quantity)}
+                          </>
+                        ) : (
+                          r.quantity
+                        )}
+                      </td>
                       <td className="py-3 pr-4 text-right tabular-nums">{formatUnitEuro(unitCostCents(r))}</td>
                       <td className="py-3 pr-4 text-right tabular-nums">{String(r.per_item_qty).replace(".", ",")}</td>
                       <td className="py-3 pr-4 text-right tabular-nums">{r.in_use ? formatUnitEuro(perItemCostCents(r)) : "—"}</td>
                       <td className="py-3 pr-4">{r.in_use ? <Tag>In uso</Tag> : <span className="text-xs text-stone-500">Non conta</span>}</td>
                       <td className="py-3">
                         <div className="flex flex-wrap items-center justify-end gap-2">
-                          <ActionForm
-                            action={setInUse.bind(null, r.id, !r.in_use)}
-                            submitLabel={r.in_use ? "Smetti di contare" : "Metti in uso"}
-                            pendingLabel="…"
-                            successMessage={null}
-                            variant="quiet"
-                          />
-                          <ModalButton label="Modifica" title={`Modifica ${r.name}`} variant="link">
+                          <ModalButton label="Modifica" title={`Modifica ${r.name}`} variant="quiet">
                             <InventoryForm action={updateInventoryItem.bind(null, r.id)} item={r} today={today} submitLabel="Salva modifiche" />
                           </ModalButton>
                           {canDelete && (
@@ -123,10 +126,7 @@ export default async function InventarioPage() {
           )}
         </Section>
 
-        <Section
-          title="Attrezzature e investimenti"
-          description="Cose comprate una volta (stampante per le etichette…). Non sono distribuite sui capi: le trovi nelle Statistiche come investimento da recuperare."
-        >
+        <Section title="Attrezzature e investimenti">
           {equipment.length === 0 ? (
             <p className="text-sm text-stone-600">Nessuna attrezzatura.</p>
           ) : (
@@ -139,7 +139,7 @@ export default async function InventarioPage() {
                   </div>
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="text-sm font-medium tabular-nums">{formatEuro(r.total_cost_cents)}</span>
-                    <ModalButton label="Modifica" title={`Modifica ${r.name}`} variant="link">
+                    <ModalButton label="Modifica" title={`Modifica ${r.name}`} variant="quiet">
                       <InventoryForm action={updateInventoryItem.bind(null, r.id)} item={r} today={today} submitLabel="Salva modifiche" />
                     </ModalButton>
                     {canDelete && (

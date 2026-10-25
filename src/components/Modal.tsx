@@ -21,7 +21,7 @@ export function ModalButton({
   description?: string;
   children: ReactNode;
   defaultOpen?: boolean;
-  variant?: "primary" | "secondary" | "link";
+  variant?: "primary" | "secondary" | "link" | "quiet";
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -37,6 +37,7 @@ export function ModalButton({
     primary: "rounded-md bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700",
     secondary: "rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50",
     link: "font-medium text-stone-900 underline",
+    quiet: "rounded-md px-2 py-1 text-sm font-medium text-stone-700 hover:bg-stone-100",
   }[variant];
 
   return (

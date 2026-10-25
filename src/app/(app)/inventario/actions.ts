@@ -40,16 +40,6 @@ export async function updateInventoryItem(id: string, _prev: FormState, formData
   return success;
 }
 
-/** Accende o spegne un materiale (es. quando finisci una confezione e ne compri un'altra a un altro prezzo). */
-export async function setInUse(id: string, inUse: boolean): Promise<FormState> {
-  if (!validId(id)) return fail("Voce non valida");
-  const supabase = await createClient();
-  const { error } = await supabase.from("inventory_items").update({ in_use: inUse }).eq("id", id).eq("kind", "materiale");
-  if (error) return fail(inventoryError(error));
-  refresh();
-  return success;
-}
-
 export async function deleteInventoryItem(id: string): Promise<FormState> {
   if (!(await isOwner())) return fail(OWNER_ONLY_MESSAGE);
   if (!validId(id)) return fail("Voce non valida");

@@ -42,6 +42,16 @@ export function investmentsTotal(rows: InventoryRow[]): number {
   return rows.filter((r) => r.kind === "attrezzatura").reduce((t, r) => t + r.total_cost_cents, 0);
 }
 
+/** Pezzi rimasti di un materiale: acquistati meno consumati dalle vendite (mai sotto zero). */
+export function remainingQty(row: Pick<InventoryRow, "quantity">, used: number): number {
+  return Math.max(0, Math.round((row.quantity - used) * 1000) / 1000);
+}
+
+/** Un numero di pezzi in italiano, senza decimali inutili (99 · 12,5). */
+export function formatQty(n: number): string {
+  return n.toLocaleString("it-IT", { maximumFractionDigits: 3 });
+}
+
 const unitFmt = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 3 });
 
 /** Un importo in centesimi con fino a 3 decimali in euro (serve per i costi unitari: 0,083 €). */
