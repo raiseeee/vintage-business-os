@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { PHOTO_BUCKET } from "@/lib/business/constants";
-import { NO_PHOTO_MESSAGE, statusAfterPhoto, statusForRequest, type ItemStatusKey } from "@/lib/business/status";
+import { NO_PHOTO_MESSAGE, statusForRequest, type ItemStatusKey } from "@/lib/business/status";
 import { fetchAll } from "@/lib/business/paginate";
 import { IMPORT_MAX_BYTES, parseItemImport } from "@/lib/business/import";
 import {
@@ -283,9 +283,13 @@ export async function registerPhoto(itemId: string, path: string): Promise<FormS
   if (error) return fail(dbErrorMessage(error));
 
   // La prima foto porta il capo «da controllare» o «da fotografare» a «pronto per la vendita».
-  const { data: current } = await supabase.from("items").select("status").eq("id", itemId).maybeSingle();
-  const next = current ? statusAfterPhoto(current.status as ItemStatusKey) : null;
-  if (next) await supabase.from("items").update({ status: next }).eq("id", itemId).eq("status", current!.status);
+  // Un solo UPDATE: cambia solo se lo stato è ancora uno di quelli che la foto promuove.
+  const { error: statusError } = await supabase
+    .from("items")
+    .update({ status: "pronto" })
+    .eq("id", itemId)
+    .in("status", ["da_controllare", "da_fotografare"]);
+  if (statusError) return fail(`Foto salvata, ma lo stato non è cambiato: ${dbErrorMessage(statusError)}`);
 
   revalidatePath(`/capi/${itemId}`);
   revalidatePath("/capi");
