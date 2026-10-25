@@ -22,7 +22,9 @@ begin;
 -- ======================================================================
 -- 1. Controlli preliminari e fotografia dei conteggi
 -- ======================================================================
-create temporary table _migration_counts (tbl text primary key, n bigint not null) on commit drop;
+drop table if exists public._migration_counts;
+create table public._migration_counts (tbl text primary key, n bigint not null);
+revoke all on public._migration_counts from public, anon, authenticated;
 
 do $pre$
 declare
@@ -32,7 +34,7 @@ declare
 begin
   foreach t in array array['suppliers', 'supplier_sources', 'supplier_claims', 'supplier_evaluations', 'contact_log', 'purchase_lots', 'items', 'item_photos', 'sales'] loop
     execute format('select count(*) from public.%I', t) into n;
-    insert into _migration_counts values (t, n);
+    insert into public._migration_counts values (t, n);
   end loop;
 
   select array_agg(distinct u) into v_users from (
@@ -717,7 +719,7 @@ declare
   c record;
   v_now bigint;
 begin
-  for c in select m.tbl, m.n as expected from _migration_counts m loop
+  for c in select m.tbl, m.n as expected from public._migration_counts m loop
     execute format('select count(*) from public.%I', c.tbl) into v_now;
     if v_now <> c.expected then
       raise exception 'Migrazione interrotta: % aveva % righe, ora ne ha %.', c.tbl, c.expected, v_now;
@@ -725,5 +727,7 @@ begin
   end loop;
 end;
 $post$;
+
+drop table public._migration_counts;
 
 commit;
