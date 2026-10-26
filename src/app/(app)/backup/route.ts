@@ -11,6 +11,7 @@ const TABLES = [
   "item_photos",
   "sales",
 ] as const;
+const OPTIONAL_TABLES = ["suppliers", "inventory_items"] as const;
 
 /**
  * Copia di sicurezza di tutti i dati visibili all'utente, in un unico file JSON.
@@ -28,6 +29,16 @@ export async function GET() {
       tables[table] = await fetchAll<Record<string, unknown>>((from, to) =>
         supabase.from(table).select("*").order("id").range(from, to),
       );
+    }
+    // Tabelle facoltative: possono mancare finché non si applica la loro migrazione.
+    for (const table of OPTIONAL_TABLES) {
+      try {
+        tables[table] = await fetchAll<Record<string, unknown>>((from, to) =>
+          supabase.from(table).select("*").order("id").range(from, to),
+        );
+      } catch {
+        /* tabella assente: si salta */
+      }
     }
   } catch {
     return new Response("Backup non riuscito: riprova.", { status: 500 });

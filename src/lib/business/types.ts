@@ -3,7 +3,9 @@ import type { ITEM_CONDITIONS, ITEM_STATUSES } from "./constants";
 /** Righe del database (nomi delle colonne come in SQL). */
 export interface LotRow {
   id: string;
-  /** Da chi hai comprato il lotto (testo libero, facoltativo). */
+  /** Fornitore collegato (facoltativo; assente finché non si applica la migrazione dei fornitori). */
+  supplier_id?: string | null;
+  /** Nome del fornitore: riempito dall'app a partire da supplier_id. */
   supplier_name?: string | null;
   code: string;
   purchased_at: string;

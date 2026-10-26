@@ -34,6 +34,7 @@ PSQL+=(-d vintage_test)
 
 SHARED="20261025000001_shared_business.sql"
 REMOVE="20261029000001_remove_suppliers.sql"
+SUPPLIERS="20261030000001_suppliers_simple.sql"
 
 # 1) Tutte le migrazioni precedenti: il database com'era prima dell'attività condivisa.
 for f in "$ROOT"/supabase/migrations/*.sql; do
@@ -75,6 +76,17 @@ SALES_BEFORE_RM="$("${PSQL[@]}" -t -A -c "select count(*) from public.sales s jo
 echo ">> migrazione $REMOVE"
 "${PSQL[@]}" -f "$ROOT/supabase/migrations/$REMOVE"
 "${PSQL[@]}" -v lots_before="$LOTS_BEFORE" -v items_before="$ITEMS_BEFORE" -v sales_before="$SALES_BEFORE_RM" -f "$ROOT/supabase/tests/07_remove_suppliers.sql"
+
+# 4d) Fornitori semplici (nome, contatti, storico lotti).
+echo ">> migrazione $SUPPLIERS"
+"${PSQL[@]}" -f "$ROOT/supabase/migrations/$SUPPLIERS"
+"${PSQL[@]}" -f "$ROOT/supabase/tests/08_suppliers_simple.sql"
+# Rilanciata due volte non deve cambiare nulla né dare errori.
+"${PSQL[@]}" -f "$ROOT/supabase/migrations/$SUPPLIERS"
+# Rollback: il nome torna sul lotto e la tabella sparisce; poi si riapplica.
+"${PSQL[@]}" -f "$ROOT/supabase/rollback/20261030000001_suppliers_simple_down.sql"
+"${PSQL[@]}" -c "select test.expect_equal((select count(*) from public.purchase_lots where code = 'SH-L1' and supplier_name = 'Nuovo fornitore del titolare'), 1, 'rollback fornitori: il nome torna sul lotto')" >/dev/null
+"${PSQL[@]}" -f "$ROOT/supabase/migrations/$SUPPLIERS"
 
 # 5) Rollback sulla copia: i dati ci sono ancora e il vecchio modello funziona di nuovo.
 echo ">> rollback (su copia)"

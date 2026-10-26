@@ -7,16 +7,28 @@ export function LotForm({
   lot,
   defaults,
   submitLabel,
+  suppliers,
 }: {
   action: (prev: FormState, formData: FormData) => Promise<FormState>;
   lot?: LotRow;
   /** Valori iniziali per un nuovo lotto. */
   defaults?: { code?: string; purchasedAt?: string };
   submitLabel: string;
+  /** Fornitori tra cui scegliere (solo in modifica del lotto). */
+  suppliers?: { id: string; name: string }[];
 }) {
   return (
     <ActionForm action={action} submitLabel={submitLabel} className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
+        {lot && suppliers && (
+          <Field
+            label="Fornitore"
+            name="supplier_id"
+            as="select"
+            defaultValue={lot.supplier_id ?? ""}
+            options={[{ value: "", label: "Nessuno" }, ...suppliers.map((s) => ({ value: s.id, label: s.name }))]}
+          />
+        )}
         <Field label="Codice lotto" name="code" required defaultValue={lot?.code ?? defaults?.code ?? ""} hint="Univoco. Lo usi per i codici dei capi." />
         <Field label="Data di acquisto" name="purchased_at" type="date" required defaultValue={lot?.purchased_at ?? defaults?.purchasedAt ?? ""} />
         <Field label="Quantità di capi" name="quantity" required defaultValue={lot?.quantity?.toString() ?? ""} hint="Alla creazione del lotto i capi vengono creati in automatico. Il costo si divide per questo numero." />

@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { getSuppliers } from "@/lib/suppliers/queries";
 import { PHOTO_BUCKET } from "./constants";
 import { fetchAll } from "./paginate";
 import type { BusinessData, ItemRow, LotRow, PhotoRow, SaleRow } from "./types";
@@ -19,6 +20,11 @@ export async function getBusinessData(): Promise<BusinessData> {
       supabase.from("sales").select("*").order("id").range(from, to),
     ),
   ]);
+
+  // Il nome del fornitore sta nella sua tabella: lo si riporta sui lotti per liste, statistiche ed esportazioni.
+  const { rows: suppliers } = await getSuppliers();
+  const names = new Map(suppliers.map((s) => [s.id, s.name]));
+  for (const l of lots) l.supplier_name = l.supplier_id ? (names.get(l.supplier_id) ?? null) : null;
 
   return { lots, items, sales };
 }
@@ -41,7 +47,15 @@ export async function getLot(id: string): Promise<LotRow | null> {
   const supabase = await createClient();
   const { data, error } = await supabase.from("purchase_lots").select("*").eq("id", id).maybeSingle();
   if (error) throw new Error("Impossibile caricare il lotto");
-  return (data as LotRow | null) ?? null;
+  const lot = (data as LotRow | null) ?? null;
+  if (lot) {
+    lot.supplier_name = null;
+    if (lot.supplier_id) {
+      const { data: s } = await supabase.from("suppliers").select("name").eq("id", lot.supplier_id).maybeSingle();
+      lot.supplier_name = (s?.name as string | undefined) ?? null;
+    }
+  }
+  return lot;
 }
 
 export interface PhotoWithUrl extends PhotoRow {

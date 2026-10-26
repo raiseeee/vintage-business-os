@@ -11,7 +11,7 @@ const uuid = "123e4567-e89b-42d3-a456-426614174000";
 const uuid2 = "223e4567-e89b-42d3-a456-426614174000";
 
 const lot = {
-  supplier_name: "Mercato di Prato",
+  supplier_id: uuid,
   code: "L-001",
   purchased_at: "2026-10-22",
   purchase_cost_cents: "150,00",
@@ -32,6 +32,14 @@ describe("lotSchema", () => {
     expect(r.weight_kg).toBe(8.5);
   });
 
+  it("il fornitore: assente = non toccare, vuoto = nessuno", () => {
+    const { supplier_id: _omit, ...without } = lot;
+    void _omit;
+    expect(lotSchema.parse(without).supplier_id).toBeUndefined();
+    expect(lotSchema.parse({ ...lot, supplier_id: "" }).supplier_id).toBeNull();
+    expect(lotSchema.parse(lot).supplier_id).toBe(uuid);
+  });
+
   it("il costo di acquisto è obbligatorio, ma zero è ammesso", () => {
     expect(lotSchema.safeParse({ ...lot, purchase_cost_cents: "" }).success).toBe(false);
     expect(lotSchema.parse({ ...lot, purchase_cost_cents: "0" }).purchase_cost_cents).toBe(0);
@@ -43,7 +51,7 @@ describe("lotSchema", () => {
     expect(lotSchema.safeParse({ ...lot, purchased_at: "2026-02-31" }).success).toBe(false);
     expect(lotSchema.safeParse({ ...lot, code: "=cmd|x" }).success).toBe(false);
     expect(lotSchema.safeParse({ ...lot, code: "" }).success).toBe(false);
-    expect(lotSchema.safeParse({ ...lot, supplier_name: "x".repeat(121) }).success).toBe(false);
+    expect(lotSchema.safeParse({ ...lot, supplier_id: "non-uuid" }).success).toBe(false);
   });
 });
 

@@ -9,6 +9,7 @@ import { uuidSchema } from "@/lib/validation";
 import { createItemsBulk } from "../../capi/actions";
 import { deleteLot, updateLot } from "../actions";
 import { LotForm } from "../LotForm";
+import { getSuppliers } from "@/lib/suppliers/queries";
 import { getMembership } from "@/lib/team/membership";
 
 export const metadata = { title: "Lotto · Vintage Business OS" };
@@ -17,6 +18,7 @@ const toneClass = { neutral: "text-stone-700", good: "text-green-800", bad: "tex
 
 export default async function LottoDetailPage(props: PageProps<"/lotti/[id]">) {
   const canDelete = (await getMembership())?.role === "owner";
+  const suppliers = await getSuppliers();
   const { id } = await props.params;
   if (!uuidSchema.safeParse(id).success) notFound();
 
@@ -142,7 +144,7 @@ export default async function LottoDetailPage(props: PageProps<"/lotti/[id]">) {
               Apri il modulo di modifica
             </summary>
             <div className="mt-4">
-              <LotForm action={updateLot.bind(null, lot.id)} lot={lot} submitLabel="Salva modifiche" />
+              <LotForm action={updateLot.bind(null, lot.id)} lot={lot} submitLabel="Salva modifiche" suppliers={suppliers.available ? suppliers.rows : undefined} />
             </div>
             <div className="mt-6 border-t border-stone-100 pt-4">
               {canDelete && (

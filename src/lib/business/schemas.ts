@@ -15,7 +15,13 @@ import { ITEM_CONDITIONS, MANUAL_ITEM_STATUSES } from "./constants";
 const uuid = z.uuid("Elemento non valido");
 
 export const lotSchema = z.object({
-  supplier_name: missingAsEmpty(shortText),
+  // Assente = non toccare; vuoto = nessun fornitore; altrimenti l'id del fornitore.
+  supplier_id: z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v === "" ? null : v))
+    .pipe(z.union([z.undefined(), z.null(), z.uuid("Fornitore non valido")])),
   code: codeField,
   purchased_at: requiredDate,
   purchase_cost_cents: requiredEuro,
