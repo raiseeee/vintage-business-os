@@ -22,7 +22,7 @@ export function Sidebar({ email, isOwner = false }: { email: string; isOwner?: b
 
   return (
     <aside className="flex w-full shrink-0 flex-col bg-stone-900 text-stone-300 md:sticky md:top-0 md:h-screen md:w-60">
-      <div className="px-5 pb-3 pt-5 md:pb-6 md:pt-7">
+      <div className="flex justify-center px-5 pb-3 pt-5 md:pb-6 md:pt-7">
         <Link href="/dashboard" aria-label="ARCHVNT, vai alla dashboard">
           <Logo tone="bianco" width={150} />
         </Link>
