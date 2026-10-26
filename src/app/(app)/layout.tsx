@@ -20,7 +20,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       <Sidebar email={data.user.email ?? ""} isOwner={membership.role === "owner"} />
-      <main className="flex-1 px-5 py-6 md:px-10 md:py-8">{children}</main>
+      <main className="min-w-0 flex-1 px-5 py-6 md:px-10 md:py-9">{children}</main>
     </div>
   );
 }

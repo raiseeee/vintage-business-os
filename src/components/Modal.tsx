@@ -34,7 +34,7 @@ export function ModalButton({
   }, [defaultOpen]);
 
   const trigger = {
-    primary: "rounded-md bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700",
+    primary: "rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-[#243897]",
     secondary: "rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50",
     link: "font-medium text-stone-900 underline",
     quiet: "rounded-md px-2 py-1 text-sm font-medium text-stone-700 hover:bg-stone-100",

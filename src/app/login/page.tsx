@@ -11,8 +11,8 @@ export default async function LoginPage(props: PageProps<"/login">) {
   return (
     <main className="flex min-h-screen items-center justify-center px-5 py-10">
       <div className="w-full max-w-sm rounded-lg border border-stone-200 bg-white p-6">
-        <p className="text-xs font-medium uppercase tracking-widest text-stone-400">Vintage</p>
-        <h1 className="mb-6 text-xl font-semibold text-stone-900">Business OS</h1>
+        <h1 className="font-display text-3xl font-semibold leading-none text-stone-900">Vintage</h1>
+        <p className="mb-6 mt-1 font-display text-sm font-medium text-stone-500">Business OS</p>
 
         {configured ? (
           <LoginForm next={typeof next === "string" ? safeNextPath(next, "") || undefined : undefined} />

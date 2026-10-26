@@ -15,7 +15,7 @@ export function AcceptForm({ token }: { token: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-md bg-stone-900 px-3 py-2 text-sm font-medium text-white hover:bg-stone-700 disabled:opacity-60"
+        className="w-full rounded-md bg-accent px-3 py-2 text-sm font-medium text-white hover:bg-[#243897] disabled:opacity-60"
       >
         {pending ? "Attendi…" : "Accetta l'invito"}
       </button>

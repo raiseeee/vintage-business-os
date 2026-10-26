@@ -33,7 +33,7 @@ function SubmitButton({
 }) {
   const { pending } = useFormStatus();
   const styles = {
-    primary: "bg-stone-900 px-4 py-2 text-white hover:bg-stone-700",
+    primary: "bg-accent px-4 py-2 text-white hover:bg-[#243897]",
     danger: "px-2 py-1 text-red-700 hover:bg-red-50",
     quiet: "px-2 py-1 text-stone-700 hover:bg-stone-100",
   }[variant];

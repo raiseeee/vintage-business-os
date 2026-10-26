@@ -11,8 +11,8 @@ export function Section({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-lg border border-stone-200 bg-white p-5">
-      <h2 className="text-base font-semibold text-stone-900">{title}</h2>
+    <section className="rounded-lg border border-stone-300/70 bg-white p-5">
+      <h2 className="text-lg font-semibold text-stone-900">{title}</h2>
       {description && <p className="mt-1 text-sm text-stone-600">{description}</p>}
       <div className="mt-4">{children}</div>
     </section>
@@ -84,9 +84,9 @@ export function Stat({
 }) {
   const color = { neutral: "text-stone-900", good: "text-green-800", bad: "text-red-800" }[tone];
   return (
-    <div className="rounded-lg border border-stone-200 bg-white p-4">
+    <div className="relative overflow-hidden rounded-lg border border-stone-300/70 bg-white p-4 pl-6 before:absolute before:left-2 before:top-4 before:size-2 before:rounded-full before:bg-background before:shadow-[inset_0_0_0_1px_var(--color-stone-300)]">
       <p className="text-sm text-stone-500">{label}</p>
-      <p className={`mt-1 text-2xl font-semibold tabular-nums ${color}`}>{value}</p>
+      <p className={`mt-1 font-display text-3xl font-semibold tabular-nums tracking-tight ${color}`}>{value}</p>
       {hint && <p className="mt-1 text-xs text-stone-500">{hint}</p>}
     </div>
   );

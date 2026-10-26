@@ -1,19 +1,79 @@
 @import "tailwindcss";
+@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/hanken-grotesk";
 
+/*
+ * Identità: il cartellino appeso al capo. Grigi d'inchiostro su fondo gesso,
+ * blu da giacca da lavoro come unico accento, angoli netti, titoli in Bricolage Grotesque.
+ * La scala "stone" è ridefinita qui: tutta l'app prende i nuovi colori senza toccare ogni pagina.
+ */
 :root {
-  --background: #fafaf9;
-  --foreground: #1c1917;
+  --background: #f0efea;
+  --foreground: #15171c;
+  --accent: #2f46b8;
+  --accent-soft: #e4e8fa;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+
+  --font-sans: "Hanken Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque Variable", "Hanken Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --color-stone-50: #f6f6f2;
+  --color-stone-100: #ebebe5;
+  --color-stone-200: #dbdbd2;
+  --color-stone-300: #c0c0b5;
+  --color-stone-400: #8d8e84;
+  --color-stone-500: #666760;
+  --color-stone-600: #4c4d47;
+  --color-stone-700: #363732;
+  --color-stone-800: #25262a;
+  --color-stone-900: #15171c;
+  --color-stone-950: #0c0d10;
+
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 7px;
+  --radius-xl: 10px;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family:
-    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, sans-serif;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+}
+
+.tabular-nums,
+td.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
