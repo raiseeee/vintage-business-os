@@ -21,7 +21,7 @@ import { ItemForm } from "../ItemForm";
 import { QuickAction } from "../QuickAction";
 import { PhotoUploader } from "../PhotoUploader";
 
-export const metadata = { title: "Capo · Vintage Business OS" };
+export const metadata = { title: "Capo · ARCHVNT" };
 
 export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
   const { id } = await props.params;

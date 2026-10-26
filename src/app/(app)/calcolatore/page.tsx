@@ -6,7 +6,7 @@ import { allocatedItemCost } from "@/lib/metrics";
 import { toMetricLot } from "@/lib/business/mappers";
 import { Calculator, type LotOption } from "./Calculator";
 
-export const metadata = { title: "Calcolatore · Vintage Business OS" };
+export const metadata = { title: "Calcolatore · ARCHVNT" };
 
 function pick(value: string | string[] | undefined): string {
   return (Array.isArray(value) ? value[0] : value) ?? "";

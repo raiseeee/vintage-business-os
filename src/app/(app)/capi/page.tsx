@@ -12,7 +12,7 @@ import { ImportForm } from "./ImportForm";
 import { NewItemForm } from "./NewItemForm";
 import { QuickAction } from "./QuickAction";
 
-export const metadata = { title: "Capi · Vintage Business OS" };
+export const metadata = { title: "Capi · ARCHVNT" };
 
 const MAX_ROWS = 200;
 const toneClass = { neutral: "text-stone-700", good: "text-green-800", bad: "text-red-800" };

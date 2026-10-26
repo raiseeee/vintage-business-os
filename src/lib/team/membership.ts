@@ -33,7 +33,7 @@ export const getMembership = cache(async (): Promise<Membership | null> => {
         userId: user.id,
         email: user.email ?? "",
         businessId: user.id,
-        businessName: "Vintage Business",
+        businessName: "ARCHVNT",
         role: "owner",
         legacy: true,
       };

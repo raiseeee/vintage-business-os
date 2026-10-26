@@ -8,7 +8,7 @@ import { getSuppliers } from "@/lib/suppliers/queries";
 import { createSupplier } from "./actions";
 import { SupplierForm } from "./SupplierForm";
 
-export const metadata = { title: "Fornitori · Vintage Business OS" };
+export const metadata = { title: "Fornitori · ARCHVNT" };
 
 export default async function FornitoriPage() {
   const { rows, available } = await getSuppliers();

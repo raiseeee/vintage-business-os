@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Vintage Business OS",
+  title: "ARCHVNT",
   description:
     "Gestionale per compravendita di abbigliamento vintage e streetwear: lotti, stock, vendite e margini.",
 };

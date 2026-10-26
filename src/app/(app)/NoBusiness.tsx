@@ -1,3 +1,4 @@
+import { Logo } from "@/components/Logo";
 import { signOut } from "./actions";
 import { createFirstBusiness } from "./actions";
 
@@ -7,7 +8,7 @@ export function NoBusiness({ email }: { email: string }) {
     <main className="flex min-h-screen items-center justify-center px-5 py-10">
       <div className="w-full max-w-md space-y-5 rounded-lg border border-stone-200 bg-white p-6 text-sm text-stone-700">
         <div>
-          <p className="text-xs font-medium uppercase tracking-widest text-stone-400">Vintage</p>
+          <div className="mb-4"><Logo width={140} /></div>
           <h1 className="text-xl font-semibold text-stone-900">Non sei ancora membro di un&apos;attività</h1>
         </div>
         <p>

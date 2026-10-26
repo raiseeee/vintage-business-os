@@ -11,7 +11,7 @@ import { uuidSchema } from "@/lib/validation";
 import { deleteSupplier, updateSupplier } from "../actions";
 import { SupplierForm } from "../SupplierForm";
 
-export const metadata = { title: "Fornitore · Vintage Business OS" };
+export const metadata = { title: "Fornitore · ARCHVNT" };
 
 export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[id]">) {
   const { id } = await props.params;

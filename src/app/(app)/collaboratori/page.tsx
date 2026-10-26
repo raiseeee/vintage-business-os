@@ -7,7 +7,7 @@ import { INVITE_STATUS_LABELS, inviteStatus } from "@/lib/team/invites";
 import { getMembership } from "@/lib/team/membership";
 import { createMemberAccount, inviteMember, promoteMember, removeMember, revokeInvite } from "./actions";
 
-export const metadata = { title: "Collaboratori · Vintage Business OS" };
+export const metadata = { title: "Collaboratori · ARCHVNT" };
 
 const ROLE_LABELS = { owner: "Titolare", collaborator: "Collaboratore" } as const;
 

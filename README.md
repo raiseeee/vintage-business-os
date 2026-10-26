@@ -1,4 +1,4 @@
-# Vintage Business OS
+# ARCHVNT
 
 Gestionale per compravendita di abbigliamento vintage e streetwear: lotti, capi, vendite e margini reali.
 
@@ -71,7 +71,7 @@ Più account lavorano sugli stessi dati (lotti, capi, foto, vendite, statistiche
 Nessun servizio esterno e nessun costo: le email non vengono inviate dall'app.
 
 ### Applicare la migrazione ai dati esistenti (in sicurezza)
-La migrazione assegna tutti i dati attuali all'attività «Vintage Business», con te come titolare, senza perdere né duplicare righe. Se qualcosa non torna (dati di più utenti, conteggi diversi) **si interrompe senza cambiare niente** (è un'unica transazione).
+La migrazione assegna tutti i dati attuali all'attività «ARCHVNT», con te come titolare, senza perdere né duplicare righe. Se qualcosa non torna (dati di più utenti, conteggi diversi) **si interrompe senza cambiare niente** (è un'unica transazione).
 
 1. **Backup.** Il piano gratuito di Supabase non ha backup automatici:
    - dalla Dashboard, pulsante **Backup completo (JSON)** (archivio dei dati);

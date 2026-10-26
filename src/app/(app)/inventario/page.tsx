@@ -18,7 +18,7 @@ import { getMembership } from "@/lib/team/membership";
 import { createInventoryItem, deleteInventoryItem, updateInventoryItem } from "./actions";
 import { InventoryForm } from "./InventoryForm";
 
-export const metadata = { title: "Inventario · Vintage Business OS" };
+export const metadata = { title: "Inventario · ARCHVNT" };
 
 export default async function InventarioPage() {
   const canDelete = (await getMembership())?.role === "owner";

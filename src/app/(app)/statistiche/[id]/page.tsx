@@ -9,7 +9,7 @@ import { formatEuro, saleNetRevenue } from "@/lib/metrics";
 import { bpToText } from "@/lib/profit";
 import { uuidSchema } from "@/lib/validation";
 
-export const metadata = { title: "Statistiche lotto · Vintage Business OS" };
+export const metadata = { title: "Statistiche lotto · ARCHVNT" };
 
 const toneClass = { neutral: "text-stone-700", good: "text-green-800", bad: "text-red-800" };
 

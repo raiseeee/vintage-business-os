@@ -1,3 +1,4 @@
+import { Logo } from "@/components/Logo";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isInviteToken } from "@/lib/team/invites";
@@ -5,7 +6,7 @@ import { getMembership } from "@/lib/team/membership";
 import { createClient } from "@/lib/supabase/server";
 import { AcceptForm } from "./AcceptForm";
 
-export const metadata = { title: "Invito · Vintage Business OS", referrer: "no-referrer" };
+export const metadata = { title: "Invito · ARCHVNT", referrer: "no-referrer" };
 
 /** Fuori dal gruppo (app): chi non ha ancora un'attività deve poter vedere questa pagina. Il proxy richiede comunque il login. */
 export default async function InvitoPage(props: PageProps<"/invito/[token]">) {
@@ -19,7 +20,7 @@ export default async function InvitoPage(props: PageProps<"/invito/[token]">) {
   return (
     <main className="flex min-h-screen items-center justify-center px-5 py-10">
       <div className="w-full max-w-sm rounded-lg border border-stone-200 bg-white p-6">
-        <p className="text-xs font-medium uppercase tracking-widest text-stone-400">Vintage</p>
+        <div className="mb-4"><Logo width={140} /></div>
         <h1 className="mb-4 text-xl font-semibold text-stone-900">Invito all&apos;attività</h1>
 
         {membership ? (

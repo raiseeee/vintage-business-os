@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Logo } from "@/components/Logo";
 import { signOut } from "@/app/(app)/actions";
 
 const NAV = [
@@ -22,8 +23,9 @@ export function Sidebar({ email, isOwner = false }: { email: string; isOwner?: b
   return (
     <aside className="flex w-full shrink-0 flex-col bg-stone-900 text-stone-300 md:sticky md:top-0 md:h-screen md:w-60">
       <div className="px-5 pb-3 pt-5 md:pb-6 md:pt-7">
-        <p className="font-display text-xl font-semibold leading-none tracking-tight text-white">Vintage</p>
-        <p className="mt-1 font-display text-sm font-medium text-stone-400">Business OS</p>
+        <Link href="/dashboard" aria-label="ARCHVNT, vai alla dashboard">
+          <Logo tone="bianco" width={150} />
+        </Link>
       </div>
       <nav className="flex flex-wrap gap-1 px-3 pb-3 md:flex-1 md:flex-col md:flex-nowrap md:overflow-y-auto">
         {[...NAV, ...(isOwner ? OWNER_NAV : [])].map((item) => {

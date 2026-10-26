@@ -46,7 +46,7 @@ export async function GET() {
 
   const counts = Object.fromEntries(Object.entries(tables).map(([k, v]) => [k, v.length]));
   const body = JSON.stringify(
-    { app: "vintage-business-os", createdAt: new Date().toISOString(), counts, tables },
+    { app: "archvnt", createdAt: new Date().toISOString(), counts, tables },
     null,
     2,
   );

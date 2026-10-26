@@ -5,7 +5,7 @@ import { toMetricItems, toMetricLot } from "@/lib/business/mappers";
 import { getBusinessData } from "@/lib/business/queries";
 import { computeDashboard, formatEuro, summarizeByLot } from "@/lib/metrics";
 
-export const metadata = { title: "Dashboard · Vintage Business OS" };
+export const metadata = { title: "Dashboard · ARCHVNT" };
 
 const toneClass = { neutral: "text-stone-700", good: "text-green-800", bad: "text-red-800" };
 

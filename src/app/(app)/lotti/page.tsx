@@ -9,7 +9,7 @@ import { formatEuro, summarizeByLot } from "@/lib/metrics";
 import { createLot } from "./actions";
 import { LotForm } from "./LotForm";
 
-export const metadata = { title: "Acquisti e lotti · Vintage Business OS" };
+export const metadata = { title: "Acquisti e lotti · ARCHVNT" };
 
 const toneClass = { neutral: "text-stone-700", good: "text-green-800", bad: "text-red-800" };
 

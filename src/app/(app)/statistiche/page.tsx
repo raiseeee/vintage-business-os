@@ -8,7 +8,7 @@ import { getInventory } from "@/lib/inventory/queries";
 import { formatEuro } from "@/lib/metrics";
 import { bpToText } from "@/lib/profit";
 
-export const metadata = { title: "Statistiche · Vintage Business OS" };
+export const metadata = { title: "Statistiche · ARCHVNT" };
 
 const toneClass = { neutral: "text-stone-700", good: "text-green-800", bad: "text-red-800" };
 

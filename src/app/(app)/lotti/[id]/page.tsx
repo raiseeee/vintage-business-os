@@ -13,7 +13,7 @@ import { getSuppliers } from "@/lib/suppliers/queries";
 import { PageHeader } from "@/components/PagePlaceholder";
 import { getMembership } from "@/lib/team/membership";
 
-export const metadata = { title: "Lotto · Vintage Business OS" };
+export const metadata = { title: "Lotto · ARCHVNT" };
 
 const toneClass = { neutral: "text-stone-700", good: "text-green-800", bad: "text-red-800" };
 
