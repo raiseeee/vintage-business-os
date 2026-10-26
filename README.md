@@ -60,7 +60,9 @@ Più account lavorano sugli stessi dati (lotti, capi, foto, vendite, statistiche
 - **Collaboratore (collaborator)**: vede tutto, crea e modifica (capi, foto, vendite, resi…). **Non elimina** nulla, non annulla vendite, non gestisce le persone.
 - I permessi li applica il database (RLS + funzioni), non solo l'interfaccia. L'attività non resta mai senza titolare; nessuno può promuovere se stesso.
 
-**Come aggiungere una persona**
+**Creare account dall'app (facoltativo)**: nella pagina Collaboratori, «Crea un account» crea email + password direttamente, senza Supabase. Richiede la chiave **service_role** come variabile segreta del server: su Vercel → *Settings → Environment Variables* → `SUPABASE_SERVICE_ROLE_KEY` (in locale `.env.local`). Mai nel repository né con prefisso `NEXT_PUBLIC_`; con quella chiave il server aggira le policy, quindi l'app la usa solo dopo aver verificato che chi chiama sia titolare. Senza la chiave l'app funziona e questa funzione mostra un avviso. Usa una chiave nuova (quella vecchia incollata in chat va ruotata).
+
+**Come aggiungere una persona (con un account già esistente)**
 1. Crea il suo account: Supabase → *Authentication → Users → Add user* (email + password, *Auto Confirm User*). Così scegli tu la password.
 2. Nell'app, pagina **Collaboratori** (visibile ai titolari) → inserisci la sua email, il ruolo e la scadenza → *Crea invito*.
 3. Copia il link mostrato (si vede **una sola volta**: nel database resta solo l'impronta) e mandaglielo.

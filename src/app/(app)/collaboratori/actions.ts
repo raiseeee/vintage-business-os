@@ -4,7 +4,9 @@ import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { fail, parseForm, validId, type FormState } from "@/lib/form-action";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { newAccountSchema } from "@/lib/team/accounts";
 import { getMembership, isMissingFunction } from "@/lib/team/membership";
 
 const NOT_OWNER = "Solo un titolare può gestire i collaboratori.";
@@ -88,4 +90,52 @@ export async function promoteMember(userId: string): Promise<FormState> {
   if (error) return fail(teamError(error));
   revalidatePath("/collaboratori");
   return { error: null, ok: true };
+}
+
+/**
+ * Crea direttamente un account (email + password) e lo aggiunge all'attività.
+ * Usa la chiave di servizio, quindi prima si verifica che chi chiama sia titolare.
+ */
+export async function createMemberAccount(_prev: FormState, formData: FormData): Promise<FormState> {
+  const owner = await requireOwnerMembership();
+  if (!owner) return fail(NOT_OWNER);
+
+  const parsed = parseForm(newAccountSchema, formData);
+  if (!parsed.ok) return fail(parsed.error); // la password non viene rimandata al browser
+  const { email, password, role } = parsed.data;
+
+  const admin = createAdminClient();
+  if (!admin) {
+    return fail("Manca la chiave di servizio sul server (SUPABASE_SERVICE_ROLE_KEY): vedi il README, sezione «Creare account dall'app».");
+  }
+
+  const { data: created, error: createError } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+  });
+  if (createError || !created.user) {
+    const exists = createError?.code === "email_exists" || /already|registered/i.test(createError?.message ?? "");
+    return fail(
+      exists
+        ? "Esiste già un account con questa email: usa «Invita una persona» qui sotto."
+        : "Account non creato. Controlla email e password e riprova.",
+    );
+  }
+
+  const { error: memberError } = await admin
+    .from("business_members")
+    .insert({ business_id: owner.businessId, user_id: created.user.id, role });
+  if (memberError) {
+    // Niente account orfani: se l'aggiunta fallisce, l'account appena creato viene tolto.
+    await admin.auth.admin.deleteUser(created.user.id);
+    return fail("Account non creato: non è stato possibile aggiungerlo all'attività.");
+  }
+
+  revalidatePath("/collaboratori");
+  return {
+    error: null,
+    ok: true,
+    message: `Account creato per ${email}. Comunicagli la password di persona: l'app non la mostra più.`,
+  };
 }

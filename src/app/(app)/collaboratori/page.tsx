@@ -5,7 +5,7 @@ import { Section, Tag, formatDate } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
 import { INVITE_STATUS_LABELS, inviteStatus } from "@/lib/team/invites";
 import { getMembership } from "@/lib/team/membership";
-import { inviteMember, promoteMember, removeMember, revokeInvite } from "./actions";
+import { createMemberAccount, inviteMember, promoteMember, removeMember, revokeInvite } from "./actions";
 
 export const metadata = { title: "Collaboratori · Vintage Business OS" };
 
@@ -88,8 +88,30 @@ export default async function CollaboratoriPage() {
         </Section>
 
         <Section
+          title="Crea un account"
+          description="Inserisci email e password: l'account nasce subito e la persona entra nell'attività, senza passare da Supabase. Comunicale la password di persona."
+        >
+          <ActionForm action={createMemberAccount} submitLabel="Crea account" pendingLabel="Creazione…" successMessage={null}>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Field label="Email" name="email" type="email" required placeholder="nome@esempio.it" />
+              <Field label="Password (min. 10 caratteri)" name="password" type="password" required />
+              <Field
+                label="Ruolo"
+                name="role"
+                as="select"
+                defaultValue="collaborator"
+                options={[
+                  { value: "collaborator", label: "Collaboratore (non elimina)" },
+                  { value: "owner", label: "Titolare (tutti i poteri)" },
+                ]}
+              />
+            </div>
+          </ActionForm>
+        </Section>
+
+        <Section
           title="Invita una persona"
-          description="La persona deve avere un account (lo crei da Supabase → Authentication → Users) e accedere con la stessa email. Il link è personale e scade."
+          description="La persona deve già avere un account e accedere con la stessa email. Il link è personale e scade."
         >
           <ActionForm action={inviteMember} submitLabel="Crea invito" pendingLabel="Creazione…" successMessage={null}>
             <div className="grid gap-4 sm:grid-cols-3">
