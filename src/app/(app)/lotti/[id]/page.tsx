@@ -152,8 +152,13 @@ export default async function LottoDetailPage(props: PageProps<"/lotti/[id]">) {
                 pendingLabel="Eliminazione…"
                 successMessage={null}
                 variant="danger"
-                confirm="Eliminare definitivamente questo lotto? Si può solo se non contiene capi."
-              />
+                confirm="Eliminare definitivamente questo lotto, i suoi capi e le loro foto? Non si può annullare."
+              >
+                <p className="mb-3 text-sm text-stone-600">
+                  Elimina il lotto insieme a tutti i suoi capi e alle foto. Non si può fare se qualche capo è stato venduto.
+                </p>
+                <Field label="Password del tuo account" name="password" type="password" required />
+              </ActionForm>
               )}
             </div>
           </details>

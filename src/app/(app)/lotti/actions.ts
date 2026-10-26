@@ -11,6 +11,9 @@ import {
   success,
   type FormState,
 } from "@/lib/form-action";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { PHOTO_BUCKET } from "@/lib/business/constants";
+import { getSupabaseEnv } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import { isOwner, OWNER_ONLY_MESSAGE } from "@/lib/team/membership";
 
@@ -77,20 +80,56 @@ export async function updateLot(
   return success;
 }
 
-export async function deleteLot(id: string): Promise<FormState> {
+/**
+ * Elimina il lotto con i suoi capi e le loro foto. Richiede la password dell'account con cui si è
+ * entrati. Si ferma se un capo ha una vendita registrata (prima va annullata).
+ */
+export async function deleteLot(id: string, _prev: FormState, formData: FormData): Promise<FormState> {
   if (!(await isOwner())) return fail(OWNER_ONLY_MESSAGE);
   if (!validId(id)) return fail("Lotto non valido");
 
+  const password = String(formData.get("password") ?? "");
+  if (!password) return fail("Inserisci la password del tuo account per confermare.");
+
   const supabase = await createClient();
-  const { error } = await supabase.from("purchase_lots").delete().eq("id", id);
-  if (error) {
-    return fail(
-      error.code === "23503"
-        ? "Il lotto contiene dei capi: eliminali prima."
-        : dbErrorMessage(error),
-    );
+  const { data: userData } = await supabase.auth.getUser();
+  const email = userData.user?.email;
+  const env = getSupabaseEnv();
+  if (!email || !env) return fail("Sessione scaduta: accedi di nuovo.");
+
+  // La password si verifica con un client a parte, che non tocca la sessione in corso.
+  const checker = createSupabaseClient(env.url, env.publishableKey, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  });
+  const { error: authError } = await checker.auth.signInWithPassword({ email, password });
+  if (authError) return fail("Password non corretta.");
+
+  const { data: items } = await supabase.from("items").select("id").eq("lot_id", id);
+  const itemIds = (items ?? []).map((i) => i.id as string);
+
+  if (itemIds.length > 0) {
+    const { count } = await supabase.from("sales").select("id", { count: "exact", head: true }).in("item_id", itemIds);
+    if ((count ?? 0) > 0) {
+      return fail("Alcuni capi di questo lotto sono stati venduti: annulla prima le vendite, poi potrai eliminare il lotto.");
+    }
   }
 
+  const { data: photos } = itemIds.length
+    ? await supabase.from("item_photos").select("storage_path").in("item_id", itemIds)
+    : { data: [] as { storage_path: string }[] };
+
+  if (itemIds.length > 0) {
+    const { error: itemsError } = await supabase.from("items").delete().eq("lot_id", id);
+    if (itemsError) return fail(dbErrorMessage(itemsError));
+  }
+
+  const { error } = await supabase.from("purchase_lots").delete().eq("id", id);
+  if (error) return fail(dbErrorMessage(error));
+
+  const paths = (photos ?? []).map((p) => p.storage_path as string);
+  if (paths.length > 0) await supabase.storage.from(PHOTO_BUCKET).remove(paths);
+
+  revalidatePath("/capi");
   revalidateLots();
   redirect("/lotti");
 }
