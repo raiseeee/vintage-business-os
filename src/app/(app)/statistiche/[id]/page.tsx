@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PageHeader } from "@/components/PagePlaceholder";
 import { ItemStatusBadge, Stat, formatDate, toneOf } from "@/components/ui";
 import { computeItemStats, computeLotStats } from "@/lib/business/lotStats";
 import { getBusinessData } from "@/lib/business/queries";
@@ -25,18 +26,16 @@ export default async function StatisticheLottoPage(props: PageProps<"/statistich
 
   return (
     <>
-      <Link href="/statistiche" className="mb-3 inline-block text-sm text-stone-600 hover:text-stone-900">
-        ← Tutti i lotti
-      </Link>
-      <header className="mb-6">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold text-stone-900">Statistiche del lotto {lot.code}</h1>
-        </div>
-        <p className="mt-1 text-sm text-stone-600">
-          {lot.supplier_name ? `${lot.supplier_name} · ` : ""}acquistato il {formatDate(lot.purchased_at)} ·{" "}
-          <Link href={`/lotti/${lot.id}`} className="underline underline-offset-2 hover:text-stone-900">scheda del lotto</Link>
-        </p>
-      </header>
+      <PageHeader
+        title={`Statistiche del lotto ${lot.code}`}
+        back={{ href: "/statistiche", label: "Tutti i lotti" }}
+        description={`${lot.supplier_name ? `${lot.supplier_name} · ` : ""}acquistato il ${formatDate(lot.purchased_at)}`}
+        actions={
+          <Link href={`/lotti/${lot.id}`} className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50">
+            Scheda del lotto
+          </Link>
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Stat label="Costo del lotto" value={formatEuro(row.totalCost)} hint={`${lot.quantity} capi dichiarati`} />

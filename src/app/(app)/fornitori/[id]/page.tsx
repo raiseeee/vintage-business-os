@@ -26,8 +26,10 @@ export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[
 
   return (
     <>
-      <Link href="/fornitori" className="mb-3 inline-block text-sm text-stone-600 hover:text-stone-900">← Fornitori</Link>
-      <PageHeader title={supplier.name} description={[supplier.email, supplier.phone, supplier.address].filter(Boolean).join(" · ") || "Nessun contatto salvato."} />
+      <PageHeader
+        title={supplier.name}
+        back={{ href: "/fornitori", label: "Tutti i fornitori" }}
+        description={[supplier.email, supplier.phone, supplier.address].filter(Boolean).join(" · ") || "Nessun contatto salvato."} />
 
       <div className="space-y-6">
         <Section title="Storico lotti" description={own.length > 0 ? `${own.length} lotti · ${formatEuro(total)} spesi in totale` : undefined}>

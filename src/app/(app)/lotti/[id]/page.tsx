@@ -10,6 +10,7 @@ import { createItemsBulk } from "../../capi/actions";
 import { deleteLot, updateLot } from "../actions";
 import { LotForm } from "../LotForm";
 import { getSuppliers } from "@/lib/suppliers/queries";
+import { PageHeader } from "@/components/PagePlaceholder";
 import { getMembership } from "@/lib/team/membership";
 
 export const metadata = { title: "Lotto · Vintage Business OS" };
@@ -35,25 +36,23 @@ export default async function LottoDetailPage(props: PageProps<"/lotti/[id]">) {
 
   return (
     <>
-      <Link href="/lotti" className="mb-3 inline-block text-sm text-stone-600 hover:text-stone-900">
-        ← Tutti i lotti
-      </Link>
-
-      <header className="mb-6">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold text-stone-900">Lotto {lot.code}</h1>
-        </div>
-        <p className="mt-1 text-sm text-stone-600">
-          {lot.supplier_name ?? "Fornitore non indicato"}
-          {" · acquistato il "}
-          {formatDate(lot.purchased_at)}
-          {lot.weight_kg !== null && ` · ${lot.weight_kg} kg`}
-          {" · "}
-          <Link href={`/calcolatore?lotto=${lot.id}`} className="underline underline-offset-2 hover:text-stone-900">
+      <PageHeader
+        title={`Lotto ${lot.code}`}
+        back={{ href: "/lotti", label: "Tutti i lotti" }}
+        description={
+          <>
+            {lot.supplier_name ?? "Fornitore non indicato"}
+            {" · acquistato il "}
+            {formatDate(lot.purchased_at)}
+            {lot.weight_kg !== null && ` · ${lot.weight_kg} kg`}
+          </>
+        }
+        actions={
+          <Link href={`/calcolatore?lotto=${lot.id}`} className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50">
             Calcola la redditività
           </Link>
-        </p>
-      </header>
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Stat

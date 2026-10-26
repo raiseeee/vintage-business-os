@@ -87,6 +87,7 @@ export default async function CapiPage(props: PageProps<"/capi">) {
     <>
       <PageHeader
           title={currentLot ? `Capi del lotto ${currentLot.code}` : "Capi"}
+        back={currentLot ? { href: "/capi", label: "Tutti i lotti" } : undefined}
           description={
             currentLot
               ? `${currentLot.supplier_name ? `${currentLot.supplier_name} · ` : ""}acquistato il ${formatDate(currentLot.purchased_at)}`
@@ -192,9 +193,6 @@ export default async function CapiPage(props: PageProps<"/capi">) {
         )
       ) : (
         <>
-          <Link href="/capi" className="mb-3 inline-block text-sm text-stone-600 hover:text-stone-900">
-            ← Tutti i lotti
-          </Link>
       <div className="mb-4 flex flex-wrap gap-2">
         <Link
           href={listHref({ q, lot: lotFilter })}

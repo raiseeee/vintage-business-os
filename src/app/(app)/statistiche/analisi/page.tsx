@@ -23,9 +23,8 @@ export default async function StatistichePage(props: PageProps<"/statistiche/ana
       <PageHeader
         title="Analisi per marca, categoria e canale"
         description="Cosa ti rende di più, calcolato solo dalle tue vendite registrate. Nessuna stima di mercato."
+        back={{ href: "/statistiche", label: "Statistiche per lotto" }}
       />
-
-      <Link href="/statistiche" className="mb-3 inline-block text-sm text-stone-600 hover:text-stone-900">← Statistiche per lotto</Link>
 
       <div className="mb-4 flex flex-wrap gap-2">
         {GROUP_KEYS.map((k) => (

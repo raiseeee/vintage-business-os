@@ -16,6 +16,7 @@ import { centsToInput } from "@/lib/money";
 import { getMembership } from "@/lib/team/membership";
 import { uuidSchema } from "@/lib/validation";
 import { deleteItem, deletePhoto, markReturned, recordSale, undoSale, updateItem } from "../actions";
+import { PageHeader } from "@/components/PagePlaceholder";
 import { ItemForm } from "../ItemForm";
 import { QuickAction } from "../QuickAction";
 import { PhotoUploader } from "../PhotoUploader";
@@ -48,35 +49,37 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
 
   return (
     <>
-      <Link href={`/capi?lot=${item.lot_id}`} className="mb-3 inline-block text-sm text-stone-600 hover:text-stone-900">
-        ← {lot ? `Capi del lotto ${lot.code}` : "Tutti i capi"}
-      </Link>
-
-      <header className="mb-6">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold text-stone-900">{item.code}</h1>
-          <ItemStatusBadge status={item.status} />
-          {item.status === "pubblicato" && item.listing_channel && <Tag>su {item.listing_channel}</Tag>}
-          <QuickAction item={item} variant="secondary" />
-        </div>
-        <p className="mt-1 text-sm text-stone-600">
-          {[item.brand, item.category, item.size].filter(Boolean).join(" · ") || "Nessun dettaglio"}
-          {" · lotto "}
-          <Link href={`/lotti/${lot.id}`} className="underline underline-offset-2 hover:text-stone-900">{lot.code}</Link>
-          {lot.supplier_name && ` · ${lot.supplier_name}`}
-          {!isSold && (
-            <>
-              {" · "}
+      <PageHeader
+        title={item.code}
+        back={{ href: `/capi?lot=${item.lot_id}`, label: lot ? `Capi del lotto ${lot.code}` : "Tutti i capi" }}
+        badges={
+          <>
+            <ItemStatusBadge status={item.status} />
+            {item.status === "pubblicato" && item.listing_channel && <Tag>su {item.listing_channel}</Tag>}
+          </>
+        }
+        description={
+          <>
+            {[item.brand, item.category, item.size].filter(Boolean).join(" · ") || "Nessun dettaglio"}
+            {" · lotto "}
+            <Link href={`/lotti/${lot.id}`} className="underline underline-offset-2 hover:text-stone-900">{lot.code}</Link>
+            {lot.supplier_name && ` · ${lot.supplier_name}`}
+          </>
+        }
+        actions={
+          <>
+            {!isSold && (
               <Link
                 href={`/calcolatore?acquisto=${encodeURIComponent(centsToInput(unitCost))}&vendita=${encodeURIComponent(centsToInput(item.expected_price_cents))}`}
-                className="underline underline-offset-2 hover:text-stone-900"
+                className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
               >
                 Calcola il profitto
               </Link>
-            </>
-          )}
-        </p>
-      </header>
+            )}
+            <QuickAction item={item} variant="secondary" />
+          </>
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Stat label="Costo attribuito" value={formatEuro(unitCost)} hint={`Costo del lotto diviso ${lot.quantity} capi`} />

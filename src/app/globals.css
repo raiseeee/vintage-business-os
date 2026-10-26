@@ -77,3 +77,86 @@ td.tabular-nums {
     animation-duration: 0.01ms !important;
   }
 }
+
+/*
+ * Movimento: poco e con uno scopo.
+ * - la pagina entra con un leggero scorrimento (una volta per cambio pagina);
+ * - i riquadri dei numeri compaiono uno dopo l'altro, come cartellini appesi in fila;
+ * - le finestre si aprono con uno zoom breve; i pulsanti rispondono alla pressione.
+ */
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes tag-in {
+  from { opacity: 0; transform: translateY(10px) rotate(-1.2deg); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes dialog-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.page-in {
+  animation: page-in 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stat-card {
+  animation: tag-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -8px rgb(21 23 28 / 0.25);
+}
+.stat-card:nth-child(1) { animation-delay: 60ms; }
+.stat-card:nth-child(2) { animation-delay: 120ms; }
+.stat-card:nth-child(3) { animation-delay: 180ms; }
+.stat-card:nth-child(4) { animation-delay: 240ms; }
+.stat-card:nth-child(5) { animation-delay: 300ms; }
+.stat-card:nth-child(n + 6) { animation-delay: 360ms; }
+
+dialog[open] {
+  animation: dialog-in 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+dialog[open]::backdrop {
+  animation: backdrop-in 200ms ease both;
+}
+
+button:not(:disabled),
+a[download] {
+  transition: background-color 150ms ease, color 150ms ease, transform 120ms ease, opacity 150ms ease;
+}
+button:not(:disabled):active,
+a[download]:active {
+  transform: scale(0.97);
+}
+
+tbody tr {
+  transition: background-color 120ms ease;
+}
+
+.back-arrow {
+  display: inline-block;
+  transition: transform 160ms ease;
+}
+.back-link:hover .back-arrow {
+  transform: translateX(-3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-in,
+  .stat-card,
+  dialog[open],
+  dialog[open]::backdrop {
+    animation: none;
+  }
+  .stat-card:hover,
+  button:not(:disabled):active {
+    transform: none;
+  }
+}
