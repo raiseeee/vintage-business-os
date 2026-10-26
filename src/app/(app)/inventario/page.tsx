@@ -46,16 +46,18 @@ export default async function InventarioPage() {
       <PageHeader
         title="Inventario"
         description="Le spese fisse dell'attività, senza l'affitto. I materiali entrano nel costo di ogni capo venduto; le attrezzature sono investimenti a parte."
+        actions={
+          <ModalButton label="Nuova voce" title="Nuova voce dell'inventario" description="Un materiale di consumo oppure un'attrezzatura.">
+            <InventoryForm action={createInventoryItem} today={today} submitLabel="Aggiungi" />
+          </ModalButton>
+        }
       />
 
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div className="grid flex-1 gap-4 sm:grid-cols-2 xl:max-w-2xl">
+      <div className="mb-6">
+        <div className="grid gap-4 sm:grid-cols-2 xl:max-w-2xl">
           <Stat label="Materiali per capo" value={formatEuro(perItem)} hint="Somma dei materiali «in uso»: si sottrae a ogni vendita nuova" />
           <Stat label="Investimenti in attrezzature" value={formatEuro(investmentsTotal(rows))} hint="Non entra nel costo dei capi" />
         </div>
-        <ModalButton label="Aggiungi" title="Aggiungi all'inventario" description="Un materiale di consumo oppure un'attrezzatura.">
-          <InventoryForm action={createInventoryItem} today={today} submitLabel="Aggiungi" />
-        </ModalButton>
       </div>
 
       <div className="space-y-6">

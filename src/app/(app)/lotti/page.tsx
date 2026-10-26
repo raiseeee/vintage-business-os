@@ -26,12 +26,11 @@ export default async function LottiPage(props: PageProps<"/lotti">) {
 
   return (
     <>
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <PageHeader
-          title="Acquisti e lotti"
-          description="Ogni lotto con i suoi costi e il risultato economico dei capi venduti."
-        />
-        <div className="flex gap-2">
+      <PageHeader
+        title="Acquisti e lotti"
+        description="Ogni lotto con i suoi costi e il risultato economico dei capi venduti."
+        actions={
+          <>
           {/* Download di un file: <a download>, non Link, che precaricherebbe (cioè eseguirebbe) l'esportazione. */}
           <a
             href="/esporta/lotti"
@@ -55,8 +54,9 @@ export default async function LottiPage(props: PageProps<"/lotti">) {
               submitLabel="Crea lotto"
             />
           </ModalButton>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {sorted.length === 0 ? (
         <div className="rounded-lg border border-dashed border-stone-300 bg-white p-8 text-center">

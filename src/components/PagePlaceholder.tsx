@@ -1,13 +1,21 @@
+import type { ReactNode } from "react";
+
 export function PageHeader({
   title,
   description,
+  actions,
 }: {
   title: string;
   description: string;
+  /** Pulsanti della pagina: sempre in alto a destra, sulla riga del titolo. */
+  actions?: ReactNode;
 }) {
   return (
     <header className="mb-7 border-b border-stone-300 pb-5">
-      <h1 className="text-3xl font-semibold leading-tight text-stone-900 md:text-4xl">{title}</h1>
+      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
+        <h1 className="min-w-0 text-3xl font-semibold leading-tight text-stone-900 md:text-4xl">{title}</h1>
+        {actions && <div className="flex flex-wrap items-center gap-2 pt-1">{actions}</div>}
+      </div>
       <p className="mt-2 max-w-xl text-sm text-stone-600">{description}</p>
     </header>
   );

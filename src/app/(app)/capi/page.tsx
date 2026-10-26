@@ -85,8 +85,7 @@ export default async function CapiPage(props: PageProps<"/capi">) {
 
   return (
     <>
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <PageHeader
+      <PageHeader
           title={currentLot ? `Capi del lotto ${currentLot.code}` : "Capi"}
           description={
             currentLot
@@ -95,8 +94,8 @@ export default async function CapiPage(props: PageProps<"/capi">) {
                 ? "Scegli un lotto per vedere i suoi capi."
                 : "Tutti i capi, di tutti i lotti."
           }
-        />
-        <div className="flex gap-2">
+        actions={
+          <>
           {/* Download di un file: <a download>, non Link, che precaricherebbe (cioè eseguirebbe) l'esportazione. */}
           <a
             href="/esporta/capi"
@@ -131,8 +130,9 @@ export default async function CapiPage(props: PageProps<"/capi">) {
               <NewItemForm lots={sortedLots} defaults={{ lotId: selected?.id, code: suggested }} businessId={businessId} />
             )}
           </ModalButton>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {choosingLot ? (
         sortedLots.length === 0 ? (

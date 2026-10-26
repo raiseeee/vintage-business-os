@@ -38,12 +38,15 @@ export default async function FornitoriPage() {
 
   return (
     <>
-      <PageHeader title="Fornitori" description="Da chi compri i lotti, con i contatti e lo storico degli acquisti." />
-      <div className="mb-6 flex justify-end">
-        <ModalButton label="Aggiungi fornitore" title="Nuovo fornitore">
-          <SupplierForm action={createSupplier} submitLabel="Aggiungi" />
-        </ModalButton>
-      </div>
+      <PageHeader
+        title="Fornitori"
+        description="Da chi compri i lotti, con i contatti e lo storico degli acquisti."
+        actions={
+          <ModalButton label="Nuovo fornitore" title="Nuovo fornitore">
+            <SupplierForm action={createSupplier} submitLabel="Aggiungi" />
+          </ModalButton>
+        }
+      />
 
       <Section title="I tuoi fornitori">
         {rows.length === 0 ? (
