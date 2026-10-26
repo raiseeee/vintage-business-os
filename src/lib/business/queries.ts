@@ -9,7 +9,7 @@ import type { BusinessData, ItemRow, LotRow, PhotoRow, SaleRow } from "./types";
 export async function getBusinessData(): Promise<BusinessData> {
   const supabase = await createClient();
 
-  const [lots, items, sales] = await Promise.all([
+  const [lots, items, sales, { rows: suppliers }] = await Promise.all([
     fetchAll<LotRow>((from, to) =>
       supabase.from("purchase_lots").select("*").order("id").range(from, to),
     ),
@@ -19,10 +19,10 @@ export async function getBusinessData(): Promise<BusinessData> {
     fetchAll<SaleRow>((from, to) =>
       supabase.from("sales").select("*").order("id").range(from, to),
     ),
+    getSuppliers(),
   ]);
 
   // Il nome del fornitore sta nella sua tabella: lo si riporta sui lotti per liste, statistiche ed esportazioni.
-  const { rows: suppliers } = await getSuppliers();
   const names = new Map(suppliers.map((s) => [s.id, s.name]));
   for (const l of lots) l.supplier_name = l.supplier_id ? (names.get(l.supplier_id) ?? null) : null;
 

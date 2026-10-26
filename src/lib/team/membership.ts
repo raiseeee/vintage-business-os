@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/supabase/user";
 
 export type Role = "owner" | "collaborator";
 
@@ -22,8 +23,7 @@ export type Membership = {
  */
 export const getMembership = cache(async (): Promise<Membership | null> => {
   const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
-  const user = auth.user;
+  const user = await getAuthUser();
   if (!user) return null;
 
   const { data, error } = await supabase.rpc("my_membership");
