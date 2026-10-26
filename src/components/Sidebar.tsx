@@ -25,7 +25,7 @@ export function Sidebar({ email, isOwner = false }: { email: string; isOwner?: b
         <p className="font-display text-xl font-semibold leading-none tracking-tight text-white">Vintage</p>
         <p className="mt-1 font-display text-sm font-medium text-stone-400">Business OS</p>
       </div>
-      <nav className="flex gap-1 overflow-x-auto px-3 pb-3 md:flex-1 md:flex-col md:overflow-y-auto md:overflow-x-visible">
+      <nav className="flex flex-wrap gap-1 px-3 pb-3 md:flex-1 md:flex-col md:flex-nowrap md:overflow-y-auto">
         {[...NAV, ...(isOwner ? OWNER_NAV : [])].map((item) => {
           const active =
             pathname === item.href || pathname.startsWith(`${item.href}/`);
