@@ -21,7 +21,7 @@ export default async function CollaboratoriPage() {
     return (
       <>
         <PageHeader title="Collaboratori" description="Chi lavora con te sui dati dell'attività." />
-        <p className="rounded-md border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <p className="rounded-md border border-stone-300 bg-stone-100 p-4 text-sm text-stone-900">
           Il database è ancora nella versione a un solo utente. Per aggiungere collaboratori applica la migrazione
           «attività condivisa» seguendo le istruzioni del README (dopo aver scaricato un backup).
         </p>
@@ -51,15 +51,15 @@ export default async function CollaboratoriPage() {
         <Section title="Membri">
           <ul className="divide-y divide-stone-100">
             {((members.data ?? []) as MemberRow[]).map((u) => (
-              <li key={u.user_id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+              <li key={u.user_id} className="flex flex-wrap items-center justify-between gap-4 py-4">
                 <div>
-                  <p className="text-sm font-medium text-stone-900">
+                  <p className="text-sm font-semibold text-stone-900">
                     {u.email}
                     {u.is_me && <span className="text-stone-500"> (tu)</span>}
                   </p>
                   <p className="text-xs text-stone-500">Dal {formatDate(u.joined_at)}</p>
                 </div>
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-wrap items-center gap-4">
                   <Tag>{ROLE_LABELS[u.role as keyof typeof ROLE_LABELS]}</Tag>
                   {u.role === "collaborator" && (
                     <>
@@ -139,15 +139,15 @@ export default async function CollaboratoriPage() {
               {(invites.data ?? []).map((i) => {
                 const status = inviteStatus(i);
                 return (
-                  <li key={i.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                  <li key={i.id} className="flex flex-wrap items-center justify-between gap-4 py-4">
                     <div>
-                      <p className="text-sm font-medium text-stone-900">{i.email}</p>
+                      <p className="text-sm font-semibold text-stone-900">{i.email}</p>
                       <p className="text-xs text-stone-500">
                         {ROLE_LABELS[i.role as keyof typeof ROLE_LABELS]} · creato il {formatDate(i.created_at)}
                         {status === "in_attesa" && ` · scade il ${formatDate(i.expires_at)}`}
                       </p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                       <Tag>{INVITE_STATUS_LABELS[status]}</Tag>
                       {status === "in_attesa" && (
                         <ActionForm

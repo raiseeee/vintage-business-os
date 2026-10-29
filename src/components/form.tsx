@@ -1,5 +1,6 @@
 "use client";
 
+import { Check, CircleAlert } from "lucide-react";
 import { createContext, useActionState, useContext, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 
@@ -33,15 +34,15 @@ function SubmitButton({
 }) {
   const { pending } = useFormStatus();
   const styles = {
-    primary: "bg-accent px-4 py-2 text-white hover:bg-[#243897]",
-    danger: "px-2 py-1 text-red-700 hover:bg-red-50",
-    quiet: "px-2 py-1 text-stone-700 hover:bg-stone-100",
+    primary: "bg-stone-900 px-4 py-2 text-white hover:bg-stone-700",
+    danger: "px-2 py-2 text-stone-900 hover:bg-stone-100",
+    quiet: "px-2 py-2 text-stone-700 hover:bg-stone-100",
   }[variant];
   return (
     <button
       type="submit"
       disabled={pending}
-      className={`rounded-md text-sm font-medium disabled:opacity-60 ${styles}`}
+      className={`rounded-md text-sm font-semibold disabled:opacity-60 ${styles}`}
     >
       {pending ? pendingLabel : label}
     </button>
@@ -88,15 +89,17 @@ export function ActionForm({
       }}
     >
       <ValuesContext.Provider value={state.values}>{children}</ValuesContext.Provider>
-      <div className="mt-3 flex flex-wrap items-center gap-3">
+      <div className="mt-4 flex flex-wrap items-center gap-4">
         <SubmitButton label={submitLabel} pendingLabel={pendingLabel} variant={variant} />
         {state.error && (
-          <p role="alert" className="whitespace-pre-line text-sm text-red-700">
+          <p role="alert" className="flex items-start gap-2 whitespace-pre-line text-sm font-semibold text-stone-900">
+            <CircleAlert aria-hidden className="mt-2 size-4 shrink-0" strokeWidth={1.5} />
             {state.error}
           </p>
         )}
         {state.ok && (state.message ?? successMessage) && (
-          <p role="status" className="break-all text-sm text-green-700">
+          <p role="status" className="flex items-start gap-2 break-all text-sm text-stone-900">
+            <Check aria-hidden className="mt-2 size-4 shrink-0" strokeWidth={1.5} />
             {state.message ?? successMessage}
           </p>
         )}
@@ -106,7 +109,7 @@ export function ActionForm({
 }
 
 const controlClass =
-  "mt-1 w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-stone-900 focus:outline-none";
+  "mt-2 w-full rounded-md border border-stone-300 bg-white px-4 py-2 text-sm text-stone-900 focus:border-stone-900 focus:outline-none";
 
 type Option = { value: string; label: string };
 
@@ -145,9 +148,9 @@ export function Field({
 
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-stone-700">
+      <label htmlFor={id} className="block text-sm font-semibold text-stone-700">
         {label}
-        {required && <span className="text-red-700"> *</span>}
+        {required && <span className="text-stone-900"> *</span>}
       </label>
       {as === "textarea" ? (
         <textarea id={id} name={name} rows={rows} defaultValue={value} placeholder={placeholder} className={controlClass} />
@@ -171,7 +174,7 @@ export function Field({
           className={controlClass}
         />
       )}
-      {hint && <p className="mt-1 text-xs text-stone-500">{hint}</p>}
+      {hint && <p className="mt-2 text-xs text-stone-500">{hint}</p>}
     </div>
   );
 }

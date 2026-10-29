@@ -5,8 +5,8 @@ import { createFirstBusiness } from "./actions";
 /** Schermata per un account che non fa ancora parte di nessuna attività. */
 export function NoBusiness({ email }: { email: string }) {
   return (
-    <main className="flex min-h-screen items-center justify-center px-5 py-10">
-      <div className="w-full max-w-md space-y-5 rounded-lg border border-stone-200 bg-white p-6 text-sm text-stone-700">
+    <main className="flex min-h-screen items-center justify-center px-6 py-10">
+      <div className="w-full max-w-md space-y-6 rounded-lg border border-stone-200 bg-white p-6 text-sm text-stone-700">
         <div>
           <div className="mb-4"><Logo width={140} /></div>
           <h1 className="text-xl font-semibold text-stone-900">Non sei ancora membro di un&apos;attività</h1>
@@ -20,12 +20,12 @@ export function NoBusiness({ email }: { email: string }) {
           <p className="mb-2 text-xs text-stone-500">
             Solo per una installazione nuova e vuota: crea la prima attività. Se ne esiste già una, l&apos;operazione viene rifiutata.
           </p>
-          <button type="submit" className="rounded-md border border-stone-300 px-3 py-1.5 text-sm font-medium hover:bg-stone-100">
+          <button type="submit" className="rounded-md border border-stone-300 px-4 py-2 text-sm font-semibold hover:bg-stone-100">
             Crea la prima attività
           </button>
         </form>
         <form action={signOut}>
-          <button type="submit" className="font-medium text-stone-700 underline">
+          <button type="submit" className="font-semibold text-stone-700 underline">
             Esci
           </button>
         </form>

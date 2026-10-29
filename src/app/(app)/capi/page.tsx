@@ -15,9 +15,9 @@ import { QuickAction } from "./QuickAction";
 export const metadata = { title: "Capi · ARCHVNT" };
 
 const MAX_ROWS = 200;
-const toneClass = { neutral: "text-stone-700", good: "text-green-800", bad: "text-red-800" };
+const toneClass = { neutral: "text-stone-700", good: "text-stone-900", bad: "text-stone-900" };
 const inputClass =
-  "mt-1 w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm focus:border-stone-900 focus:outline-none";
+  "mt-2 w-full rounded-md border border-stone-300 bg-white px-4 py-2 text-sm focus:border-stone-900 focus:outline-none";
 
 function pick(value: string | string[] | undefined): string {
   return (Array.isArray(value) ? value[0] : value) ?? "";
@@ -101,7 +101,7 @@ export default async function CapiPage(props: PageProps<"/capi">) {
           <a
             href="/esporta/capi"
             download
-            className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
+            className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50"
           >
             Esporta CSV
           </a>
@@ -125,7 +125,7 @@ export default async function CapiPage(props: PageProps<"/capi">) {
             {sortedLots.length === 0 ? (
               <p className="text-sm text-stone-700">
                 Ogni capo appartiene a un lotto.{" "}
-                <Link href="/lotti?nuovo=1" className="font-medium text-stone-900 underline">Registra prima un lotto</Link>.
+                <Link href="/lotti?nuovo=1" className="font-semibold text-stone-900 underline">Registra prima un lotto</Link>.
               </p>
             ) : (
               <NewItemForm lots={sortedLots} defaults={{ lotId: selected?.id, code: suggested }} businessId={businessId} />
@@ -138,8 +138,8 @@ export default async function CapiPage(props: PageProps<"/capi">) {
       {choosingLot ? (
         sortedLots.length === 0 ? (
           <div className="rounded-lg border border-dashed border-stone-300 bg-white p-8 text-center">
-            <p className="text-sm font-medium text-stone-900">Non hai ancora registrato nessun lotto.</p>
-            <p className="mt-1 text-sm text-stone-600">
+            <p className="text-sm font-semibold text-stone-900">Non hai ancora registrato nessun lotto.</p>
+            <p className="mt-2 text-sm text-stone-600">
               Ogni capo appartiene a un lotto: <Link href="/lotti?nuovo=1" className="underline">registra prima un acquisto</Link>.
             </p>
           </div>
@@ -147,11 +147,11 @@ export default async function CapiPage(props: PageProps<"/capi">) {
           <>
             <div className="overflow-x-auto rounded-lg border border-stone-200 bg-white">
               <table className="w-full min-w-[640px] text-left text-sm">
-                <thead className="border-b border-stone-200 bg-stone-50 text-xs uppercase tracking-wide text-stone-500">
+                <thead className="border-b border-stone-200 bg-stone-50 text-xs text-stone-500">
                   <tr>
-                    <th className="px-4 py-3 font-medium">Lotto</th>
-                    <th className="px-4 py-3 text-right font-medium">Capi</th>
-                    <th className="px-4 py-3 font-medium">Stato dei capi</th>
+                    <th className="px-4 py-4 font-semibold">Lotto</th>
+                    <th className="px-4 py-4 text-right font-semibold">Capi</th>
+                    <th className="px-4 py-4 font-semibold">Stato dei capi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-stone-100">
@@ -160,19 +160,19 @@ export default async function CapiPage(props: PageProps<"/capi">) {
                     const counts = ITEM_STATUSES.map((st) => [st, own.filter((i) => i.status === st).length] as const).filter(([, n]) => n > 0);
                     return (
                       <tr key={l.id} className="hover:bg-stone-50">
-                        <td className="px-4 py-3">
-                          <Link href={`/capi?lot=${l.id}`} className="font-medium text-stone-900 underline-offset-2 hover:underline">{l.code}</Link>
+                        <td className="px-4 py-4">
+                          <Link href={`/capi?lot=${l.id}`} className="font-semibold text-stone-900 underline-offset-2 hover:underline">{l.code}</Link>
                           <p className="text-xs text-stone-500">{l.supplier_name ? `${l.supplier_name} · ` : ""}{formatDate(l.purchased_at)}</p>
                         </td>
-                        <td className="px-4 py-3 text-right tabular-nums">
+                        <td className="px-4 py-4 text-right tabular-nums">
                           {own.length}
                           {own.length < l.quantity && <span className="block text-xs text-stone-500">su {l.quantity} dichiarati</span>}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-4">
                           {counts.length === 0 ? (
                             <span className="text-stone-400">Nessun capo ancora</span>
                           ) : (
-                            <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-stone-700">
+                            <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-stone-700">
                               {counts.map(([st, n]) => (
                                 <span key={st}>{n} {ITEM_STATUS_LABELS[st].toLowerCase()}</span>
                               ))}
@@ -185,7 +185,7 @@ export default async function CapiPage(props: PageProps<"/capi">) {
                 </tbody>
               </table>
             </div>
-            <p className="mt-3 text-sm text-stone-600">
+            <p className="mt-4 text-sm text-stone-600">
               Ti serve cercare un capo senza sapere il lotto?{" "}
               <Link href={`/capi?lot=${ALL_LOTS}`} className="underline">Vedi tutti i capi insieme</Link>.
             </p>
@@ -196,7 +196,7 @@ export default async function CapiPage(props: PageProps<"/capi">) {
       <div className="mb-4 flex flex-wrap gap-2">
         <Link
           href={listHref({ q, lot: lotFilter })}
-          className={`rounded-full px-3 py-1 text-sm ${!status ? "bg-stone-900 text-white" : "bg-white text-stone-700 ring-1 ring-stone-200 hover:bg-stone-50"}`}
+          className={`rounded-full px-4 py-2 text-sm ${!status ? "bg-stone-900 text-white" : "bg-white text-stone-700 ring-1 ring-stone-200 hover:bg-stone-50"}`}
         >
           Tutti ({scopeItems.length})
         </Link>
@@ -204,24 +204,24 @@ export default async function CapiPage(props: PageProps<"/capi">) {
           <Link
             key={s}
             href={listHref({ q, status: s, lot: lotFilter })}
-            className={`rounded-full px-3 py-1 text-sm ${status === s ? "bg-stone-900 text-white" : "bg-white text-stone-700 ring-1 ring-stone-200 hover:bg-stone-50"}`}
+            className={`rounded-full px-4 py-2 text-sm ${status === s ? "bg-stone-900 text-white" : "bg-white text-stone-700 ring-1 ring-stone-200 hover:bg-stone-50"}`}
           >
             {ITEM_STATUS_LABELS[s]} ({statusCounts.get(s) ?? 0})
           </Link>
         ))}
       </div>
 
-      <form method="get" className="mb-6 grid gap-3 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-[2fr_1fr_auto]">
+      <form method="get" className="mb-6 grid gap-4 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-[2fr_1fr_auto]">
         {status && <input type="hidden" name="status" value={status} />}
         <div>
-          <label htmlFor="q" className="block text-xs font-medium text-stone-600">Cerca (codice, marca, categoria, taglia)</label>
+          <label htmlFor="q" className="block text-xs font-semibold text-stone-600">Cerca (codice, marca, categoria, taglia)</label>
           <input id="q" name="q" defaultValue={q} className={inputClass} />
         </div>
         {currentLot ? (
           <input type="hidden" name="lot" value={currentLot.id} />
         ) : (
           <div>
-            <label htmlFor="lot" className="block text-xs font-medium text-stone-600">Lotto</label>
+            <label htmlFor="lot" className="block text-xs font-semibold text-stone-600">Lotto</label>
             <select id="lot" name="lot" defaultValue={lotFilter} className={inputClass}>
               <option value={ALL_LOTS}>Tutti i lotti</option>
               {[...lots].sort((a, b) => a.code.localeCompare(b.code)).map((l) => (
@@ -231,18 +231,18 @@ export default async function CapiPage(props: PageProps<"/capi">) {
           </div>
         )}
         <div className="flex items-end gap-2">
-          <button type="submit" className="rounded-md bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700">Cerca</button>
+          <button type="submit" className="rounded-md bg-stone-900 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-700">Cerca</button>
           {hasFilters && <Link href={listHref({ lot: lotFilter })} className="px-2 py-2 text-sm text-stone-600 hover:text-stone-900">Azzera filtri</Link>}
         </div>
       </form>
 
       {filtered.length === 0 ? (
         <div className="rounded-lg border border-dashed border-stone-300 bg-white p-8 text-center">
-          <p className="text-sm font-medium text-stone-900">
+          <p className="text-sm font-semibold text-stone-900">
             {hasFilters ? "Nessun capo corrisponde ai filtri." : "Non hai ancora registrato nessun capo."}
           </p>
           {!hasFilters && (
-            <p className="mt-1 text-sm text-stone-600">
+            <p className="mt-2 text-sm text-stone-600">
               Registra prima un lotto, poi aggiungi i capi dalla sua scheda (anche tanti insieme).
             </p>
           )}
@@ -250,17 +250,17 @@ export default async function CapiPage(props: PageProps<"/capi">) {
       ) : (
         <>
           <div className="overflow-x-auto rounded-lg border border-stone-200 bg-white">
-            <table className="w-full min-w-[860px] text-left text-sm">
-              <thead className="border-b border-stone-200 bg-stone-50 text-xs uppercase tracking-wide text-stone-500">
+            <table className="w-full min-w-[864px] text-left text-sm">
+              <thead className="border-b border-stone-200 bg-stone-50 text-xs text-stone-500">
                 <tr>
-                  <th className="w-16 px-4 py-3 font-medium"><span className="sr-only">Foto</span></th>
-                  <th className="px-4 py-3 font-medium">Capo</th>
-                  <th className="px-4 py-3 font-medium">Stato</th>
-                  <th className="px-4 py-3 font-medium">Lotto</th>
-                  <th className="px-4 py-3 text-right font-medium">Costo unitario</th>
-                  <th className="px-4 py-3 text-right font-medium">Previsto</th>
-                  <th className="px-4 py-3 text-right font-medium">Profitto</th>
-                  <th className="px-4 py-3 text-right font-medium"><span className="sr-only">Azione</span></th>
+                  <th className="w-16 px-4 py-4 font-semibold"><span className="sr-only">Foto</span></th>
+                  <th className="px-4 py-4 font-semibold">Capo</th>
+                  <th className="px-4 py-4 font-semibold">Stato</th>
+                  <th className="px-4 py-4 font-semibold">Lotto</th>
+                  <th className="px-4 py-4 text-right font-semibold">Costo unitario</th>
+                  <th className="px-4 py-4 text-right font-semibold">Previsto</th>
+                  <th className="px-4 py-4 text-right font-semibold">Profitto</th>
+                  <th className="px-4 py-4 text-right font-semibold"><span className="sr-only">Azione</span></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
@@ -279,14 +279,14 @@ export default async function CapiPage(props: PageProps<"/capi">) {
                         )}
                       </td>
                       <td className="px-4 py-2">
-                        <Link href={`/capi/${i.id}`} className="font-medium text-stone-900 hover:underline">{i.code}</Link>
+                        <Link href={`/capi/${i.id}`} className="font-semibold text-stone-900 hover:underline">{i.code}</Link>
                         <div className="text-xs text-stone-500">
                           {[i.brand, i.category, i.size].filter(Boolean).join(" · ") || "—"}
                         </div>
                       </td>
                       <td className="px-4 py-2">
                         <ItemStatusBadge status={i.status} />
-                        {i.status === "pubblicato" && i.listing_channel && <div className="mt-1 text-xs text-stone-500">su {i.listing_channel}</div>}
+                        {i.status === "pubblicato" && i.listing_channel && <div className="mt-2 text-xs text-stone-500">su {i.listing_channel}</div>}
                       </td>
                       <td className="px-4 py-2 text-stone-700">{lot?.code ?? "—"}</td>
                       <td className="px-4 py-2 text-right tabular-nums">{formatEuro(allocatedItemCost(metricLotById.get(i.lot_id)!))}</td>
@@ -302,7 +302,7 @@ export default async function CapiPage(props: PageProps<"/capi">) {
             </table>
           </div>
           {filtered.length > MAX_ROWS && (
-            <p className="mt-3 text-sm text-stone-600">
+            <p className="mt-4 text-sm text-stone-600">
               Mostrati i primi {MAX_ROWS} di {filtered.length} capi: restringi la ricerca per vedere gli altri.
             </p>
           )}

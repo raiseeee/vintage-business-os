@@ -71,7 +71,7 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
             {!isSold && (
               <Link
                 href={`/calcolatore?acquisto=${encodeURIComponent(centsToInput(unitCost))}&vendita=${encodeURIComponent(centsToInput(item.expected_price_cents))}`}
-                className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
+                className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50"
               >
                 Calcola il profitto
               </Link>
@@ -92,7 +92,7 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
         />
       </div>
 
-      <div className="mt-5 space-y-5">
+      <div className="mt-6 space-y-6">
         <Section title="Dati del capo">
           <ItemForm action={updateItem.bind(null, item.id)} item={item} submitLabel="Salva modifiche" />
         </Section>
@@ -124,18 +124,18 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
               ))}
             </ul>
           )}
-          <div className="mt-5 border-t border-stone-100 pt-4">
+          <div className="mt-6 border-t border-stone-100 pt-4">
             <PhotoUploader itemId={item.id} businessId={membership.businessId} />
           </div>
         </Section>
 
         <Section title="Vendita">
           {sale && (
-            <div className="mb-5 rounded-md border border-stone-200 bg-stone-50 p-4 text-sm">
-              <p className="font-medium text-stone-900">
+            <div className="mb-6 rounded-md border border-stone-200 bg-stone-50 p-4 text-sm">
+              <p className="font-semibold text-stone-900">
                 {isReturned ? "Vendita precedente (capo reso: non conta nei ricavi)" : "Vendita registrata"}
               </p>
-              <dl className="mt-2 grid max-w-sm grid-cols-[1fr_auto] gap-x-6 gap-y-1">
+              <dl className="mt-2 grid max-w-sm grid-cols-[1fr_auto] gap-x-6 gap-y-2">
                 <dt className="text-stone-600">Canale e data</dt>
                 <dd className="text-right">{sale.channel} · {formatDate(sale.sold_at)}</dd>
                 <dt className="text-stone-600">Prezzo incassato</dt>
@@ -152,23 +152,23 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
                     <dd className="text-right tabular-nums">− {formatEuro(sale.materials_cost_cents ?? 0)}</dd>
                   </>
                 )}
-                <dt className="border-t border-stone-200 pt-1 font-medium">Ricavo netto</dt>
-                <dd className="border-t border-stone-200 pt-1 text-right font-medium tabular-nums">
+                <dt className="border-t border-stone-200 pt-2 font-semibold">Ricavo netto</dt>
+                <dd className="border-t border-stone-200 pt-2 text-right font-semibold tabular-nums">
                   {formatEuro(saleNetRevenue(toMetricSale(sale)))}
                 </dd>
                 <dt className="text-stone-600">Costo attribuito del lotto</dt>
                 <dd className="text-right tabular-nums">− {formatEuro(unitCost)}</dd>
                 {isSold && profit !== null && (
                   <>
-                    <dt className="border-t border-stone-200 pt-1 font-semibold">Profitto</dt>
-                    <dd className={`border-t border-stone-200 pt-1 text-right font-semibold tabular-nums ${profit < 0 ? "text-red-800" : "text-green-800"}`}>{formatEuro(profit)}</dd>
+                    <dt className="border-t border-stone-200 pt-2 font-semibold">Profitto</dt>
+                    <dd className={`border-t border-stone-200 pt-2 text-right font-semibold tabular-nums ${profit < 0 ? "text-stone-900" : "text-stone-900"}`}>{formatEuro(profit)}</dd>
                   </>
                 )}
               </dl>
               {sale.notes && <p className="mt-2 whitespace-pre-wrap text-stone-700">{sale.notes}</p>}
 
               {isSold && (
-                <div className="mt-4 flex flex-wrap gap-4 border-t border-stone-200 pt-3">
+                <div className="mt-4 flex flex-wrap gap-4 border-t border-stone-200 pt-4">
                   <ActionForm
                     action={markReturned.bind(null, item.id)}
                     submitLabel="Segna come reso"
@@ -196,18 +196,18 @@ export default async function CapoDetailPage(props: PageProps<"/capi/[id]">) {
             {isSold ? "Modifica i dati della vendita" : isReturned ? "Registra una nuova vendita" : "Registra la vendita"}
           </h3>
           {isReturned && (
-            <p className="mt-1 text-xs text-stone-500">Una nuova vendita sostituisce quella precedente.</p>
+            <p className="mt-2 text-xs text-stone-500">Una nuova vendita sostituisce quella precedente.</p>
           )}
           <ActionForm
             action={recordSale.bind(null, item.id)}
             submitLabel={isSold ? "Salva vendita" : "Registra vendita"}
             successMessage="Vendita salvata."
-            className="mt-2 space-y-3"
+            className="mt-2 space-y-4"
           >
             <datalist id="canali">
               {CHANNEL_SUGGESTIONS.map((c) => <option key={c} value={c} />)}
             </datalist>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Field label="Canale di vendita" name="channel" required list="canali" defaultValue={sale?.channel ?? ""} />
               <Field label="Data" name="sold_at" type="date" required defaultValue={sale?.sold_at ?? todayIso()} />
               <Field label="Prezzo incassato (€)" name="price_cents" required defaultValue={sale ? centsToInput(sale.price_cents) : centsToInput(item.expected_price_cents)} hint="Quanto paga il cliente per il capo, senza la spedizione che paga lui." />

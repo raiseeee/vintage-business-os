@@ -30,7 +30,7 @@ export function PhotoUploader({ itemId, businessId }: { itemId: string; business
 
   return (
     <div>
-      <label htmlFor="photos" className="block text-sm font-medium text-stone-700">
+      <label htmlFor="photos" className="block text-sm font-semibold text-stone-700">
         Aggiungi foto
       </label>
       <input
@@ -41,17 +41,17 @@ export function PhotoUploader({ itemId, businessId }: { itemId: string; business
         multiple
         disabled={busy}
         onChange={(e) => handleFiles(e.target.files)}
-        className="mt-1 block w-full text-sm text-stone-700 file:mr-3 file:rounded-md file:border-0 file:bg-stone-900 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-stone-700 disabled:opacity-60"
+        className="mt-2 block w-full text-sm text-stone-700 file:mr-4 file:rounded-md file:border-0 file:bg-stone-900 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-stone-700 disabled:opacity-60"
       />
-      <p className="mt-1 text-xs text-stone-500">JPG, PNG o WebP, fino a {PHOTO_MAX_BYTES / 1024 / 1024} MB ciascuna.</p>
+      <p className="mt-2 text-xs text-stone-500">JPG, PNG o WebP, fino a {PHOTO_MAX_BYTES / 1024 / 1024} MB ciascuna.</p>
       {busy && <p role="status" className="mt-2 text-sm text-stone-600">Caricamento in corso…</p>}
       {!busy && done > 0 && (
-        <p role="status" className="mt-2 text-sm text-green-700">
+        <p role="status" className="mt-2 text-sm text-stone-900">
           {done === 1 ? "1 foto caricata." : `${done} foto caricate.`}
         </p>
       )}
       {errors.map((e) => (
-        <p key={e} role="alert" className="mt-1 text-sm text-red-700">
+        <p key={e} role="alert" className="mt-2 text-sm text-stone-900">
           {e}
         </p>
       ))}

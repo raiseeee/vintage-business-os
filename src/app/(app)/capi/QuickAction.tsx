@@ -8,8 +8,8 @@ import { publishItem, recordSale } from "./actions";
 
 /**
  * Il passo successivo di un capo, a un clic:
- *  - «Pronto per la vendita» → Pubblica: chiede dove l'hai messo in vendita;
- *  - «Pubblicato» → Segna venduto: chiede il prezzo (e il resto) e registra la vendita.
+ *  - «Pronto per la vendita»: Pubblica: chiede dove l'hai messo in vendita;
+ *  - «Pubblicato»: Segna venduto: chiede il prezzo (e il resto) e registra la vendita.
  * `key` sullo stato: quando lo stato cambia la finestra si richiude da sola.
  */
 export function QuickAction({ item, variant = "quiet" }: { item: ItemRow; variant?: "quiet" | "secondary" }) {
@@ -71,8 +71,8 @@ export function QuickAction({ item, variant = "quiet" }: { item: ItemRow; varian
             <Field label="Data" name="sold_at" type="date" required defaultValue={todayIso()} />
           </div>
           <details>
-            <summary className="cursor-pointer text-sm font-medium text-stone-700 hover:text-stone-900">Costi della vendita (facoltativi, si possono aggiungere dopo)</summary>
-            <div className="mt-3 grid gap-4 sm:grid-cols-3">
+            <summary className="cursor-pointer text-sm font-semibold text-stone-700 hover:text-stone-900">Costi della vendita (facoltativi, si possono aggiungere dopo)</summary>
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
               <Field label="Commissioni (€)" name="fees_cents" />
               <Field label="Spedizione in uscita (€)" name="outbound_shipping_cents" hint="Solo se la paghi tu." />
               <Field label="Costi extra (€)" name="extra_costs_cents" />

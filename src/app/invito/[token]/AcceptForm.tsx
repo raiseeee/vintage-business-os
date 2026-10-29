@@ -6,16 +6,16 @@ import { acceptInvite, type AcceptState } from "./actions";
 export function AcceptForm({ token }: { token: string }) {
   const [state, formAction, pending] = useActionState(acceptInvite.bind(null, token), { error: null } as AcceptState);
   return (
-    <form action={formAction} className="space-y-3">
+    <form action={formAction} className="space-y-4">
       {state.error && (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="text-sm text-stone-900">
           {state.error}
         </p>
       )}
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-md bg-accent px-3 py-2 text-sm font-medium text-white hover:bg-[#243897] disabled:opacity-60"
+        className="w-full rounded-md bg-stone-900 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-700 disabled:opacity-60"
       >
         {pending ? "Attendi…" : "Accetta l'invito"}
       </button>

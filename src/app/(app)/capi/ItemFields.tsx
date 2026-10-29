@@ -52,7 +52,7 @@ export function ItemFields({
           <>
             <input type="hidden" name="status" value="pronto" />
             <div>
-              <p className="block text-sm font-medium text-stone-700">Stato</p>
+              <p className="block text-sm font-semibold text-stone-700">Stato</p>
               <p className="mt-2 text-sm text-stone-600">
                 Venduto. Per cambiarlo, annulla la vendita o segnalo come reso (sezione Vendita).
               </p>

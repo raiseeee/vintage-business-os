@@ -11,7 +11,7 @@ import { LotForm } from "./LotForm";
 
 export const metadata = { title: "Acquisti e lotti · ARCHVNT" };
 
-const toneClass = { neutral: "text-stone-700", good: "text-green-800", bad: "text-red-800" };
+const toneClass = { neutral: "text-stone-700", good: "text-stone-900", bad: "text-stone-900" };
 
 export default async function LottiPage(props: PageProps<"/lotti">) {
   const params = await props.searchParams;
@@ -35,7 +35,7 @@ export default async function LottiPage(props: PageProps<"/lotti">) {
           <a
             href="/esporta/lotti"
             download
-            className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
+            className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50"
           >
             Esporta CSV
           </a>
@@ -60,23 +60,23 @@ export default async function LottiPage(props: PageProps<"/lotti">) {
 
       {sorted.length === 0 ? (
         <div className="rounded-lg border border-dashed border-stone-300 bg-white p-8 text-center">
-          <p className="text-sm font-medium text-stone-900">Non hai ancora registrato nessun lotto.</p>
-          <p className="mt-1 text-sm text-stone-600">
+          <p className="text-sm font-semibold text-stone-900">Non hai ancora registrato nessun lotto.</p>
+          <p className="mt-2 text-sm text-stone-600">
             Registra qui il tuo primo acquisto con «Nuovo lotto».
           </p>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-stone-200 bg-white">
-          <table className="w-full min-w-[860px] text-left text-sm">
-            <thead className="border-b border-stone-200 bg-stone-50 text-xs uppercase tracking-wide text-stone-500">
+          <table className="w-full min-w-[864px] text-left text-sm">
+            <thead className="border-b border-stone-200 bg-stone-50 text-xs text-stone-500">
               <tr>
-                <th className="px-4 py-3 font-medium">Lotto</th>
-                <th className="px-4 py-3 font-medium">Fornitore</th>
-                <th className="px-4 py-3 text-right font-medium">Capi</th>
-                <th className="px-4 py-3 text-right font-medium">Costo totale</th>
-                <th className="px-4 py-3 text-right font-medium">Venduti</th>
-                <th className="px-4 py-3 text-right font-medium">Margine realizzato</th>
-                <th className="px-4 py-3 text-right font-medium">Saldo cassa</th>
+                <th className="px-4 py-4 font-semibold">Lotto</th>
+                <th className="px-4 py-4 font-semibold">Fornitore</th>
+                <th className="px-4 py-4 text-right font-semibold">Capi</th>
+                <th className="px-4 py-4 text-right font-semibold">Costo totale</th>
+                <th className="px-4 py-4 text-right font-semibold">Venduti</th>
+                <th className="px-4 py-4 text-right font-semibold">Margine realizzato</th>
+                <th className="px-4 py-4 text-right font-semibold">Saldo cassa</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">
@@ -85,24 +85,24 @@ export default async function LottiPage(props: PageProps<"/lotti">) {
                 const n = registered.get(lot.id) ?? 0;
                 return (
                   <tr key={lot.id} className="hover:bg-stone-50">
-                    <td className="px-4 py-3">
-                      <Link href={`/lotti/${lot.id}`} className="font-medium text-stone-900 hover:underline">
+                    <td className="px-4 py-4">
+                      <Link href={`/lotti/${lot.id}`} className="font-semibold text-stone-900 hover:underline">
                         {lot.code}
                       </Link>
-                      <div className="mt-1 flex items-center gap-1 text-xs text-stone-500">
+                      <div className="mt-2 flex items-center gap-2 text-xs text-stone-500">
                         {formatDate(lot.purchased_at)}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-stone-700">{lot.supplier_name ?? "—"}</td>
-                    <td className="px-4 py-3 text-right tabular-nums text-stone-700">
+                    <td className="px-4 py-4 text-stone-700">{lot.supplier_name ?? "—"}</td>
+                    <td className="px-4 py-4 text-right tabular-nums text-stone-700">
                       {n}/{lot.quantity}
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums">{formatEuro(m.capitalInvested)}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{m.soldCount}</td>
-                    <td className={`px-4 py-3 text-right font-medium tabular-nums ${toneClass[toneOf(m.realizedMargin)]}`}>
+                    <td className="px-4 py-4 text-right tabular-nums">{formatEuro(m.capitalInvested)}</td>
+                    <td className="px-4 py-4 text-right tabular-nums">{m.soldCount}</td>
+                    <td className={`px-4 py-4 text-right font-semibold tabular-nums ${toneClass[toneOf(m.realizedMargin)]}`}>
                       {formatEuro(m.realizedMargin)}
                     </td>
-                    <td className={`px-4 py-3 text-right tabular-nums ${toneClass[toneOf(m.cashBalance)]}`}>
+                    <td className={`px-4 py-4 text-right tabular-nums ${toneClass[toneOf(m.cashBalance)]}`}>
                       {formatEuro(m.cashBalance)}
                     </td>
                   </tr>
@@ -113,7 +113,7 @@ export default async function LottiPage(props: PageProps<"/lotti">) {
         </div>
       )}
 
-      <p className="mt-3 max-w-3xl text-xs text-stone-500">
+      <p className="mt-4 max-w-3xl text-xs text-stone-500">
         <strong>Margine realizzato</strong>: incassi − costi di vendita − costo dei soli capi venduti.{" "}
         <strong>Saldo cassa</strong>: incassi netti − costo dell&apos;intero lotto (negativo finché non lo hai recuperato).
         «Capi» mostra quelli registrati sul totale dichiarato.

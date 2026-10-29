@@ -15,7 +15,7 @@ import { getMembership } from "@/lib/team/membership";
 
 export const metadata = { title: "Lotto · ARCHVNT" };
 
-const toneClass = { neutral: "text-stone-700", good: "text-green-800", bad: "text-red-800" };
+const toneClass = { neutral: "text-stone-700", good: "text-stone-900", bad: "text-stone-900" };
 
 export default async function LottoDetailPage(props: PageProps<"/lotti/[id]">) {
   const canDelete = (await getMembership())?.role === "owner";
@@ -48,7 +48,7 @@ export default async function LottoDetailPage(props: PageProps<"/lotti/[id]">) {
           </>
         }
         actions={
-          <Link href={`/calcolatore?lotto=${lot.id}`} className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50">
+          <Link href={`/calcolatore?lotto=${lot.id}`} className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50">
             Calcola la redditività
           </Link>
         }
@@ -69,20 +69,20 @@ export default async function LottoDetailPage(props: PageProps<"/lotti/[id]">) {
         <Stat label="Capi registrati" value={`${lotItems.length}/${lot.quantity}`} hint={lotItems.length > lot.quantity ? "Hai registrato più capi di quelli dichiarati" : undefined} tone={lotItems.length > lot.quantity ? "bad" : "neutral"} />
       </div>
 
-      <div className="mt-5 space-y-5">
+      <div className="mt-6 space-y-6">
         <Section title="Capi del lotto">
           {lotItems.length === 0 ? (
             <p className="text-sm text-stone-500">Nessun capo registrato per questo lotto.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] text-left text-sm">
-                <thead className="text-xs uppercase tracking-wide text-stone-500">
+                <thead className="text-xs text-stone-500">
                   <tr>
-                    <th className="py-2 pr-3 font-medium">Codice</th>
-                    <th className="py-2 pr-3 font-medium">Descrizione</th>
-                    <th className="py-2 pr-3 font-medium">Stato</th>
-                    <th className="py-2 pr-3 text-right font-medium">Previsto</th>
-                    <th className="py-2 text-right font-medium">Profitto</th>
+                    <th className="py-2 pr-4 font-semibold">Codice</th>
+                    <th className="py-2 pr-4 font-semibold">Descrizione</th>
+                    <th className="py-2 pr-4 font-semibold">Stato</th>
+                    <th className="py-2 pr-4 text-right font-semibold">Previsto</th>
+                    <th className="py-2 text-right font-semibold">Profitto</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-stone-100">
@@ -90,12 +90,12 @@ export default async function LottoDetailPage(props: PageProps<"/lotti/[id]">) {
                     const profit = itemProfit(metricById.get(i.id)!, metricLot);
                     return (
                       <tr key={i.id}>
-                        <td className="py-2 pr-3">
-                          <Link href={`/capi/${i.id}`} className="font-medium text-stone-900 hover:underline">{i.code}</Link>
+                        <td className="py-2 pr-4">
+                          <Link href={`/capi/${i.id}`} className="font-semibold text-stone-900 hover:underline">{i.code}</Link>
                         </td>
-                        <td className="py-2 pr-3 text-stone-700">{[i.brand, i.category, i.size].filter(Boolean).join(" · ") || "—"}</td>
-                        <td className="py-2 pr-3"><ItemStatusBadge status={i.status} /></td>
-                        <td className="py-2 pr-3 text-right tabular-nums">{i.expected_price_cents !== null ? formatEuro(i.expected_price_cents) : "—"}</td>
+                        <td className="py-2 pr-4 text-stone-700">{[i.brand, i.category, i.size].filter(Boolean).join(" · ") || "—"}</td>
+                        <td className="py-2 pr-4"><ItemStatusBadge status={i.status} /></td>
+                        <td className="py-2 pr-4 text-right tabular-nums">{i.expected_price_cents !== null ? formatEuro(i.expected_price_cents) : "—"}</td>
                         <td className={`py-2 text-right tabular-nums ${profit === null ? "text-stone-400" : toneClass[toneOf(profit)]}`}>
                           {profit === null ? "—" : formatEuro(profit)}
                         </td>
@@ -107,20 +107,20 @@ export default async function LottoDetailPage(props: PageProps<"/lotti/[id]">) {
             </div>
           )}
 
-          <div className="mt-5 grid gap-6 border-t border-stone-100 pt-5 lg:grid-cols-2">
+          <div className="mt-6 grid gap-6 border-t border-stone-100 pt-6 lg:grid-cols-2">
             <div>
               <h3 className="text-sm font-semibold text-stone-900">Aggiungi un capo</h3>
-              <p className="mt-1 text-sm text-stone-600">Con tutti i dettagli: marca, categoria, taglia, condizione.</p>
+              <p className="mt-2 text-sm text-stone-600">Con tutti i dettagli: marca, categoria, taglia, condizione.</p>
               <Link
                 href={`/capi?nuovo=1&nuovolotto=${lot.id}`}
-                className="mt-3 inline-block rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
+                className="mt-4 inline-block rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50"
               >
                 Nuovo capo
               </Link>
             </div>
             <div>
               <h3 className="text-sm font-semibold text-stone-900">Crea più capi in una volta</h3>
-              <p className="mt-1 text-sm text-stone-600">
+              <p className="mt-2 text-sm text-stone-600">
                 Crea capi vuoti con codici progressivi ({lot.code}-001, -002…): poi li completi uno per uno.
               </p>
               <ActionForm action={createItemsBulk} submitLabel="Crea capi" pendingLabel="Creazione…" successMessage="Capi creati." className="mt-2">
@@ -139,7 +139,7 @@ export default async function LottoDetailPage(props: PageProps<"/lotti/[id]">) {
 
         <Section title="Modifica lotto">
           <details>
-            <summary className="cursor-pointer text-sm font-medium text-stone-700 hover:text-stone-900">
+            <summary className="cursor-pointer text-sm font-semibold text-stone-700 hover:text-stone-900">
               Apri il modulo di modifica
             </summary>
             <div className="mt-4">
@@ -155,7 +155,7 @@ export default async function LottoDetailPage(props: PageProps<"/lotti/[id]">) {
                 variant="danger"
                 confirm="Eliminare definitivamente questo lotto, i suoi capi e le loro foto? Non si può annullare."
               >
-                <p className="mb-3 text-sm text-stone-600">
+                <p className="mb-4 text-sm text-stone-600">
                   Elimina il lotto insieme a tutti i suoi capi e alle foto. Non si può fare se qualche capo è stato venduto.
                 </p>
                 <Field label="Password del tuo account" name="password" type="password" required />

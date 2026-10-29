@@ -34,17 +34,17 @@ export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[
       <div className="space-y-6">
         <Section title="Storico lotti" description={own.length > 0 ? `${own.length} lotti · ${formatEuro(total)} spesi in totale` : undefined}>
           {own.length === 0 ? (
-            <p className="text-sm text-stone-600">Nessun lotto collegato. Collega un lotto dalla sua pagina (Modifica lotto → Fornitore).</p>
+            <p className="text-sm text-stone-600">Nessun lotto collegato. Collega un lotto dalla sua pagina (Modifica lotto, campo Fornitore).</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[560px] text-left text-sm">
-                <thead className="border-b border-stone-200 text-xs uppercase tracking-wide text-stone-500">
+                <thead className="border-b border-stone-200 text-xs text-stone-500">
                   <tr>
-                    <th className="py-2 pr-4 font-medium">Lotto</th>
-                    <th className="py-2 pr-4 font-medium">Data</th>
-                    <th className="py-2 pr-4 text-right font-medium">Capi</th>
-                    <th className="py-2 pr-4 text-right font-medium">Venduti</th>
-                    <th className="py-2 text-right font-medium">Costo totale</th>
+                    <th className="py-2 pr-4 font-semibold">Lotto</th>
+                    <th className="py-2 pr-4 font-semibold">Data</th>
+                    <th className="py-2 pr-4 text-right font-semibold">Capi</th>
+                    <th className="py-2 pr-4 text-right font-semibold">Venduti</th>
+                    <th className="py-2 text-right font-semibold">Costo totale</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-stone-100">
@@ -52,11 +52,11 @@ export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[
                     const mine = items.filter((i) => i.lot_id === l.id);
                     return (
                       <tr key={l.id}>
-                        <td className="py-3 pr-4"><Link href={`/lotti/${l.id}`} className="font-medium text-stone-900 hover:underline">{l.code}</Link></td>
-                        <td className="py-3 pr-4 text-stone-600">{formatDate(l.purchased_at)}</td>
-                        <td className="py-3 pr-4 text-right tabular-nums">{l.quantity}</td>
-                        <td className="py-3 pr-4 text-right tabular-nums">{mine.filter((i) => i.status === "venduto").length}</td>
-                        <td className="py-3 text-right tabular-nums">{formatEuro(l.purchase_cost_cents + l.inbound_shipping_cents + l.other_costs_cents)}</td>
+                        <td className="py-4 pr-4"><Link href={`/lotti/${l.id}`} className="font-semibold text-stone-900 hover:underline">{l.code}</Link></td>
+                        <td className="py-4 pr-4 text-stone-600">{formatDate(l.purchased_at)}</td>
+                        <td className="py-4 pr-4 text-right tabular-nums">{l.quantity}</td>
+                        <td className="py-4 pr-4 text-right tabular-nums">{mine.filter((i) => i.status === "venduto").length}</td>
+                        <td className="py-4 text-right tabular-nums">{formatEuro(l.purchase_cost_cents + l.inbound_shipping_cents + l.other_costs_cents)}</td>
                       </tr>
                     );
                   })}
@@ -72,7 +72,7 @@ export default async function FornitoreDetailPage(props: PageProps<"/fornitori/[
 
         {canDelete && (
           <Section title="Elimina fornitore">
-            <p className="mb-3 text-sm text-stone-600">I suoi lotti restano, senza fornitore.</p>
+            <p className="mb-4 text-sm text-stone-600">I suoi lotti restano, senza fornitore.</p>
             <ActionForm
               action={deleteSupplier.bind(null, id)}
               submitLabel="Elimina fornitore"

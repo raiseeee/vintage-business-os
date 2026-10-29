@@ -6,7 +6,7 @@ import { formatEuro } from "@/lib/metrics";
 import { centsToInput, parseEuroToCents } from "@/lib/money";
 
 const inputClass =
-  "mt-1 w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm focus:border-stone-900 focus:outline-none";
+  "mt-2 w-full rounded-md border border-stone-300 bg-white px-4 py-2 text-sm focus:border-stone-900 focus:outline-none";
 const STORAGE_KEY = "vbos-calc-fees";
 
 type Values = Record<
@@ -125,74 +125,74 @@ export function Calculator({
     return { result: errs.length === 0 ? computeProfit(input) : null, errors: errs };
   }, [v]);
 
-  const tone = (n: number) => (n > 0 ? "text-green-800" : n < 0 ? "text-red-800" : "text-stone-900");
+  const tone = (n: number) => (n > 0 ? "text-stone-900" : n < 0 ? "text-stone-900" : "text-stone-900");
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
       <div className="space-y-6">
-        <section className="rounded-lg border border-stone-200 bg-white p-5">
+        <section className="rounded-lg border border-stone-200 bg-white p-6">
           <h2 className="text-base font-semibold text-stone-900">Costi del capo</h2>
-          <div className="mt-3">
-            <label htmlFor="lot" className="block text-sm font-medium text-stone-700">Parti da un lotto</label>
+          <div className="mt-4">
+            <label htmlFor="lot" className="block text-sm font-semibold text-stone-700">Parti da un lotto</label>
             <select id="lot" value={lotId} onChange={(e) => pickLot(e.target.value)} className={inputClass}>
               <option value="">Nessuno: compilo a mano</option>
               {lots.map((l) => (
                 <option key={l.id} value={l.id}>{l.label}</option>
               ))}
             </select>
-            <p className="mt-1 text-xs text-stone-500">
+            <p className="mt-2 text-xs text-stone-500">
               Compila il costo per capo (costo del lotto diviso i capi dichiarati), i materiali dall&apos;Inventario e, se hai messo i prezzi previsti dei capi, il prezzo medio previsto. Puoi sempre modificare i campi.
             </p>
           </div>
-          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
             {EURO_FIELDS.map((f) => (
               <div key={f.name}>
-                <label htmlFor={f.name} className="block text-sm font-medium text-stone-700">{f.label}</label>
+                <label htmlFor={f.name} className="block text-sm font-semibold text-stone-700">{f.label}</label>
                 <input id={f.name} inputMode="decimal" value={v[f.name]} onChange={set(f.name)} className={inputClass} />
-                {f.hint && <p className="mt-1 text-xs text-stone-500">{f.hint}</p>}
+                {f.hint && <p className="mt-2 text-xs text-stone-500">{f.hint}</p>}
               </div>
             ))}
           </div>
         </section>
 
-        <section className="rounded-lg border border-stone-200 bg-white p-5">
+        <section className="rounded-lg border border-stone-200 bg-white p-6">
           <h2 className="text-base font-semibold text-stone-900">Vendita</h2>
-          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="salePrice" className="block text-sm font-medium text-stone-700">Prezzo di vendita previsto (€)</label>
+              <label htmlFor="salePrice" className="block text-sm font-semibold text-stone-700">Prezzo di vendita previsto (€)</label>
               <input id="salePrice" inputMode="decimal" value={v.salePrice} onChange={set("salePrice")} className={inputClass} />
             </div>
             <div>
-              <label htmlFor="discount" className="block text-sm font-medium text-stone-700">Sconto medio (%)</label>
+              <label htmlFor="discount" className="block text-sm font-semibold text-stone-700">Sconto medio (%)</label>
               <input id="discount" inputMode="decimal" value={v.discount} onChange={set("discount")} className={inputClass} />
-              <p className="mt-1 text-xs text-stone-500">Ribasso o trattativa sul prezzo di listino.</p>
+              <p className="mt-2 text-xs text-stone-500">Ribasso o trattativa sul prezzo di listino.</p>
             </div>
             <div>
-              <label htmlFor="fee" className="block text-sm font-medium text-stone-700">Commissione del canale (%)</label>
+              <label htmlFor="fee" className="block text-sm font-semibold text-stone-700">Commissione del canale (%)</label>
               <input id="fee" inputMode="decimal" value={v.fee} onChange={set("fee")} className={inputClass} />
             </div>
             <div>
-              <label htmlFor="feeFixed" className="block text-sm font-medium text-stone-700">Commissione fissa (€)</label>
+              <label htmlFor="feeFixed" className="block text-sm font-semibold text-stone-700">Commissione fissa (€)</label>
               <input id="feeFixed" inputMode="decimal" value={v.feeFixed} onChange={set("feeFixed")} className={inputClass} />
             </div>
             <div>
-              <label htmlFor="outboundShipping" className="block text-sm font-medium text-stone-700">Spedizione a tuo carico (€)</label>
+              <label htmlFor="outboundShipping" className="block text-sm font-semibold text-stone-700">Spedizione a tuo carico (€)</label>
               <input id="outboundShipping" inputMode="decimal" value={v.outboundShipping} onChange={set("outboundShipping")} className={inputClass} />
             </div>
           </div>
-          <p className="mt-3 text-xs text-stone-500">
+          <p className="mt-4 text-xs text-stone-500">
             Le commissioni dipendono dalle condizioni attuali del canale (per esempio Vinted): non le do per scontate, inseriscile tu e
             controllale ogni tanto. Si ricordano su questo dispositivo.
           </p>
         </section>
       </div>
 
-      <aside className="h-fit rounded-lg border border-stone-200 bg-white p-5 lg:sticky lg:top-6" aria-live="polite">
+      <aside className="h-fit rounded-lg border border-stone-200 bg-white p-6 lg:sticky lg:top-6" aria-live="polite">
         <h2 className="text-base font-semibold text-stone-900">Risultato</h2>
         {!result ? (
-          <p className="mt-3 text-sm text-red-700">Controlla questi campi: {errors.join(", ")}.</p>
+          <p className="mt-4 text-sm text-stone-900">Controlla questi campi: {errors.join(", ")}.</p>
         ) : (
-          <dl className="mt-3 space-y-2 text-sm">
+          <dl className="mt-4 space-y-2 text-sm">
             <Row label="Prezzo incassato (dopo lo sconto)" value={formatEuro(result.soldPrice)} />
             <Row label="Commissioni" value={`− ${formatEuro(result.fees)}`} />
             <Row label="Ricavo netto" value={formatEuro(result.netRevenue)} />
@@ -207,16 +207,16 @@ export function Calculator({
                 label="Prezzo minimo per non perdere"
                 value={result.breakEvenPrice !== null ? formatEuro(result.breakEvenPrice) : "—"}
               />
-              <p className="mt-1 text-xs text-stone-500">Prezzo di listino più basso con profitto di almeno 0, tenendo conto di sconto e commissioni.</p>
+              <p className="mt-2 text-xs text-stone-500">Prezzo di listino più basso con profitto di almeno 0, tenendo conto di sconto e commissioni.</p>
             </div>
-            {result.profit < 0 && <p className="rounded-md bg-red-50 p-2 text-xs text-red-800">A questo prezzo vendi in perdita.</p>}
+            {result.profit < 0 && <p className="rounded-md bg-stone-100 p-2 text-xs text-stone-900">A questo prezzo vendi in perdita.</p>}
           </dl>
         )}
       </aside>
 
-      <section className="rounded-lg border border-stone-200 bg-stone-50 p-5 text-sm text-stone-700 lg:col-span-2">
+      <section className="rounded-lg border border-stone-200 bg-stone-50 p-6 text-sm text-stone-700 lg:col-span-2">
         <h2 className="text-base font-semibold text-stone-900">Come si calcola</h2>
-        <ul className="mt-2 list-disc space-y-1 pl-5">
+        <ul className="mt-2 list-disc space-y-2 pl-6">
           <li><strong>Prezzo incassato</strong> = prezzo di vendita × (1 − sconto)</li>
           <li><strong>Commissioni</strong> = prezzo incassato × commissione % + commissione fissa</li>
           <li><strong>Ricavo netto</strong> = prezzo incassato − commissioni − spedizione a tuo carico</li>
@@ -230,7 +230,7 @@ export function Calculator({
 
 function Row({ label, value, valueClass = "text-stone-900" }: { label: string; value: string; valueClass?: string }) {
   return (
-    <div className="flex items-baseline justify-between gap-3">
+    <div className="flex items-baseline justify-between gap-4">
       <dt className="text-stone-600">{label}</dt>
       <dd className={`tabular-nums ${valueClass}`}>{value}</dd>
     </div>

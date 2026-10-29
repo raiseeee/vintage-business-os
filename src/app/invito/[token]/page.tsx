@@ -18,22 +18,22 @@ export default async function InvitoPage(props: PageProps<"/invito/[token]">) {
   const membership = await getMembership();
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-5 py-10">
+    <main className="flex min-h-screen items-center justify-center px-6 py-10">
       <div className="w-full max-w-sm rounded-lg border border-stone-200 bg-white p-6">
         <div className="mb-4"><Logo width={140} /></div>
         <h1 className="mb-4 text-xl font-semibold text-stone-900">Invito all&apos;attività</h1>
 
         {membership ? (
-          <div className="space-y-3 text-sm text-stone-700">
+          <div className="space-y-4 text-sm text-stone-700">
             <p>
               Fai già parte di «{membership.businessName}» con l&apos;account {membership.email}.
             </p>
-            <Link href="/dashboard" className="font-medium text-stone-900 underline">
+            <Link href="/dashboard" className="font-semibold text-stone-900 underline">
               Vai alla dashboard
             </Link>
           </div>
         ) : !isInviteToken(token) ? (
-          <p className="text-sm text-red-700">Invito non valido, scaduto o riservato a un&apos;altra email.</p>
+          <p className="text-sm text-stone-900">Invito non valido, scaduto o riservato a un&apos;altra email.</p>
         ) : (
           <div className="space-y-4 text-sm text-stone-700">
             <p>

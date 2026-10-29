@@ -1,4 +1,6 @@
+import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 import type { ReactNode } from "react";
+import { compare } from "@/lib/business/monthly";
 import { ITEM_STATUS_LABELS } from "@/lib/business/constants";
 
 export function Section({
@@ -11,9 +13,9 @@ export function Section({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-lg border border-stone-300/70 bg-white p-5">
+    <section className="rounded-lg border border-stone-300 bg-white p-6">
       <h2 className="text-lg font-semibold text-stone-900">{title}</h2>
-      {description && <p className="mt-1 text-sm text-stone-600">{description}</p>}
+      {description && <p className="mt-2 text-sm text-stone-600">{description}</p>}
       <div className="mt-4">{children}</div>
     </section>
   );
@@ -21,7 +23,7 @@ export function Section({
 
 export function Tag({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-block rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-700">
+    <span className="inline-block rounded-full bg-stone-100 px-2 py-0 text-xs leading-6 text-stone-700">
       {children}
     </span>
   );
@@ -40,7 +42,7 @@ export function ExternalLink({ href, children }: { href: string | null | undefin
       href={safe}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-blue-800 underline underline-offset-2 hover:text-blue-950"
+      className="text-stone-900 underline underline-offset-2 hover:text-stone-600"
     >
       {children}
     </a>
@@ -54,45 +56,77 @@ export function formatDate(iso: string | null | undefined): string {
 }
 
 const ITEM_STATUS_STYLES: Record<string, string> = {
-  da_controllare: "bg-stone-200 text-stone-800",
-  da_fotografare: "bg-amber-100 text-amber-900",
-  pronto: "bg-sky-100 text-sky-900",
-  pubblicato: "bg-indigo-100 text-indigo-900",
-  venduto: "bg-green-100 text-green-900",
-  reso: "bg-red-100 text-red-900",
+  da_controllare: "bg-stone-100 text-stone-600",
+  da_fotografare: "bg-stone-100 text-stone-800",
+  pronto: "bg-stone-200 text-stone-900",
+  pubblicato: "border border-stone-400 text-stone-900",
+  venduto: "bg-stone-900 text-white",
+  reso: "border border-stone-300 text-stone-600",
 };
 
 export function ItemStatusBadge({ status }: { status: keyof typeof ITEM_STATUS_LABELS }) {
   return (
-    <span className={`inline-block whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ${ITEM_STATUS_STYLES[status]}`}>
+    <span className={`inline-block whitespace-nowrap rounded-full px-2 py-0 text-xs font-semibold leading-6 ${ITEM_STATUS_STYLES[status]}`}>
       {ITEM_STATUS_LABELS[status]}
     </span>
   );
 }
 
-/** Riquadro con un numero: usato per i riepiloghi economici. */
+/** Variazione rispetto al mese precedente: simbolo a linea, segno e percentuale, senza colori. */
+export function Delta({
+  current,
+  previous,
+  previousLabel,
+  format,
+}: {
+  current: number;
+  previous: number;
+  /** Nome del mese di confronto, già in minuscolo («settembre»). */
+  previousLabel: string;
+  format: (value: number) => string;
+}) {
+  const { diff, percent } = compare(current, previous);
+  const Icon = diff > 0 ? ArrowUpRight : diff < 0 ? ArrowDownRight : Minus;
+  const sign = diff > 0 ? "+" : diff < 0 ? "−" : "";
+  const amount = percent === null ? format(Math.abs(diff)) : `${Math.abs(percent)}%`;
+  return (
+    <p className="mt-2 flex items-center gap-2 text-sm text-stone-600">
+      <Icon aria-hidden className="size-4 shrink-0" strokeWidth={1.5} />
+      <span>
+        <span className="font-semibold text-stone-900">{diff === 0 ? "Invariato" : `${sign}${amount}`}</span>
+        {" "}
+        rispetto a {previousLabel} ({format(previous)})
+      </span>
+    </p>
+  );
+}
+
+/** Un numero senza cornici né sfondi. Con `delta` mostra il confronto con il mese precedente. */
 export function Stat({
   label,
   value,
   hint,
-  tone = "neutral",
+  delta,
 }: {
   label: string;
   value: string;
   hint?: string;
+  /** Importo del mese corrente e del precedente, per il confronto. */
+  delta?: { current: number; previous: number; previousLabel: string; format: (value: number) => string };
+  /** Non cambia l'aspetto: i colori non codificano più il segno, che resta nel numero. */
   tone?: "neutral" | "good" | "bad";
 }) {
-  const color = { neutral: "text-stone-900", good: "text-green-800", bad: "text-red-800" }[tone];
   return (
-    <div className="stat-card relative overflow-hidden rounded-lg border border-stone-300/70 bg-white p-4 pl-6 before:absolute before:left-2 before:top-4 before:size-2 before:rounded-full before:bg-background before:shadow-[inset_0_0_0_1px_var(--color-stone-300)]">
-      <p className="text-sm text-stone-500">{label}</p>
-      <p className={`mt-1 font-display text-3xl font-semibold tabular-nums tracking-tight ${color}`}>{value}</p>
-      {hint && <p className="mt-1 text-xs text-stone-500">{hint}</p>}
+    <div className="stat-card border-t border-stone-300 pt-4">
+      <p className="text-sm text-stone-600">{label}</p>
+      <p className="mt-2 font-display text-3xl font-semibold tabular-nums text-stone-900">{value}</p>
+      {delta && <Delta {...delta} />}
+      {hint && <p className="mt-2 text-xs text-stone-600">{hint}</p>}
     </div>
   );
 }
 
-/** Tono di un importo con segno: verde se positivo, rosso se negativo, neutro se zero. */
+/** Tono di un importo: tenuto per compatibilità, il segno è già nel numero. */
 export function toneOf(cents: number): "neutral" | "good" | "bad" {
   return cents > 0 ? "good" : cents < 0 ? "bad" : "neutral";
 }

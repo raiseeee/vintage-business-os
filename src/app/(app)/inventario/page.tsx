@@ -29,9 +29,9 @@ export default async function InventarioPage() {
     return (
       <>
         <PageHeader title="Inventario" description="Materiali di consumo e attrezzature." />
-        <p className="rounded-md border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <p className="rounded-md border border-stone-300 bg-stone-100 p-4 text-sm text-stone-900">
           Il database non ha ancora la tabella dell&apos;inventario. Applica la migrazione{" "}
-          <code className="rounded bg-white px-1">20261026000001_inventory.sql</code> dallo SQL Editor di Supabase (istruzioni nel README).
+          <code className="rounded bg-white px-2">20261026000001_inventory.sql</code> dallo SQL Editor di Supabase (istruzioni nel README).
         </p>
       </>
     );
@@ -63,34 +63,34 @@ export default async function InventarioPage() {
       <div className="space-y-6">
         <Section title="Materiali di consumo">
           {materials.length === 0 ? (
-            <p className="text-sm text-stone-600">Nessun materiale. Esempio: 100 sacchetti a 10 € → 0,10 € l&apos;uno, per ogni capo spedito.</p>
+            <p className="text-sm text-stone-600">Nessun materiale. Esempio: 100 sacchetti a 10 € costano 0,10 € l&apos;uno, per ogni capo spedito.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] text-left text-sm">
-                <thead className="border-b border-stone-200 text-xs uppercase tracking-wide text-stone-500">
+                <thead className="border-b border-stone-200 text-xs text-stone-500">
                   <tr>
-                    <th className="py-2 pr-4 font-medium">Voce</th>
-                    <th className="py-2 pr-4 text-right font-medium">Costo totale</th>
-                    <th className="py-2 pr-4 text-right font-medium">{stockTracked ? "Rimaste" : "Quantità"}</th>
-                    <th className="py-2 pr-4 text-right font-medium">Costo unitario</th>
-                    <th className="py-2 pr-4 text-right font-medium">Per capo</th>
-                    <th className="py-2 pr-4 text-right font-medium">Costo per capo</th>
-                    <th className="py-2 pr-4 font-medium">Stato</th>
-                    <th className="py-2 font-medium"><span className="sr-only">Azioni</span></th>
+                    <th className="py-2 pr-4 font-semibold">Voce</th>
+                    <th className="py-2 pr-4 text-right font-semibold">Costo totale</th>
+                    <th className="py-2 pr-4 text-right font-semibold">{stockTracked ? "Rimaste" : "Quantità"}</th>
+                    <th className="py-2 pr-4 text-right font-semibold">Costo unitario</th>
+                    <th className="py-2 pr-4 text-right font-semibold">Per capo</th>
+                    <th className="py-2 pr-4 text-right font-semibold">Costo per capo</th>
+                    <th className="py-2 pr-4 font-semibold">Stato</th>
+                    <th className="py-2 font-semibold"><span className="sr-only">Azioni</span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-stone-100">
                   {materials.map((r) => (
                     <tr key={r.id}>
-                      <td className="py-3 pr-4">
-                        <p className="font-medium text-stone-900">{r.name}</p>
+                      <td className="py-4 pr-4">
+                        <p className="font-semibold text-stone-900">{r.name}</p>
                         <p className="text-xs text-stone-500">Acquistato il {formatDate(r.purchased_at)}</p>
                       </td>
-                      <td className="py-3 pr-4 text-right tabular-nums">{formatEuro(r.total_cost_cents)}</td>
-                      <td className="py-3 pr-4 text-right tabular-nums">
+                      <td className="py-4 pr-4 text-right tabular-nums">{formatEuro(r.total_cost_cents)}</td>
+                      <td className="py-4 pr-4 text-right tabular-nums">
                         {stockTracked ? (
                           <>
-                            <span className={remainingQty(r, used[r.id] ?? 0) === 0 ? "font-medium text-red-800" : ""}>
+                            <span className={remainingQty(r, used[r.id] ?? 0) === 0 ? "font-semibold text-stone-900" : ""}>
                               {formatQty(remainingQty(r, used[r.id] ?? 0))}
                             </span>
                             /{formatQty(r.quantity)}
@@ -99,11 +99,11 @@ export default async function InventarioPage() {
                           r.quantity
                         )}
                       </td>
-                      <td className="py-3 pr-4 text-right tabular-nums">{formatUnitEuro(unitCostCents(r))}</td>
-                      <td className="py-3 pr-4 text-right tabular-nums">{String(r.per_item_qty).replace(".", ",")}</td>
-                      <td className="py-3 pr-4 text-right tabular-nums">{r.in_use ? formatUnitEuro(perItemCostCents(r)) : "—"}</td>
-                      <td className="py-3 pr-4">{r.in_use ? <Tag>In uso</Tag> : <span className="text-xs text-stone-500">Non conta</span>}</td>
-                      <td className="py-3">
+                      <td className="py-4 pr-4 text-right tabular-nums">{formatUnitEuro(unitCostCents(r))}</td>
+                      <td className="py-4 pr-4 text-right tabular-nums">{String(r.per_item_qty).replace(".", ",")}</td>
+                      <td className="py-4 pr-4 text-right tabular-nums">{r.in_use ? formatUnitEuro(perItemCostCents(r)) : "—"}</td>
+                      <td className="py-4 pr-4">{r.in_use ? <Tag>In uso</Tag> : <span className="text-xs text-stone-500">Non conta</span>}</td>
+                      <td className="py-4">
                         <div className="flex flex-wrap items-center justify-end gap-2">
                           <ModalButton label="Modifica" title={`Modifica ${r.name}`} variant="quiet">
                             <InventoryForm action={updateInventoryItem.bind(null, r.id)} item={r} today={today} submitLabel="Salva modifiche" />
@@ -134,13 +134,13 @@ export default async function InventarioPage() {
           ) : (
             <ul className="divide-y divide-stone-100">
               {equipment.map((r) => (
-                <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                <li key={r.id} className="flex flex-wrap items-center justify-between gap-4 py-4">
                   <div>
-                    <p className="text-sm font-medium text-stone-900">{r.name}</p>
+                    <p className="text-sm font-semibold text-stone-900">{r.name}</p>
                     <p className="text-xs text-stone-500">Acquistato il {formatDate(r.purchased_at)}{r.notes ? ` · ${r.notes}` : ""}</p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <span className="text-sm font-medium tabular-nums">{formatEuro(r.total_cost_cents)}</span>
+                  <div className="flex flex-wrap items-center gap-4">
+                    <span className="text-sm font-semibold tabular-nums">{formatEuro(r.total_cost_cents)}</span>
                     <ModalButton label="Modifica" title={`Modifica ${r.name}`} variant="quiet">
                       <InventoryForm action={updateInventoryItem.bind(null, r.id)} item={r} today={today} submitLabel="Salva modifiche" />
                     </ModalButton>

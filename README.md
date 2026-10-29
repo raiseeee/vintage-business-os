@@ -165,3 +165,16 @@ Collegamento ai siti di vendita (Vinted, Depop, eBay) per preparare gli annunci 
 
 ## Deployment
 Previsto su Vercel: importa il repository e imposta le due variabili di `.env.example` in *Project Settings → Environment Variables*. Le istruzioni verificate arrivano a fine MVP.
+
+## Regole di design
+
+Le regole sono verificate da `src/design-rules.test.ts` (parte di `npm test`):
+
+1. Spaziature solo multipli di 8 px (scala Tailwind pari).
+2. Una sola palette neutra (`stone`), niente gradienti, ombre o glow.
+3. Icone a linea, tutte da `lucide-react`; niente emoji.
+4. Due soli pesi (400 e 600), niente maiuscolo.
+5. Numeri senza decorazioni, con confronto rispetto al mese precedente.
+6. Grafici con linee sottili, colori tenui e assi leggibili (`LineChart`).
+
+Dopo un pull esegui `npm install` (nuova dipendenza `lucide-react`).

@@ -35,7 +35,7 @@ export function LotForm({
       </div>
 
       <fieldset className="grid gap-4 sm:grid-cols-3">
-        <legend className="mb-1 text-sm font-semibold text-stone-900">Costi del lotto (€)</legend>
+        <legend className="mb-2 text-sm font-semibold text-stone-900">Costi del lotto (€)</legend>
         <Field label="Merce" name="purchase_cost_cents" required defaultValue={centsToInput(lot?.purchase_cost_cents)} placeholder="150,00" />
         <Field label="Spedizione in entrata" name="inbound_shipping_cents" defaultValue={lot ? centsToInput(lot.inbound_shipping_cents) : ""} hint="Quella per ricevere il lotto. Quella ai clienti va sulla vendita." />
         <Field label="Altri costi" name="other_costs_cents" defaultValue={lot ? centsToInput(lot.other_costs_cents) : ""} hint="Dogana, imballi, ispezione…" />
