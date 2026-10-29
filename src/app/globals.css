@@ -104,7 +104,7 @@ td.tabular-nums {
   to { opacity: 1; transform: none; }
 }
 @keyframes drawer-in {
-  from { transform: translateX(100%); }
+  from { transform: translateX(-100%); }
   to { transform: none; }
 }
 @keyframes backdrop-in {

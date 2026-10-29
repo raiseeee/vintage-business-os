@@ -123,24 +123,7 @@ function MobileChrome({ email, items, pathname }: { email: string; items: NavIte
           compact ? "h-16" : "h-40"
         }`}
       >
-        <form action={signOut} className="flex w-24 justify-start">
-          <button
-            type="submit"
-            aria-label="Esci"
-            className="flex h-6 items-center gap-2 rounded-md border border-stone-600 px-2 text-xs font-semibold text-stone-200"
-          >
-            <LogOut aria-hidden className="size-4" strokeWidth={1.5} />
-            Esci
-          </button>
-        </form>
-        <Link href="/dashboard" aria-label="ARCHVNT, vai alla dashboard" className="flex justify-center">
-          <Logo
-            tone="bianco"
-            width={160}
-            className={`h-auto transition-[width] duration-300 ease-out ${compact ? "w-16" : "w-40"}`}
-          />
-        </Link>
-        <div className="flex w-24 justify-end">
+        <div className="flex w-24 justify-start">
           <button
             type="button"
             aria-label="Apri il menu"
@@ -151,6 +134,23 @@ function MobileChrome({ email, items, pathname }: { email: string; items: NavIte
             <Menu aria-hidden className="size-6" strokeWidth={1.5} />
           </button>
         </div>
+        <Link href="/dashboard" aria-label="ARCHVNT, vai alla dashboard" className="flex justify-center">
+          <Logo
+            tone="bianco"
+            width={160}
+            className={`h-auto transition-[width] duration-300 ease-out ${compact ? "w-16" : "w-40"}`}
+          />
+        </Link>
+        <form action={signOut} className="flex w-24 justify-end">
+          <button
+            type="submit"
+            aria-label="Esci"
+            className="flex h-6 items-center gap-2 rounded-md border border-stone-600 px-2 text-xs font-semibold text-stone-200"
+          >
+            <LogOut aria-hidden className="size-4" strokeWidth={1.5} />
+            Esci
+          </button>
+        </form>
       </header>
 
       {open && (
@@ -163,7 +163,7 @@ function MobileChrome({ email, items, pathname }: { email: string; items: NavIte
           />
           <nav
             aria-label="Menu principale"
-            className="drawer-in absolute inset-y-0 right-0 flex w-80 max-w-full flex-col bg-stone-900 text-stone-300"
+            className="drawer-in absolute inset-y-0 left-0 flex w-80 max-w-full flex-col bg-stone-900 text-stone-300"
           >
             <div className="flex h-16 items-center justify-between border-b border-stone-800 pl-6 pr-4">
               <p className="truncate text-xs text-stone-400" title={email}>
